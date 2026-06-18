@@ -1,0 +1,41 @@
+{
+  "name": "elearning-frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@mdi/font": "^7.4.47",
+    "@vueuse/motion": "^3.0.3",
+    "axios": "^1.6.8",
+    "canvas-confetti": "^1.9.4",
+    "chart.js": "^4.5.1",
+    "dompurify": "^3.4.11",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.7",
+    "nprogress": "^0.2.0",
+    "pinia": "^2.1.7",
+    "vue": "^3.5.25",
+    "vue-chartjs": "^5.3.3",
+    "vue-router": "^4.3.0",
+    "vuetify": "^3.5.14"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "@vitejs/plugin-vue": "^6.0.2",
+    "@vue/test-utils": "latest",
+    "eslint": "^9.39.4",
+    "eslint-plugin-vue": "^9.33.0",
+    "globals": "^15.15.0",
+    "jsdom": "latest",
+    "vite": "^7.3.1",
+    "vite-plugin-vuetify": "^2.1.3",
+    "vitest": "latest"
+  }
+}
