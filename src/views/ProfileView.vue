@@ -150,28 +150,7 @@
                             />
                           </div>
                         </v-col>
-                        <v-col cols="12" sm="6" class="pb-4">
-                          <div class="neo-input-group">
-                            <label class="neo-label">Profession / Titre</label>
-                            <v-text-field
-                              variant="solo" flat rounded="xl"
-                              bg-color="rgba(255,255,255,0.03)" class="neo-input"
-                              placeholder="Ex: Développeur Fullstack" prepend-inner-icon="mdi-briefcase-outline"
-                              density="comfortable" hide-details
-                            />
-                          </div>
-                        </v-col>
-                        <v-col cols="12" class="pb-4">
-                          <div class="neo-input-group">
-                            <label class="neo-label">Bio Courte</label>
-                            <v-textarea
-                              variant="solo" flat rounded="xl" rows="3"
-                              bg-color="rgba(255,255,255,0.03)" class="neo-input"
-                              placeholder="Parlez-nous de vous..." prepend-inner-icon="mdi-text-account"
-                              density="comfortable" hide-details no-resize
-                            />
-                          </div>
-                        </v-col>
+
                       </v-row>
 
                       <v-alert v-if="saveMessage" :type="saveSuccess ? 'success' : 'error'" variant="tonal" rounded="xl" class="mt-6 border-glass glass-alert animate-in" density="compact">

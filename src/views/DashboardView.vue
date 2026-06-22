@@ -199,8 +199,12 @@
               <v-card
                 class="premium-course-card rounded-2xl border-subtle flex-grow-1"
                 elevation="0"
+                tabindex="0"
+                role="button"
                 :style="`--card-accent: ${getCategoryColorHex(item.cours.categorie)}; animation-delay:${index * 50}ms`"
                 @click="$router.push(`/cours/${item.cours.id}/apprendre`)"
+                @keydown.enter="$router.push(`/cours/${item.cours.id}/apprendre`)"
+                @keydown.space.prevent="$router.push(`/cours/${item.cours.id}/apprendre`)"
               >
                 <!-- Background Visual -->
                 <div class="card-visual" :style="{ background: getGradient(item.cours.id) }">

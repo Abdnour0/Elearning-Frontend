@@ -226,13 +226,11 @@ const passRateColor = computed(() => {
 });
 
 /* ── Chart Data ──────────────────────────────────────────── */
-const months = ['Déc', 'Jan', 'Fév', 'Mar', 'Avr', 'Mai'];
-
 const enrollmentChartData = computed(() => ({
-  labels: stats.value.trends?.map(t => t.month) || months,
+  labels: stats.value.trends?.map(t => t.month) || [],
   datasets: [{
     label: 'Inscriptions',
-    data: stats.value.trends?.map(t => t.enrollments) || [18, 24, 32, 28, 41, 55],
+    data: stats.value.trends?.map(t => t.enrollments) || [],
     backgroundColor: 'rgba(59,130,246,0.75)',
     borderColor: '#3b82f6',
     borderWidth: 0,
@@ -240,7 +238,7 @@ const enrollmentChartData = computed(() => ({
     borderSkipped: false,
   }, {
     label: 'Cours complétés',
-    data: stats.value.trends?.map(t => t.completions) || [12, 18, 22, 20, 30, 38],
+    data: stats.value.trends?.map(t => t.completions) || [],
     backgroundColor: 'rgba(16,185,129,0.65)',
     borderColor: '#10b981',
     borderWidth: 0,
@@ -264,10 +262,10 @@ const roleChartData = computed(() => {
 });
 
 const quizLineData = computed(() => ({
-  labels: stats.value.trends?.map(t => t.month) || months,
+  labels: stats.value.trends?.map(t => t.month) || [],
   datasets: [{
     label: 'Score moyen (%)',
-    data: stats.value.trends?.map(t => t.avg_score) || [62, 68, 71, 65, 78, 75],
+    data: stats.value.trends?.map(t => t.avg_score) || [],
     borderColor: '#f97316',
     backgroundColor: 'rgba(249,115,22,0.1)',
     pointBackgroundColor: '#f97316',

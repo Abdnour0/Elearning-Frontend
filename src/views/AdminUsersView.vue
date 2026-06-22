@@ -22,7 +22,7 @@
           v-model="search" prepend-inner-icon="mdi-magnify" placeholder="Rechercher par nom ou email..."
           variant="outlined" density="comfortable" color="primary" bg-color="rgba(0,0,0,0.2)"
           hide-details class="rounded-lg border-subtle"
-          @update:model-value="fetchUsers"
+          @update:model-value="debouncedFetchUsers"
         />
       </div>
       <div style="width: 200px;">
@@ -163,7 +163,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import api from '../axios';
 import { showErrorToast, showToast } from '../composables/useToast.js';
 import { useViewLoadState } from '../composables/useViewLoadState.js';
@@ -186,6 +186,13 @@ const avatarColors = ['#3b82f6', '#10b981', '#f97316', '#8b5cf6', '#ec4899', '#0
 
 function avatarColor(id) {
   return avatarColors[id % avatarColors.length] || avatarColors[0];
+}
+
+let searchDebounceId = null;
+
+function debouncedFetchUsers() {
+  window.clearTimeout(searchDebounceId);
+  searchDebounceId = window.setTimeout(fetchUsers, 350);
 }
 
 function initials(name) {
@@ -251,6 +258,7 @@ async function deleteUser() {
 }
 
 onMounted(fetchUsers);
+onUnmounted(() => window.clearTimeout(searchDebounceId));
 </script>
 
 <style scoped>

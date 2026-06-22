@@ -386,23 +386,13 @@ onMounted(async () => {
   try {
     const response = await api.get('/cours');
     const coursesData = response.data?.data || [];
-    if (coursesData.length > 0) {
-      featuredCourses.value = coursesData.slice(0, 3).map((c, i) => ({
-        ...c,
-        icon: courseIcons[i % courseIcons.length],
-        gradient: courseGradients[i % courseGradients.length],
-      }));
-    } else {
-      featuredCourses.value = [1,2,3].map((_, i) => ({
-        id: i, titre: `Formation Avancée ${i+1}`, categorie: 'Développement Web',
-        icon: courseIcons[i], gradient: courseGradients[i], formateur: { name: 'Expert IT' }
-      }));
-    }
-  } catch {
-    featuredCourses.value = [1,2,3].map((_, i) => ({
-      id: i, titre: `Formation Avancée ${i+1}`, categorie: 'Développement Web',
-      icon: courseIcons[i], gradient: courseGradients[i], formateur: { name: 'Expert IT' }
+    featuredCourses.value = coursesData.slice(0, 3).map((c, i) => ({
+      ...c,
+      icon: courseIcons[i % courseIcons.length],
+      gradient: courseGradients[i % courseGradients.length],
     }));
+  } catch {
+    // API unavailable — no fallback; template shows empty state
   }
 });
 

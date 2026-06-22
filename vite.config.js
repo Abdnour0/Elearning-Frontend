@@ -30,18 +30,8 @@ export default defineConfig({
     },
   },
   build: {
-    rollupOptions: {
-      output: {
-        onlyExplicitManualChunks: true,
-        manualChunks(id) {
-          if (id.includes('/src/views/Admin')) return 'admin';
-          if (id.includes('node_modules/chart.js') || id.includes('node_modules/vue-chartjs')) return 'charts';
-          if (id.includes('node_modules/jspdf')) return 'exports';
-          if (id.includes('node_modules/vuetify') || id.includes('@mdi/font')) return 'ui';
-          if (id.includes('node_modules/vue') || id.includes('node_modules/pinia') || id.includes('node_modules/vue-router')) return 'vue-core';
-        },
-      },
-    },
+    // Let Vite/Rollup derive a safe chunk graph automatically.
+    // The previous manual chunk rules introduced circular chunks in production.
     chunkSizeWarningLimit: 700,
   },
 });

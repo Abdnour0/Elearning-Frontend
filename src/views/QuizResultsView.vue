@@ -94,6 +94,8 @@
 import { ref, onMounted, computed, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useViewLoadState } from '../composables/useViewLoadState.js';
+import api from '../axios';
+import { showErrorToast } from '../composables/useToast.js';
 
 const route  = useRoute();
 const router = useRouter();
@@ -130,6 +132,18 @@ function retryQuiz() {
   router.push(`/quiz/${route.params.id}`);
 }
 
+async function fetchLastAttempt() {
+  try {
+    const { data } = await api.get(`/quiz/${route.params.id}/historique`);
+    if (data.length > 0) {
+      const last = data[data.length - 1];
+      result.value = { score: last.score, reussi: last.reussi };
+    }
+  } catch (e) {
+    showErrorToast(e, 'Impossible de récupérer les résultats.');
+  }
+}
+
 onMounted(async () => {
   markLoading();
   try {
@@ -142,6 +156,9 @@ onMounted(async () => {
           });
         }, 400);
       }
+    } else {
+      await fetchLastAttempt();
+      if (result.value) animateScore(result.value.score);
     }
   } finally {
     markLoaded();

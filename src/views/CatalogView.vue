@@ -68,8 +68,12 @@
           <v-card
             class="premium-course-card rounded-2xl border-subtle flex-grow-1"
             elevation="0"
+            tabindex="0"
+            role="button"
             :style="`--card-accent: ${getCategoryColorHex(course.categorie)}; animation-delay:${i * 50}ms`"
             @click="handleEnroll(course.id)"
+            @keydown.enter="handleEnroll(course.id)"
+            @keydown.space.prevent="handleEnroll(course.id)"
           >
             <!-- Background Visual -->
             <div class="card-visual" :style="{ background: getGradient(course.id) }">

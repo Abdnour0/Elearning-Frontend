@@ -82,8 +82,7 @@
                       prepend-icon=""
                       prepend-inner-icon="mdi-cloud-upload"
                       :loading="lecon.uploading"
-                      :success="!!lecon.urlContenu"
-                      @change="(e) => handleFileUpload(e, lecon)"
+                      @change="(file) => handleFileUpload(file, lecon)"
                     />
                   </div>
                   <v-text-field v-else v-model="lecon.urlContenu" label="Contenu texte" variant="outlined" density="compact" color="primary" hide-details />
@@ -211,11 +210,10 @@ function deleteLesson(mod, lIdx) {
   mod.lecons.splice(lIdx, 1);
 }
 
-function handleFileUpload(e, lecon) {
-  const file = e.target.files?.[0];
+function handleFileUpload(file, lecon) {
   if (file) {
     lecon.file = file;
-    lecon.urlContenu = file.name; // Temporary display name
+    lecon.urlContenu = file.name;
   } else {
     lecon.file = null;
     lecon.urlContenu = '';

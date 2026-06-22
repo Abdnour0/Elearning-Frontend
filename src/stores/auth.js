@@ -13,7 +13,7 @@ async function refreshCsrf() {
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    user: JSON.parse(localStorage.getItem('user')) || null,
+    user: (() => { try { return JSON.parse(localStorage.getItem('user')); } catch { return null; } })(),
   }),
 
   getters: {
