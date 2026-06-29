@@ -9,9 +9,9 @@
 ## Tech Stack
 
 - **Frontend**: Vue.js 3 SPA (Vuetify 3, Pinia, Vue Router) with lazy-loaded routes and manual Vite chunk splitting for sub-500kB bundles
-- **Backend repo**: Laravel (PHP 8.2, MySQL 8, Redis 7) with RESTful API under `/api/v1/*`
-- **Infrastructure**: Docker Compose with multi-stage builds, MySQL 8 + Redis 7, Nginx with gzip and immutable asset caching
-- **Analytics**: Chart.js for enrollment/quiz charts, jsPDF for exports
+- **Backend**: Laravel API under `/api/v1/*`
+- **Infrastructure**: Docker Compose with multi-stage builds, MySQL 8, Redis, Nginx
+- **Analytics**: Chart.js, jsPDF
 
 ## Architecture
 
@@ -40,9 +40,9 @@ Three roles — `apprenant`, `formateur`, `admin`. Enforced via Laravel gates, r
 
 7 Vitest component tests covering CatalogView, DashboardView, QuizView + 3 auth store tests.
 
-## Deployment
+## Links
 
-Frontend hosted on Vercel at [elearning-frontend-five-olive.vercel.app](https://elearning-frontend-five-olive.vercel.app).
+- **Backend repo**: https://github.com/Abdnour0/Elearning-Backend
 
 ## Features
 
@@ -61,7 +61,3 @@ Frontend hosted on Vercel at [elearning-frontend-five-olive.vercel.app](https://
 - Most proud of the clean API contract — it made the mobile app pivot trivial
 - Biggest lesson: CORS, environment chaining, and zero-downtime deployment are architecture decisions, not "ops problems"
 
-## Links
-
-- **Live**: https://elearning-frontend-five-olive.vercel.app
-- **Backend repo**: https://github.com/Abdnour0/Elearning-Backend
