@@ -1,8 +1,8 @@
 <template>
   <main class="catalog-page">
-    <section class="catalog-intro"><span class="eyebrow"><i /> YOUR NEXT SKILL, STARTS HERE</span><h1>Find a course<br /><em>worth your time.</em></h1><p>Thoughtful, expert-led learning for work that keeps moving.</p></section>
+    <section class="catalog-intro"><span class="eyebrow"><i /> YOUR NEXT SKILL, STARTS HERE</span><h1>Find a course<br><em>worth your time.</em></h1><p>Thoughtful, expert-led learning for work that keeps moving.</p></section>
     <section class="catalog-content" aria-label="Course catalogue">
-      <div class="catalog-toolbar"><label class="catalog-search"><span aria-hidden="true">⌕</span><input v-model="search" type="search" placeholder="Search by skill, course or instructor" aria-label="Search courses" @input="debouncedFetchCourses" /></label><span class="result-count">{{ totalCourses }} courses to explore</span></div>
+      <div class="catalog-toolbar"><label class="catalog-search"><span aria-hidden="true">⌕</span><input v-model="search" type="search" placeholder="Search by skill, course or instructor" aria-label="Search courses" @input="debouncedFetchCourses"></label><span class="result-count">{{ totalCourses }} courses to explore</span></div>
       <div class="catalog-filters" aria-label="Filter by subject"><button v-for="category in categoryFilters" :key="category.value || 'all'" :class="['filter-chip', { active: selectedCategory === category.value }]" @click="chooseCategory(category.value)">{{ category.label }}</button></div>
 
       <div v-if="isLoading" class="catalog-grid" aria-live="polite"><article v-for="i in 3" :key="i" class="skeleton-card"><div class="skeleton-img" /><div class="skeleton-line short" /><div class="skeleton-line" /><div class="skeleton-line medium" /></article></div>
