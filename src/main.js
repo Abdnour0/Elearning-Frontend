@@ -17,24 +17,24 @@ const vuetify = createVuetify({
   components,
   directives,
   theme: {
-    defaultTheme: 'dark',
+    defaultTheme: 'light',
     themes: {
       dark: {
         dark: true,
         colors: {
-          background: '#0a0f1c',
-          surface: '#111827',
-          'surface-variant': '#1f2937',
-          'on-background': '#f8fafc',
-          'on-surface': '#f1f5f9',
-          'on-surface-variant': '#9ca3af',
-          primary: '#3b82f6',
-          secondary: '#f97316',
-          accent: '#06b6d4',
-          error: '#ef4444',
-          info: '#38bdf8',
-          success: '#10b981',
-          warning: '#f59e0b',
+          background: '#fbfaf6',
+          surface: '#ffffff',
+          'surface-variant': '#f0f2ec',
+          'on-background': '#29382e',
+          'on-surface': '#354439',
+          'on-surface-variant': '#778178',
+          primary: '#537a62',
+          secondary: '#a97852',
+          accent: '#718b74',
+          error: '#a94e46',
+          info: '#557c82',
+          success: '#527a5c',
+          warning: '#92733f',
         },
       },
     },
@@ -64,11 +64,11 @@ const vuetify = createVuetify({
 const app = createApp(App);
 
 app.config.errorHandler = (err) => {
-  showErrorToast(err, 'Une erreur inattendue est survenue dans l\'interface.');
+    showErrorToast(err, 'An unexpected interface error occurred.');
 };
 
 window.addEventListener('unhandledrejection', function(event) {
-  showErrorToast(event.reason, 'Une action n\'a pas pu être terminée.');
+  showErrorToast(event.reason, 'That action could not be completed.');
 });
 
 app.use(createPinia());

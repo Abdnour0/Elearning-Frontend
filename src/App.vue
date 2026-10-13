@@ -20,30 +20,30 @@
       <nav class="d-none d-md-flex align-center gap-1">
         <!-- Unauthenticated -->
         <template v-if="!authStore.isAuthenticated">
-          <v-btn key="unauth-catalogue" variant="text" to="/catalogue" exact class="nav-link text-none font-weight-medium">Catalogue</v-btn>
+          <v-btn key="unauth-catalogue" variant="text" to="/catalogue" exact class="nav-link text-none font-weight-medium">Courses</v-btn>
           <v-btn key="unauth-login" color="primary" variant="flat" to="/login" class="nav-cta text-none font-weight-bold ml-2 rounded-lg" height="38">
-            Connexion
+            Sign in
           </v-btn>
         </template>
 
         <!-- Apprenant -->
         <template v-else-if="authStore.isApprenant">
-          <v-btn key="app-dashboard" variant="text" to="/dashboard" exact class="nav-link text-none font-weight-medium" :ripple="false">Mon espace</v-btn>
-          <v-btn key="app-catalogue" variant="text" to="/catalogue" exact class="nav-link text-none font-weight-medium" :ripple="false">Catalogue</v-btn>
+          <v-btn key="app-dashboard" variant="text" to="/dashboard" exact class="nav-link text-none font-weight-medium" :ripple="false">My learning</v-btn>
+          <v-btn key="app-catalogue" variant="text" to="/catalogue" exact class="nav-link text-none font-weight-medium" :ripple="false">Courses</v-btn>
         </template>
 
         <!-- Formateur -->
         <template v-else-if="authStore.isFormateur">
-          <v-btn variant="text" to="/formateur" class="nav-link text-none font-weight-medium">Mes cours</v-btn>
-          <v-btn variant="text" to="/formateur/cours/creer" class="nav-link text-none font-weight-medium">Créer</v-btn>
-          <v-btn variant="text" to="/catalogue" class="nav-link text-none font-weight-medium">Catalogue</v-btn>
+          <v-btn variant="text" to="/formateur" class="nav-link text-none font-weight-medium">My courses</v-btn>
+          <v-btn variant="text" to="/formateur/cours/creer" class="nav-link text-none font-weight-medium">Create</v-btn>
+          <v-btn variant="text" to="/catalogue" class="nav-link text-none font-weight-medium">Courses</v-btn>
         </template>
 
         <!-- Admin -->
         <template v-else-if="authStore.isAdmin">
-          <v-btn variant="text" to="/admin" class="nav-link text-none font-weight-medium">Dashboard</v-btn>
-          <v-btn variant="text" to="/admin/users" class="nav-link text-none font-weight-medium">Utilisateurs</v-btn>
-          <v-btn variant="text" to="/catalogue" class="nav-link text-none font-weight-medium">Catalogue</v-btn>
+          <v-btn variant="text" to="/admin" class="nav-link text-none font-weight-medium">Overview</v-btn>
+          <v-btn variant="text" to="/admin/users" class="nav-link text-none font-weight-medium">People</v-btn>
+          <v-btn variant="text" to="/catalogue" class="nav-link text-none font-weight-medium">Courses</v-btn>
         </template>
 
         <!-- Avatar Menu -->
@@ -85,7 +85,7 @@
                     <template #prepend>
                       <v-icon size="20" class="mr-3 opacity-70">mdi-account-circle-outline</v-icon>
                     </template>
-                    <v-list-item-title class="font-weight-medium text-body-2">Mon profil</v-list-item-title>
+                    <v-list-item-title class="font-weight-medium text-body-2">My profile</v-list-item-title>
                   </v-list-item>
                   
                   <v-divider class="my-2 opacity-10 border-white" />
@@ -94,7 +94,7 @@
                     <template #prepend>
                       <v-icon size="20" class="mr-3 text-error opacity-90">mdi-logout-variant</v-icon>
                     </template>
-                    <v-list-item-title class="font-weight-bold text-error text-body-2">Déconnexion</v-list-item-title>
+                    <v-list-item-title class="font-weight-bold text-error text-body-2">Sign out</v-list-item-title>
                   </v-list-item>
                 </v-list>
               </div>
@@ -112,29 +112,29 @@
           <v-card class="user-menu-card rounded-xl pa-2" width="220" theme="dark">
             <v-list density="compact" bg-color="transparent" class="pa-1">
               <template v-if="!authStore.isAuthenticated">
-                <v-list-item to="/catalogue" title="Catalogue" prepend-icon="mdi-bookshelf" class="rounded-lg text-body-2 menu-item" />
-                <v-list-item to="/login" title="Connexion" prepend-icon="mdi-login" class="rounded-lg text-body-2 menu-item" />
-                <v-list-item to="/register" title="S'inscrire" prepend-icon="mdi-account-plus" base-color="primary" class="rounded-lg text-body-2 menu-item font-weight-bold" />
+                <v-list-item to="/catalogue" title="Courses" prepend-icon="mdi-bookshelf" class="rounded-lg text-body-2 menu-item" />
+                <v-list-item to="/login" title="Sign in" prepend-icon="mdi-login" class="rounded-lg text-body-2 menu-item" />
+                <v-list-item to="/register" title="Create account" prepend-icon="mdi-account-plus" base-color="primary" class="rounded-lg text-body-2 menu-item font-weight-bold" />
               </template>
               <template v-else-if="authStore.isApprenant">
-                <v-list-item to="/dashboard" title="Mon espace" prepend-icon="mdi-view-dashboard" class="rounded-lg text-body-2 menu-item" />
-                <v-list-item to="/catalogue" title="Catalogue" prepend-icon="mdi-bookshelf" class="rounded-lg text-body-2 menu-item" />
+                <v-list-item to="/dashboard" title="My learning" prepend-icon="mdi-view-dashboard" class="rounded-lg text-body-2 menu-item" />
+                <v-list-item to="/catalogue" title="Courses" prepend-icon="mdi-bookshelf" class="rounded-lg text-body-2 menu-item" />
               </template>
               <template v-else-if="authStore.isFormateur">
-                <v-list-item to="/formateur" title="Mes cours" prepend-icon="mdi-school" class="rounded-lg text-body-2 menu-item" />
-                <v-list-item to="/formateur/cours/creer" title="Créer un cours" prepend-icon="mdi-plus-box" class="rounded-lg text-body-2 menu-item" />
-                <v-list-item to="/catalogue" title="Catalogue" prepend-icon="mdi-bookshelf" class="rounded-lg text-body-2 menu-item" />
+                <v-list-item to="/formateur" title="My courses" prepend-icon="mdi-school" class="rounded-lg text-body-2 menu-item" />
+                <v-list-item to="/formateur/cours/creer" title="Create a course" prepend-icon="mdi-plus-box" class="rounded-lg text-body-2 menu-item" />
+                <v-list-item to="/catalogue" title="Courses" prepend-icon="mdi-bookshelf" class="rounded-lg text-body-2 menu-item" />
               </template>
               <template v-else-if="authStore.isAdmin">
-                <v-list-item to="/admin" title="Dashboard" prepend-icon="mdi-shield-crown" class="rounded-lg text-body-2 menu-item" />
-                <v-list-item to="/admin/users" title="Utilisateurs" prepend-icon="mdi-account-group" class="rounded-lg text-body-2 menu-item" />
-                <v-list-item to="/catalogue" title="Catalogue" prepend-icon="mdi-bookshelf" class="rounded-lg text-body-2 menu-item" />
+                <v-list-item to="/admin" title="Overview" prepend-icon="mdi-shield-crown" class="rounded-lg text-body-2 menu-item" />
+                <v-list-item to="/admin/users" title="People" prepend-icon="mdi-account-group" class="rounded-lg text-body-2 menu-item" />
+                <v-list-item to="/catalogue" title="Courses" prepend-icon="mdi-bookshelf" class="rounded-lg text-body-2 menu-item" />
               </template>
               
               <template v-if="authStore.isAuthenticated">
                 <v-divider class="my-2 opacity-10" />
-                <v-list-item to="/profil" prepend-icon="mdi-account-circle-outline" title="Mon profil" class="rounded-lg text-body-2 menu-item" />
-                <v-list-item prepend-icon="mdi-logout-variant" title="Déconnexion" base-color="error" class="rounded-lg text-body-2 menu-item" @click="handleLogout" />
+                <v-list-item to="/profil" prepend-icon="mdi-account-circle-outline" title="My profile" class="rounded-lg text-body-2 menu-item" />
+                <v-list-item prepend-icon="mdi-logout-variant" title="Sign out" base-color="error" class="rounded-lg text-body-2 menu-item" @click="handleLogout" />
               </template>
             </v-list>
           </v-card>
@@ -161,16 +161,16 @@
               <v-icon color="primary" size="20">mdi-school-outline</v-icon>
               <span class="text-h6 font-weight-black text-white tracking-tighter">E-Learning Hub</span>
             </div>
-            <div class="text-caption text-grey">
-              &copy; 2026 E-Learning Hub. Tous droits réservés.
+              <div class="text-caption text-grey">
+              &copy; 2026 E-Learning Hub. Learn with intention.
             </div>
           </v-col>
 
           <!-- Essential Links -->
           <v-col cols="12" md="4" class="d-flex justify-center gap-6 mb-4 mb-md-0">
-            <a href="#" class="text-body-2 text-grey-lighten-1 text-decoration-none footer-link transition-colors">À propos</a>
-            <a href="#" class="text-body-2 text-grey-lighten-1 text-decoration-none footer-link transition-colors">Contact</a>
-            <a href="#" class="text-body-2 text-grey-lighten-1 text-decoration-none footer-link transition-colors">Confidentialité</a>
+            <a href="#" class="text-body-2 text-grey-lighten-1 text-decoration-none footer-link transition-colors">About</a>
+            <a href="mailto:hello@elearninghub.example" class="text-body-2 text-grey-lighten-1 text-decoration-none footer-link transition-colors">Contact</a>
+            <a href="#" class="text-body-2 text-grey-lighten-1 text-decoration-none footer-link transition-colors">Privacy</a>
           </v-col>
 
           <!-- Social Icons -->
