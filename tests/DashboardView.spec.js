@@ -94,6 +94,6 @@ describe('DashboardView', () => {
     await flushPromises();
 
     expect(wrapper.find('.empty-state-card').exists()).toBe(true);
-    expect(wrapper.text()).toContain('Aucune formation en cours');
+    expect(wrapper.text()).toContain('Make your first move.');
   });
 });

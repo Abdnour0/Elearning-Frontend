@@ -150,8 +150,7 @@
                             />
                           </div>
                         </v-col>
-
-                      </v-row>
+</v-row>
 
                       <v-alert v-if="saveMessage" :type="saveSuccess ? 'success' : 'error'" variant="tonal" rounded="xl" class="mt-6 border-glass glass-alert animate-in" density="compact">
                         {{ saveMessage }}
