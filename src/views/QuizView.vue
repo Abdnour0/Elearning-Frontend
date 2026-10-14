@@ -1,40 +1,49 @@
 <template>
-  <div class="quiz-page">
-    <div class="quiz-inner">
-      <!-- ═══════════════ LOADING ═══════════════ -->
-      <div v-if="isInitial || isLoading" class="quiz-loading">
-        <div class="skeleton-block" style="height: 130px;" />
-        <div class="skeleton-block" style="height: 240px;" />
-        <p class="loading-note">Loading quiz…</p>
+  <div class="quiz-wrapper">
+    <!-- Ambient mesh background -->
+    <div class="quiz-mesh" />
+
+    <v-container class="position-relative z-1" style="max-width: 820px;">
+<!-- ═══════════════ LOADING STATE ═══════════════ -->
+      <div v-if="isInitial || isLoading" class="d-flex flex-column align-center justify-center" style="min-height: 60vh;">
+        <v-progress-circular indeterminate color="primary" size="64" width="5" />
+        <p class="mt-6 text-grey-lighten-1 font-weight-medium tracking-wide text-uppercase text-caption">Chargement du quiz…</p>
       </div>
 
       <!-- ═══════════════ QUIZ FLOW ═══════════════ -->
-      <template v-else-if="quizData && quizData.questions?.length && !result">
-        <!-- Header -->
-        <div class="paper-card quiz-header">
-          <div class="quiz-head-row">
+      <template v-else-if="quizData && !result">
+<!-- Header strip -->
+        <div class="el-fade-up quiz-header glass-panel rounded-xl pa-5 mb-6">
+          <div class="d-flex align-center justify-space-between flex-wrap gap-4">
             <div>
-              <h1>{{ quizData.quiz?.titre }}</h1>
-              <p class="quiz-count">Question <strong>{{ currentIndex + 1 }}</strong> of <strong>{{ totalQuestions }}</strong></p>
+              <h1 class="text-h5 font-weight-black text-white mb-1">{{ quizData.quiz?.titre }}</h1>
+              <p class="text-caption text-grey-lighten-1 ma-0">
+                Question <strong class="text-white">{{ currentIndex + 1 }}</strong> sur <strong class="text-white">{{ totalQuestions }}</strong>
+              </p>
             </div>
+            <!-- Timer -->
             <div v-if="quizData.minuterie" class="timer-pill" :class="{ 'timer-danger': timeLeft < 60 }">
-              <v-icon size="17">mdi-timer-outline</v-icon>
-              <span class="timer-value">{{ formattedTime }}</span>
+              <v-icon size="18" class="mr-1">mdi-timer-outline</v-icon>
+              <span class="font-mono font-weight-black">{{ formattedTime }}</span>
             </div>
           </div>
 
-          <div class="progress-track"><div class="progress-fill" :style="{ width: progressPercent + '%' }" /></div>
+          <!-- Progress bar -->
+          <div class="progress-track mt-4">
+            <div class="progress-fill" :style="{ width: progressPercent + '%' }" />
+          </div>
 
-          <div class="dot-row">
+          <!-- Question dots -->
+          <div class="d-flex gap-1 mt-3 flex-wrap">
             <button
               v-for="(q, i) in quizData.questions"
               :key="q.id"
               class="q-dot"
               :class="{
                 'q-dot-active': i === currentIndex,
-                'q-dot-answered': i !== currentIndex && answers[q.id] != null && answers[q.id] !== '',
+                'q-dot-answered': answers[q.id] != null && answers[q.id] !== '',
+                'q-dot-unanswered': i !== currentIndex && (answers[q.id] == null || answers[q.id] === '')
               }"
-              :aria-label="`Go to question ${i + 1}`"
               @click="goToQuestion(i)"
             >
               {{ i + 1 }}
@@ -42,14 +51,15 @@
           </div>
         </div>
 
-        <!-- Question -->
+        <!-- Question Card (animated) -->
         <transition :name="slideDirection" mode="out-in">
-          <div :key="currentIndex" class="paper-card question-panel">
-            <div class="question-head">
-              <span class="q-number-badge">{{ currentIndex + 1 }}</span>
-              <h2>{{ activeQuestion.contenu }}</h2>
+          <div :key="currentIndex" class="question-panel glass-panel rounded-xl pa-6 pa-md-8 mb-6">
+            <div class="d-flex align-start gap-4 mb-6">
+              <div class="q-number-badge">{{ currentIndex + 1 }}</div>
+              <h2 class="text-h6 font-weight-bold text-white" style="line-height: 1.6;">{{ activeQuestion.contenu }}</h2>
             </div>
 
+            <!-- QCM / Vrai-Faux choices -->
             <div v-if="activeQuestion.type === 'qcm' || activeQuestion.type === 'vrai_faux'" class="choices-grid">
               <button
                 v-for="(choix, cIdx) in activeQuestion.choix"
@@ -60,56 +70,76 @@
               >
                 <span class="choice-letter">{{ String.fromCharCode(65 + cIdx) }}</span>
                 <span class="choice-text">{{ choix }}</span>
-                <v-icon v-if="answers[activeQuestion.id] === choix" size="19" color="primary" class="choice-check">mdi-check-circle</v-icon>
+                <v-icon v-if="answers[activeQuestion.id] === choix" size="20" color="primary" class="ml-auto">mdi-check-circle</v-icon>
               </button>
             </div>
 
+            <!-- Free-text answer -->
             <v-text-field
               v-else
               v-model="answers[activeQuestion.id]"
-              label="Your answer"
+              label="Votre réponse"
               variant="outlined"
               color="primary"
-              class="zen-input mt-2"
+              class="custom-input mt-2"
               hide-details
             />
           </div>
         </transition>
 
-        <!-- Navigation -->
-        <div class="quiz-nav">
-          <button v-if="currentIndex > 0" class="zen-btn zen-btn-quiet" @click="prevQuestion">
-            ← Previous
-          </button>
-          <span v-else />
+        <!-- Bottom Navigation -->
+        <div class="d-flex align-center justify-space-between flex-wrap gap-3">
+          <v-btn
+            v-if="currentIndex > 0"
+            variant="tonal"
+            color="secondary"
+            class="rounded-pill px-6"
+            prepend-icon="mdi-arrow-left"
+            @click="prevQuestion"
+          >
+            Précédent
+          </v-btn>
+          <div v-else />
 
-          <button
-            v-if="currentIndex < totalQuestions - 1"
-            class="zen-btn"
-            @click="nextQuestion"
-          >
-            Next <span aria-hidden="true">→</span>
-          </button>
-          <button
-            v-else
-            class="zen-btn"
-            :disabled="submitting"
-            @click="submitQuiz"
-          >
-            {{ submitting ? 'Submitting…' : 'Finish quiz' }} <span aria-hidden="true">→</span>
-          </button>
+          <div class="d-flex gap-3">
+            <v-btn
+              v-if="currentIndex < totalQuestions - 1"
+              color="primary"
+              variant="flat"
+              class="rounded-pill px-8 font-weight-bold btn-glow"
+              append-icon="mdi-arrow-right"
+              @click="nextQuestion"
+            >
+              Suivant
+            </v-btn>
+            <v-btn
+              v-else
+              color="success"
+              variant="flat"
+              class="rounded-pill px-8 font-weight-bold btn-glow-success"
+              prepend-icon="mdi-send"
+              :loading="submitting"
+              @click="submitQuiz"
+            >
+              Terminer le quiz
+            </v-btn>
+          </div>
         </div>
 
-        <p v-if="unansweredCount > 0" class="unanswered-note">
-          <v-icon size="14">mdi-alert-circle-outline</v-icon>
-          {{ unansweredCount }} unanswered question{{ unansweredCount > 1 ? 's' : '' }}
-        </p>
+        <!-- Unanswered warning -->
+        <div v-if="unansweredCount > 0" class="text-center mt-4">
+          <p class="text-caption text-warning">
+            <v-icon size="14" class="mr-1">mdi-alert-circle-outline</v-icon>
+            {{ unansweredCount }} question(s) sans réponse
+          </p>
+        </div>
       </template>
 
       <!-- ═══════════════ RESULTS ═══════════════ -->
       <template v-else-if="result">
-        <div class="paper-card result-panel">
-          <div class="score-ring-container">
+        <div class="result-panel glass-panel rounded-2xl pa-8 pa-md-10 text-center">
+<!-- Animated Score Ring -->
+          <div class="score-ring-container mx-auto mb-6">
             <svg viewBox="0 0 120 120" class="score-ring-svg">
               <circle cx="60" cy="60" r="52" class="ring-bg" />
               <circle
@@ -120,65 +150,82 @@
               />
             </svg>
             <div class="score-value">
-              <span class="score-number" :class="result.reussi ? 'is-pass' : 'is-fail'">{{ Math.round(animatedScore) }}</span>
-              <span class="score-pct" :class="result.reussi ? 'is-pass' : 'is-fail'">%</span>
+              <span class="text-h3 font-weight-black" :class="result.reussi ? 'text-success' : 'text-error'">
+                {{ Math.round(animatedScore) }}
+              </span>
+              <span class="text-caption font-weight-bold" :class="result.reussi ? 'text-success' : 'text-error'">%</span>
             </div>
           </div>
 
-          <span class="result-chip" :class="result.reussi ? 'chip-pass' : 'chip-fail'">
-            <span class="chip-dot" />{{ result.reussi ? 'Passed — well done' : 'Not passed yet — keep going' }}
-          </span>
+          <!-- Status chip -->
+          <v-chip
+            :color="result.reussi ? 'success' : 'error'"
+            size="large"
+            variant="flat"
+            class="font-weight-bold mb-6"
+          >
+            <span class="emoji mr-1">{{ result.reussi ? '🎉' : '😔' }}</span>{{ result.reussi ? 'Félicitations — Réussi !' : 'Non réussi — Réessayez' }}
+          </v-chip>
 
-          <div class="stats-grid">
-            <div class="mini-stat">
-              <v-icon size="20" color="primary">mdi-check-circle-outline</v-icon>
-              <strong>{{ correctCount }}</strong>
-              <span>Correct</span>
+          <!-- Stats Grid -->
+          <div class="stats-grid mb-8">
+            <div class="stat-card">
+              <v-icon size="24" color="primary" class="mb-2">mdi-check-circle-outline</v-icon>
+              <div class="text-h5 font-weight-black text-white">{{ correctCount }}</div>
+              <div class="text-caption text-grey-lighten-1">Correctes</div>
             </div>
-            <div class="mini-stat">
-              <v-icon size="20" color="error">mdi-close-circle-outline</v-icon>
-              <strong>{{ wrongCount }}</strong>
-              <span>Incorrect</span>
+            <div class="stat-card">
+              <v-icon size="24" color="error" class="mb-2">mdi-close-circle-outline</v-icon>
+              <div class="text-h5 font-weight-black text-white">{{ wrongCount }}</div>
+              <div class="text-caption text-grey-lighten-1">Incorrectes</div>
             </div>
-            <div class="mini-stat">
-              <v-icon size="20" color="warning">mdi-percent-outline</v-icon>
-              <strong>{{ result.score.toFixed(1) }}%</strong>
-              <span>Accuracy</span>
+            <div class="stat-card">
+              <v-icon size="24" color="warning" class="mb-2">mdi-percent</v-icon>
+              <div class="text-h5 font-weight-black text-white">{{ result.score.toFixed(1) }}%</div>
+              <div class="text-caption text-grey-lighten-1">Précision</div>
             </div>
           </div>
 
-          <div class="results-divider" />
-          <h3 class="corrections-title">Detailed corrections</h3>
+          <!-- Corrections -->
+          <v-divider class="mb-6 opacity-10" />
+          <h3 class="text-left text-h6 font-weight-bold mb-4 text-white">Corrections détaillées</h3>
 
           <div
             v-for="(c, idx) in result.corrections"
             :key="c.question_id"
-            class="correction-item"
+            class="correction-item rounded-xl pa-4 mb-3 text-left"
             :class="c.est_correct ? 'correction-correct' : 'correction-wrong'"
           >
-            <div class="correction-head">
-              <span class="correction-mark">{{ c.est_correct ? '✓' : '✕' }}</span>
-              <span class="correction-index">Question {{ idx + 1 }}</span>
+            <div class="d-flex align-center gap-2 mb-2">
+              <v-icon :color="c.est_correct ? 'success' : 'error'" size="18">
+                {{ c.est_correct ? 'mdi-check-circle' : 'mdi-close-circle' }}
+              </v-icon>
+              <span class="text-body-2 font-weight-bold text-white">Question {{ idx + 1 }}</span>
             </div>
-            <p class="correction-line">Your answer: <strong>{{ c.reponse_soumise || 'None' }}</strong></p>
-            <p v-if="!c.est_correct" class="correction-line is-good">Correct answer: <strong>{{ c.bonneReponse }}</strong></p>
+            <p class="text-caption text-grey-lighten-1 mb-1">
+              Votre réponse : <strong class="text-white">{{ c.reponse_soumise || 'Aucune' }}</strong>
+            </p>
+            <p v-if="!c.est_correct" class="text-caption text-success">
+              Bonne réponse : <strong>{{ c.bonneReponse }}</strong>
+            </p>
           </div>
 
-          <div class="results-actions">
-            <button class="zen-btn zen-btn-quiet" @click="restart">Try again</button>
-            <RouterLink class="zen-btn" to="/catalogue">Back to catalogue <span aria-hidden="true">→</span></RouterLink>
+          <!-- Action buttons -->
+          <div class="d-flex gap-3 mt-8 justify-center flex-wrap">
+            <v-btn variant="outlined" color="primary" class="rounded-pill px-6 border-subtle" prepend-icon="mdi-refresh" @click="restart">
+              Réessayer
+            </v-btn>
+            <v-btn color="primary" variant="flat" class="rounded-pill px-6 font-weight-bold btn-glow" to="/catalogue" prepend-icon="mdi-book-open-variant">
+              Catalogue
+            </v-btn>
           </div>
         </div>
       </template>
 
-      <!-- ═══════════════ ERROR / EMPTY ═══════════════ -->
-      <div v-else class="paper-card error-panel">
-        <span class="empty-symbol">✳</span>
-        <h2>{{ quizData ? 'No questions yet' : "We couldn't load this quiz" }}</h2>
-        <p>{{ quizData ? 'This quiz has no questions to answer right now.' : 'Check that the quiz is still available, then try again.' }}</p>
-        <RouterLink class="zen-btn" to="/catalogue">Back to catalogue <span aria-hidden="true">→</span></RouterLink>
-      </div>
-    </div>
+      <v-alert v-else type="error" variant="tonal" class="rounded-xl">
+        Impossible de charger ce quiz.
+      </v-alert>
+</v-container>
   </div>
 </template>
 
@@ -200,6 +247,7 @@ const submitting = ref(false);
 const currentIndex = ref(0);
 const slideDirection = ref('slide-left');
 
+// Score animation
 const animatedScore = ref(0);
 let scoreAnimFrame = null;
 
@@ -255,10 +303,11 @@ function prevQuestion() {
 function animateScore(target) {
   animatedScore.value = 0;
   const start = performance.now();
-  const duration = 1200;
+  const duration = 1400;
   function tick(now) {
     const elapsed = now - start;
     const progress = Math.min(elapsed / duration, 1);
+    // easeOutExpo
     const ease = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
     animatedScore.value = target * ease;
     if (progress < 1) scoreAnimFrame = requestAnimationFrame(tick);
@@ -276,7 +325,7 @@ async function submitQuiz() {
     await nextTick();
     animateScore(data.score);
   } catch (e) {
-    showErrorToast(e, 'Could not submit the quiz.');
+    showErrorToast(e, 'Impossible de soumettre le quiz.');
   }
   finally { submitting.value = false; }
 }
@@ -296,7 +345,7 @@ onMounted(async () => {
     quizData.value = data;
     if (data.minuterie) startTimer(data.minuterie);
   } catch (e) {
-    showErrorToast(e, 'Could not load this quiz.');
+    showErrorToast(e, 'Impossible de charger ce quiz.');
   }
   finally { markLoaded(); }
 });
@@ -308,331 +357,219 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.quiz-page {
-  min-height: calc(100vh - var(--el-app-bar-h, 72px));
-  padding: 65px 24px 90px;
-  background: #fbfaf6;
-  color: #28382e;
-}
-.quiz-inner { max-width: 820px; margin: 0 auto; }
-
-.paper-card {
-  padding: 26px;
-  border: 1px solid #e5e7df;
-  border-radius: 10px;
-  background: #fff;
-}
-
-/* ── Header ────────────────────────────────────────────── */
-.quiz-header { margin-bottom: 20px; }
-.quiz-head-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
-.quiz-header h1 {
-  margin: 0 0 6px;
-  font-family: 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
-  font-size: clamp(24px, 3vw, 32px);
-  font-weight: 400;
-  line-height: 1.1;
-  letter-spacing: -.03em;
-}
-.quiz-count { margin: 0; color: #7d867d; font-size: 12px; }
-.quiz-count strong { color: #33473a; }
-
-.timer-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 8px 14px;
-  border: 1px solid #e2e6de;
-  border-radius: 8px;
-  background: #f6f8f4;
-  color: #47624e;
-  transition: background .2s ease, color .2s ease, border-color .2s ease;
-}
-.timer-value { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; }
-.timer-danger { background: #f7efed; border-color: #e4cbc6; color: #a4574f; }
-
-.progress-track {
-  height: 5px;
-  margin: 18px 0 14px;
+/* ── Layout ────────────────────────────────────── */
+.quiz-wrapper {
+  min-height: 100vh;
+  padding-top: calc(var(--el-app-bar-h, 72px) + 32px);
+  padding-bottom: 48px;
+  position: relative;
   overflow: hidden;
-  border-radius: 4px;
-  background: #eef0eb;
+}
+.quiz-mesh {
+  display: none;
+}
+.z-1 { position: relative; z-index: 1; }
+.tracking-wide { letter-spacing: 0.05em; }
+
+/* ── Glass panels ──────────────────────────────── */
+.glass-panel {
+  background: var(--el-surface);
+  border: 1px solid var(--el-border);
+  backdrop-filter: none;
+}
+
+/* ── Quiz Header ───────────────────────────────── */
+.quiz-header { position: relative; overflow: hidden; }
+
+/* Timer */
+.timer-pill {
+  display: flex; align-items: center;
+  padding: 8px 16px;
+  border-radius: var(--el-radius-sm);
+  background: var(--el-surface-2);
+  border: 1px solid var(--el-border);
+  color: var(--el-text);
+  font-size: 1.1rem;
+  transition: none;
+}
+.timer-danger {
+  background: rgba(229,72,77,0.12);
+  border-color: rgba(229,72,77,0.4);
+  color: #e5484d;
+  animation: none;
+}
+.font-mono { font-family: 'Courier New', monospace; }
+
+/* ── Progress Bar ──────────────────────────────── */
+.progress-track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--el-border);
+  overflow: hidden;
 }
 .progress-fill {
   height: 100%;
-  border-radius: 4px;
-  background: #6f9276;
-  transition: width .4s cubic-bezier(.22, 1, .36, 1);
+  border-radius: 3px;
+  background: var(--el-accent);
+  box-shadow: 0 0 10px -1px rgba(255, 116, 72, 0.6);
+  transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.dot-row { display: flex; flex-wrap: wrap; gap: 6px; }
+/* ── Question dots ─────────────────────────────── */
 .q-dot {
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border: 1px solid #e2e6de;
-  border-radius: 7px;
-  background: #fff;
-  color: #8b938b;
-  font: inherit;
-  font-size: 11px;
-  font-weight: 700;
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  border: 1px solid var(--el-border-strong);
+  background: transparent;
+  color: var(--el-text-subtle);
   cursor: pointer;
-  transition: background .18s ease, border-color .18s ease, color .18s ease;
+  transition: all 0.2s ease;
+  display: flex; align-items: center; justify-content: center;
 }
-.q-dot:hover { border-color: #b9c8b7; color: #55735c; }
-.q-dot-active { background: #e7eee5; border-color: #9db99f; color: #3f5f49; }
-.q-dot-answered { background: #f0f4ee; border-color: #cfe0cd; color: #46704f; }
+.q-dot:hover { border-color: var(--el-border-strong); color: var(--el-text); }
+.q-dot-active {
+  background: var(--el-accent-soft);
+  border-color: var(--el-accent);
+  color: var(--el-accent);
+  box-shadow: var(--el-shadow-xs);
+}
+.q-dot-answered {
+  background: rgba(63,166,106,0.15);
+  border-color: rgba(63,166,106,0.4);
+  color: #86bd97;
+}
 
-/* ── Question ──────────────────────────────────────────── */
-.question-panel { margin-bottom: 20px; }
-.question-head { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 24px; }
+/* ── Question Badge ────────────────────────────── */
 .q-number-badge {
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  width: 34px;
-  height: 34px;
-  border-radius: 9px;
-  background: #6f9276;
-  color: #fff;
-  font-size: 14px;
-  font-weight: 700;
-}
-.question-head h2 {
-  margin: 0;
-  font-family: 'Iowan Old Style', Georgia, serif;
-  font-size: 22px;
-  font-weight: 400;
-  line-height: 1.45;
-  letter-spacing: -.01em;
+  width: 36px; height: 36px; flex-shrink: 0;
+  border-radius: var(--el-radius-sm);
+  background: var(--el-accent);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 0.85rem; color: var(--el-text);
 }
 
-.choices-grid { display: flex; flex-direction: column; gap: 10px; }
+/* ── Choice Buttons ────────────────────────────── */
+.choices-grid {
+  display: flex; flex-direction: column; gap: 10px;
+}
 .choice-btn {
-  display: flex;
-  align-items: center;
-  gap: 13px;
-  padding: 14px 17px;
-  border: 1px solid #e5e7df;
-  border-radius: 9px;
-  background: #fff;
-  color: #4a5a4f;
-  font: inherit;
-  font-size: 14px;
-  text-align: left;
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 18px;
+  border-radius: var(--el-radius-sm);
+  border: 1px solid var(--el-border);
+  background: var(--el-surface);
+  color: var(--el-text-muted);
+  font-size: 0.95rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: background .18s ease, border-color .18s ease;
+  text-align: left;
+  transition: border-color 0.15s ease, background 0.15s ease;
 }
-.choice-btn:hover { background: #f7f9f5; border-color: #c3cfc1; }
-.choice-selected { background: #eef4ec !important; border-color: #8fb092 !important; color: #2f4a37; }
+.choice-btn:hover {
+  background: var(--el-surface-2);
+  border-color: var(--el-border-strong);
+}
+.choice-selected {
+  background: var(--el-accent-soft) !important;
+  border-color: var(--el-accent) !important;
+  color: var(--el-text);
+  box-shadow: 0 8px 20px -12px rgba(241, 63, 7, 0.5);
+}
 .choice-letter {
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  width: 28px;
-  height: 28px;
-  border-radius: 7px;
-  background: #eef0eb;
-  color: #6f7a70;
-  font-size: 12px;
-  font-weight: 700;
-  transition: background .18s ease, color .18s ease;
+  width: 30px; height: 30px; flex-shrink: 0;
+  border-radius: var(--el-radius-sm);
+  background: var(--el-surface-2);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 0.8rem;
+  transition: none;
 }
-.choice-selected .choice-letter { background: #6f9276; color: #fff; }
-.choice-text { flex: 1; }
-.choice-check { flex-shrink: 0; }
-
-.zen-input :deep(.v-field) { border-radius: 8px; }
-
-/* ── Navigation ────────────────────────────────────────── */
-.quiz-nav { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
-.unanswered-note {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  margin: 16px 0 0;
-  color: #9a7a3f;
-  font-size: 12px;
+.choice-selected .choice-letter {
+  background: var(--el-accent);
+  color: var(--el-text);
 }
 
-/* ── Transitions ───────────────────────────────────────── */
+/* ── Custom input ──────────────────────────────── */
+.custom-input :deep(.v-field) {
+  border-radius: var(--el-radius-sm);
+  background: var(--el-bg-1);
+}
+
+/* ── Question Slide Transitions ────────────────── */
 .slide-left-enter-active, .slide-left-leave-active,
 .slide-right-enter-active, .slide-right-leave-active {
-  transition: opacity .22s ease, transform .22s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.slide-left-enter-from  { opacity: 0; transform: translateX(28px); }
-.slide-left-leave-to    { opacity: 0; transform: translateX(-28px); }
-.slide-right-enter-from { opacity: 0; transform: translateX(-28px); }
-.slide-right-leave-to   { opacity: 0; transform: translateX(28px); }
+.slide-left-enter-from  { opacity: 0; transform: translateX(40px); }
+.slide-left-leave-to    { opacity: 0; transform: translateX(-40px); }
+.slide-right-enter-from { opacity: 0; transform: translateX(-40px); }
+.slide-right-leave-to   { opacity: 0; transform: translateX(40px); }
 
-/* ── Results ───────────────────────────────────────────── */
-.result-panel { text-align: center; }
-.score-ring-container { position: relative; width: 156px; height: 156px; margin: 0 auto 22px; }
-.score-ring-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-.ring-bg { fill: none; stroke: #eef0eb; stroke-width: 8; }
+/* ── Buttons ───────────────────────────────────── */
+.btn-glow { box-shadow: none; }
+.btn-glow-success { box-shadow: none; }
+.border-subtle { border-color: var(--el-border) !important; }
+
+/* ── RESULTS ───────────────────────────────────── */
+.result-panel { animation: fadeInUp 0.5s ease both; }
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.rounded-2xl { border-radius: var(--el-radius-lg) !important; }
+
+/* Score Ring */
+.score-ring-container {
+  width: 160px; height: 160px;
+  position: relative;
+}
+.score-ring-svg {
+  width: 100%; height: 100%;
+  transform: rotate(-90deg);
+}
+.ring-bg {
+  fill: none;
+  stroke: rgba(15, 21, 29, 0.1);
+  stroke-width: 8;
+}
 .ring-fill {
   fill: none;
   stroke-width: 8;
   stroke-linecap: round;
-  stroke-dasharray: 326.73;
-  transition: stroke-dashoffset 1.2s cubic-bezier(.22, 1, .36, 1);
+  stroke-dasharray: 326.73; /* 2 * PI * 52 */
+  transition: stroke-dashoffset 1.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.ring-fill-success { stroke: #5f9070; }
-.ring-fill-error { stroke: #bc7168; }
+.ring-fill-success { stroke: #86bd97; }
+.ring-fill-error   { stroke: #e5484d; }
+
 .score-value {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: row; gap: 2px;
 }
-.score-number {
-  font-family: 'Iowan Old Style', Georgia, serif;
-  font-size: 44px;
-  font-weight: 400;
-  letter-spacing: -.03em;
-}
-.score-pct { font-size: 18px; font-weight: 700; }
-.score-number.is-pass, .score-pct.is-pass { color: #46704f; }
-.score-number.is-fail, .score-pct.is-fail { color: #a4574f; }
 
-.result-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 650;
-}
-.chip-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
-.chip-pass { background: #e8f0e7; color: #46704f; }
-.chip-fail { background: #f3e8e6; color: #a4574f; }
-
+/* Stats Grid */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
-  margin: 26px 0 4px;
 }
-.mini-stat {
-  display: grid;
-  justify-items: center;
-  gap: 5px;
-  padding: 16px 10px;
-  border: 1px solid #eceee7;
-  border-radius: 9px;
-}
-.mini-stat strong {
-  font-family: 'Iowan Old Style', Georgia, serif;
-  font-size: 22px;
-  font-weight: 400;
-}
-.mini-stat span { color: #8b938b; font-size: 11px; }
-
-.results-divider { height: 1px; margin: 28px 0; background: #ecece5; }
-.corrections-title {
-  margin: 0 0 16px;
-  font-family: 'Iowan Old Style', Georgia, serif;
-  font-size: 21px;
-  font-weight: 400;
-  text-align: left;
-}
-.correction-item { margin-bottom: 10px; padding: 15px 17px; border-radius: 9px; text-align: left; }
-.correction-correct { background: #f0f4ee; border: 1px solid #dbe6d9; }
-.correction-wrong { background: #f7efed; border: 1px solid #ecd9d5; }
-.correction-head { display: flex; align-items: center; gap: 9px; margin-bottom: 8px; }
-.correction-mark {
-  display: grid;
-  place-items: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  font-size: 11px;
-  font-weight: 700;
-}
-.correction-correct .correction-mark { background: #dcead9; color: #46704f; }
-.correction-wrong .correction-mark { background: #efd9d5; color: #a4574f; }
-.correction-index { color: #33473a; font-size: 13px; font-weight: 650; }
-.correction-line { margin: 0 0 3px; color: #6f7a70; font-size: 12px; line-height: 1.6; }
-.correction-line strong { color: #33473a; }
-.correction-line.is-good { color: #567a5e; }
-.correction-line.is-good strong { color: #46704f; }
-
-.results-actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 28px;
+.stat-card {
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--el-surface-2);
+  border: 1px solid var(--el-border);
+  text-align: center;
 }
 
-/* ── Error / loading ───────────────────────────────────── */
-.error-panel { padding: 60px 24px; text-align: center; }
-.error-panel h2 {
-  margin: 0;
-  font-family: 'Iowan Old Style', Georgia, serif;
-  font-size: 25px;
-  font-weight: 400;
+/* Corrections */
+.correction-correct {
+  background: rgba(34,197,94,0.06);
+  border: 1px solid rgba(34,197,94,0.15);
 }
-.error-panel p { margin: 8px 0 20px; color: #828a82; font-size: 13px; }
-.empty-symbol {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  margin: 0 auto 14px;
-  border-radius: 50%;
-  background: #edf1e9;
-  color: #65816a;
-  font-size: 24px;
-}
-.quiz-loading { display: grid; gap: 20px; }
-.loading-note { margin: 0; color: #828a82; font-size: 13px; text-align: center; }
-.skeleton-block {
-  border-radius: 10px;
-  background: #eceee7;
-  animation: pulse 1.6s ease-in-out infinite alternate;
-}
-@keyframes pulse { to { opacity: .52; } }
-
-/* ── Buttons ───────────────────────────────────────────── */
-.zen-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  min-height: 46px;
-  padding: 0 22px;
-  border: 0;
-  border-radius: 7px;
-  background: #537a62;
-  color: #fff;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 650;
-  text-decoration: none;
-  cursor: pointer;
-  transition: background .18s ease, transform .18s ease;
-}
-.zen-btn:hover:not(:disabled) { background: #456c54; transform: translateY(-1px); }
-.zen-btn:disabled { opacity: .6; cursor: default; }
-.zen-btn-quiet { background: #fff; color: #55735c; border: 1px solid #dfe5db; }
-.zen-btn-quiet:hover { background: #f4f6f1; border-color: #c3cfc1; }
-
-@media (max-width: 560px) {
-  .quiz-page { padding: 50px 18px 72px; }
-  .paper-card { padding: 20px; }
-  .stats-grid { gap: 8px; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .quiz-page *, .quiz-page *::before, .quiz-page *::after {
-    transition-duration: .01ms !important;
-    animation-duration: .01ms !important;
-  }
+.correction-wrong {
+  background: rgba(239,68,68,0.06);
+  border: 1px solid rgba(239,68,68,0.15);
 }
 </style>

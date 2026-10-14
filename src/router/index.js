@@ -7,28 +7,28 @@ NProgress.configure({ showSpinner: false, speed: 400, minimum: 0.15 });
 
 const routes = [
   // Public
-  { path: '/', meta: { title: 'E-Learning Hub — Make room for your next skill' }, component: () => import('../views/HomeView.vue') },
-  { path: '/login', meta: { guest: true, title: 'Sign in — E-Learning Hub' }, component: () => import('../views/LoginView.vue') },
-  { path: '/register', meta: { guest: true, title: 'Create account — E-Learning Hub' }, component: () => import('../views/RegisterView.vue') },
-  { path: '/catalogue', meta: { title: 'Course catalogue — E-Learning Hub' }, component: () => import('../views/CatalogView.vue') },
-  { path: '/cours/:id', meta: { title: 'Course details — E-Learning Hub' }, component: () => import('../views/CourseDetailView.vue') },
+  { path: '/', meta: { title: 'Accueil — E-Learning Hub' }, component: () => import('../views/HomeView.vue') },
+  { path: '/login', meta: { guest: true, title: 'Connexion' }, component: () => import('../views/LoginView.vue') },
+  { path: '/register', meta: { guest: true, title: 'Inscription' }, component: () => import('../views/RegisterView.vue') },
+  { path: '/catalogue', meta: { title: 'Catalogue de cours' }, component: () => import('../views/CatalogView.vue') },
+  { path: '/cours/:id', meta: { title: 'Détail du cours' }, component: () => import('../views/CourseDetailView.vue') },
 
   // Apprenant — auth required
-  { path: '/dashboard', meta: { requiresAuth: true, roles: ['apprenant'], title: 'My learning — E-Learning Hub', hideFooter: true }, component: () => import('../views/DashboardView.vue') },
-  { path: '/cours/:id/apprendre', meta: { requiresAuth: true, roles: ['apprenant'], title: 'Continue learning — E-Learning Hub', hideFooter: true, hideNav: true }, component: () => import('../views/CourseLearnView.vue') },
-  { path: '/quiz/:id', meta: { requiresAuth: true, roles: ['apprenant'], title: 'Quiz — E-Learning Hub' }, component: () => import('../views/QuizView.vue') },
-  { path: '/quiz/:id/resultats', meta: { requiresAuth: true, roles: ['apprenant'], title: 'Quiz results — E-Learning Hub' }, component: () => import('../views/QuizResultsView.vue') },
-  { path: '/profil', meta: { requiresAuth: true, title: 'My profile — E-Learning Hub' }, component: () => import('../views/ProfileView.vue') },
+  { path: '/dashboard', meta: { requiresAuth: true, roles: ['apprenant'], title: 'Mon espace', hideFooter: true }, component: () => import('../views/DashboardView.vue') },
+  { path: '/cours/:id/apprendre', meta: { requiresAuth: true, roles: ['apprenant'], title: 'Apprendre', hideFooter: true, hideNav: true }, component: () => import('../views/CourseLearnView.vue') },
+  { path: '/quiz/:id', meta: { requiresAuth: true, roles: ['apprenant'], title: 'Quiz' }, component: () => import('../views/QuizView.vue') },
+  { path: '/quiz/:id/resultats', meta: { requiresAuth: true, roles: ['apprenant'], title: 'Résultats du quiz' }, component: () => import('../views/QuizResultsView.vue') },
+  { path: '/profil', meta: { requiresAuth: true, title: 'Mon profil' }, component: () => import('../views/ProfileView.vue') },
 
   // Formateur
-  { path: '/formateur', meta: { requiresAuth: true, roles: ['formateur', 'admin'], title: 'Instructor workspace — E-Learning Hub' }, component: () => import('../views/FormateurDashboard.vue') },
-  { path: '/formateur/cours/creer', meta: { requiresAuth: true, roles: ['formateur', 'admin'], title: 'Create a course — E-Learning Hub' }, component: () => import('../views/CourseCreateView.vue') },
-  { path: '/formateur/cours/:id/edit', meta: { requiresAuth: true, roles: ['formateur', 'admin'], title: 'Edit course — E-Learning Hub' }, component: () => import('../views/CourseCreateView.vue') },
-  { path: '/formateur/cours/:id/stats', meta: { requiresAuth: true, roles: ['formateur', 'admin'], title: 'Course analytics — E-Learning Hub' }, component: () => import('../views/CourseStatsView.vue') },
+  { path: '/formateur', meta: { requiresAuth: true, roles: ['formateur', 'admin'], title: 'Espace formateur' }, component: () => import('../views/FormateurDashboard.vue') },
+  { path: '/formateur/cours/creer', meta: { requiresAuth: true, roles: ['formateur', 'admin'], title: 'Créer un cours' }, component: () => import('../views/CourseCreateView.vue') },
+  { path: '/formateur/cours/:id/edit', meta: { requiresAuth: true, roles: ['formateur', 'admin'], title: 'Modifier le cours' }, component: () => import('../views/CourseCreateView.vue') },
+  { path: '/formateur/cours/:id/stats', meta: { requiresAuth: true, roles: ['formateur', 'admin'], title: 'Statistiques du cours' }, component: () => import('../views/CourseStatsView.vue') },
 
   // Admin
-  { path: '/admin', meta: { requiresAuth: true, roles: ['admin'], title: 'Admin overview — E-Learning Hub' }, component: () => import('../views/AdminDashboard.vue') },
-  { path: '/admin/users', meta: { requiresAuth: true, roles: ['admin'], title: 'People — E-Learning Hub' }, component: () => import('../views/AdminUsersView.vue') },
+  { path: '/admin', meta: { requiresAuth: true, roles: ['admin'], title: 'Administration' }, component: () => import('../views/AdminDashboard.vue') },
+  { path: '/admin/users', meta: { requiresAuth: true, roles: ['admin'], title: 'Gestion des utilisateurs' }, component: () => import('../views/AdminUsersView.vue') },
 
   // Catch-all
   { path: '/:pathMatch(.*)*', redirect: '/' },

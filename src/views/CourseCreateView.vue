@@ -1,165 +1,167 @@
 <template>
-  <div class="create-page">
-    <div class="create-inner">
-      <!-- Header -->
-      <header class="page-head">
-        <span class="eyebrow"><i class="focus-dot" /> COURSE BUILDER</span>
-        <h1>{{ isEdit ? 'Edit your course' : 'Create a new course' }}</h1>
-        <p class="page-lede">Step {{ step }} of {{ totalSteps }}</p>
-      </header>
+  <v-container class="py-8">
+    <div class="create-hero-glow" />
+    <v-row class="el-fade-up mb-6 position-relative z-1" align="center">
+      <v-col>
+        <h1 class="el-d1 text-h4 font-weight-black text-white">{{ isEdit ? 'Modifier le cours' : 'Créer un cours' }}</h1>
+        <p class="el-d2 text-grey-lighten-1 mt-1">Étape {{ step }} / {{ totalSteps }}</p>
+      </v-col>
+    </v-row>
 
-      <!-- Step bar -->
-      <div class="step-bar">
-        <span
-          v-for="n in totalSteps" :key="n"
-          class="step-dot"
-          :class="{ 'step-active': n === step, 'step-done': n < step }"
-        />
+    <!-- Step indicators -->
+    <div class="d-flex gap-2 mb-8">
+      <div
+        v-for="n in totalSteps" :key="n"
+        class="step-dot"
+        :class="{ 'step-active': n === step, 'step-done': n < step }"
+      />
+    </div>
+
+    <!-- Step 1: Course Info -->
+    <v-card v-if="step === 1" class="glass-card rounded-xl pa-6" >
+      <h2 class="text-h6 font-weight-bold mb-6">
+        <v-icon color="primary" class="mr-2">mdi-information</v-icon>Informations du cours
+      </h2>
+      <v-text-field v-model="form.titre" label="Titre du cours *" variant="outlined" color="primary" class="mb-4" :error-messages="errors.titre" />
+      <v-select v-model="form.categorie" label="Catégorie *" variant="outlined" color="primary" class="mb-4" :items="categories" :error-messages="errors.categorie" />
+      <v-textarea v-model="form.description" label="Description *" variant="outlined" color="primary" rows="4" :error-messages="errors.description" />
+      <div class="d-flex justify-end mt-4">
+        <v-btn color="primary" variant="flat" class="rounded-pill" :disabled="!step1Valid" @click="step++">Suivant <v-icon end>mdi-arrow-right</v-icon></v-btn>
       </div>
+    </v-card>
 
-      <!-- Step 1: Course info -->
-      <section v-if="step === 1" class="paper-card">
-        <h2 class="card-title"><v-icon color="primary" size="20">mdi-information-outline</v-icon> Course information</h2>
-        <v-text-field v-model="form.titre" label="Course title *" variant="outlined" color="primary" class="mb-4 zen-input" :error-messages="errors.titre" />
-        <v-select v-model="form.categorie" label="Category *" variant="outlined" color="primary" class="mb-4 zen-input" :items="categories" :error-messages="errors.categorie" />
-        <v-textarea v-model="form.description" label="Description *" variant="outlined" color="primary" rows="4" class="zen-input" :error-messages="errors.description" />
-        <div class="card-actions end">
-          <button class="zen-btn" :disabled="!step1Valid" @click="step++">Next <span aria-hidden="true">→</span></button>
-        </div>
-      </section>
+    <!-- Step 2: Modules -->
+    <v-card v-else-if="step === 2" class="glass-card rounded-xl pa-6" >
+      <div class="d-flex align-center mb-6">
+        <h2 class="text-h6 font-weight-bold"><v-icon color="primary" class="mr-2">mdi-layers</v-icon>Modules</h2>
+        <v-spacer />
+        <v-btn color="secondary" variant="tonal" class="rounded-pill" prepend-icon="mdi-plus" @click="addModule">Ajouter</v-btn>
+      </div>
+      <div v-if="form.modules.length === 0" class="text-center py-8 text-grey">
+        <v-icon size="48" color="grey-darken-1">mdi-layers-plus</v-icon>
+        <p class="mt-3">Ajoutez au moins un module</p>
+      </div>
+      <div v-for="(mod, idx) in form.modules" :key="idx" class="d-flex gap-3 mb-3 align-center">
+        <v-avatar color="primary" size="28"><span class="text-caption font-weight-black">{{ idx + 1 }}</span></v-avatar>
+        <v-text-field v-model="mod.titre" :label="`Module ${idx + 1}`" variant="outlined" density="compact" color="primary" hide-details class="flex-grow-1" />
+        <v-btn icon="mdi-delete" size="small" variant="text" color="error" @click="deleteModule(idx)" />
+      </div>
+      <div class="d-flex justify-space-between mt-6">
+        <v-btn variant="outlined" class="rounded-pill" @click="step--"><v-icon start>mdi-arrow-left</v-icon>Précédent</v-btn>
+        <v-btn color="primary" variant="flat" class="rounded-pill" :disabled="form.modules.length === 0" @click="step++">Suivant <v-icon end>mdi-arrow-right</v-icon></v-btn>
+      </div>
+    </v-card>
 
-      <!-- Step 2: Modules -->
-      <section v-else-if="step === 2" class="paper-card">
-        <div class="card-head">
-          <h2 class="card-title"><v-icon color="primary" size="20">mdi-layers-outline</v-icon> Modules</h2>
-          <button class="zen-btn zen-btn-quiet" @click="addModule">+ Add module</button>
-        </div>
-
-        <div v-if="form.modules.length === 0" class="empty-inline">
-          <span class="empty-symbol">✳</span>
-          <p>Add at least one module to structure your course.</p>
-        </div>
-
-        <div v-for="(mod, idx) in form.modules" :key="idx" class="module-row">
-          <span class="index-badge">{{ idx + 1 }}</span>
-          <v-text-field v-model="mod.titre" :label="`Module ${idx + 1}`" variant="outlined" density="compact" color="primary" hide-details class="flex-grow-1 zen-input" />
-          <button class="icon-btn is-danger" aria-label="Delete module" @click="deleteModule(idx)"><v-icon size="18">mdi-delete-outline</v-icon></button>
-        </div>
-
-        <div class="card-actions">
-          <button class="zen-btn zen-btn-quiet" @click="step--">← Previous</button>
-          <button class="zen-btn" :disabled="form.modules.length === 0" @click="step++">Next <span aria-hidden="true">→</span></button>
-        </div>
-      </section>
-
-      <!-- Step 3: Lessons -->
-      <section v-else-if="step === 3" class="paper-card">
-        <h2 class="card-title"><v-icon color="primary" size="20">mdi-book-open-variant</v-icon> Lessons</h2>
-
-        <details v-for="(mod, mIdx) in form.modules" :key="mIdx" class="module-block" open>
-          <summary>
-            <span class="module-block-title">Module {{ mIdx + 1 }}: {{ mod.titre }}</span>
-            <span class="module-chevron"><v-icon size="18">mdi-chevron-down</v-icon></span>
-          </summary>
-
-          <div class="module-block-body">
-            <div v-for="(lecon, lIdx) in mod.lecons" :key="lIdx" class="lesson-row">
-              <div class="lesson-grid">
-                <v-text-field v-model="lecon.titre" :label="`Lesson ${lIdx + 1}`" variant="outlined" density="compact" color="primary" hide-details class="zen-input" />
-                <v-select v-model="lecon.typeContenu" :items="['video','pdf','image','texte','td']" label="Type" variant="outlined" density="compact" color="primary" hide-details class="zen-input" />
-                <div>
-                  <div v-if="lecon.typeContenu !== 'texte'" class="file-cell">
+    <!-- Step 3: Lessons -->
+    <v-card v-else-if="step === 3" class="glass-card rounded-xl pa-6" >
+      <h2 class="text-h6 font-weight-bold mb-6"><v-icon color="primary" class="mr-2">mdi-book-open-variant</v-icon>Leçons</h2>
+      <v-expansion-panels variant="popout" class="custom-panels">
+        <v-expansion-panel v-for="(mod, mIdx) in form.modules" :key="mIdx" class="glass-panel mb-3 rounded-xl border-subtle" elevation="0" bg-color="transparent">
+          <v-expansion-panel-title class="font-weight-bold py-4">
+            Module {{ mIdx + 1 }}: {{ mod.titre }}
+            <v-chip class="ml-3" size="x-small">{{ mod.lecons?.length || 0 }} leçons</v-chip>
+          </v-expansion-panel-title>
+          <v-expansion-panel-text>
+            <div v-for="(lecon, lIdx) in mod.lecons" :key="lIdx" class="lesson-row rounded-lg pa-4 mb-4 border-subtle bg-surface-light">
+              <v-row align="center" no-gutters>
+                <v-col cols="12" md="4" class="pr-md-2 mb-2 mb-md-0">
+                  <v-text-field v-model="lecon.titre" :label="`Leçon ${lIdx+1}`" variant="outlined" density="compact" color="primary" hide-details />
+                </v-col>
+                <v-col cols="12" md="2" class="px-md-2 mb-2 mb-md-0">
+                  <v-select v-model="lecon.typeContenu" :items="['video','pdf','image','texte','td']" label="Type" variant="outlined" density="compact" color="primary" hide-details />
+                </v-col>
+                <v-col cols="12" md="5" class="px-md-2 mb-2 mb-md-0">
+                  <!-- File Upload Placeholder/Indicator -->
+                  <div v-if="lecon.typeContenu !== 'texte'" class="d-flex align-center gap-2">
                     <v-file-input
-                      label="Attach a file"
-                      variant="outlined" density="compact" color="primary" hide-details
-                      prepend-icon="" prepend-inner-icon="mdi-cloud-upload"
+                      label="Joindre un fichier"
+                      variant="outlined"
+                      density="compact"
+                      color="primary"
+                      hide-details
+                      prepend-icon=""
+                      prepend-inner-icon="mdi-cloud-upload"
                       :loading="lecon.uploading"
                       @change="(file) => handleFileUpload(file, lecon)"
                     />
                   </div>
-                  <v-text-field v-else v-model="lecon.urlContenu" label="Text content" variant="outlined" density="compact" color="primary" hide-details class="zen-input" />
-                </div>
-                <button class="icon-btn is-danger" aria-label="Delete lesson" @click="deleteLesson(mod, lIdx)"><v-icon size="18">mdi-delete-outline</v-icon></button>
+                  <v-text-field v-else v-model="lecon.urlContenu" label="Contenu texte" variant="outlined" density="compact" color="primary" hide-details />
+                </v-col>
+                <v-col cols="12" md="1" class="text-right">
+                  <v-btn icon="mdi-delete-outline" size="small" variant="text" color="error" @click="deleteLesson(mod, lIdx)" />
+                </v-col>
+              </v-row>
+              <div v-if="lecon.urlContenu && lecon.typeContenu !== 'texte'" class="text-caption text-success mt-1 d-flex align-center">
+                <v-icon size="14" class="mr-1">mdi-check-circle</v-icon> Fichier prêt : {{ lecon.urlContenu.split('/').pop() }}
               </div>
-              <p v-if="lecon.urlContenu && lecon.typeContenu !== 'texte'" class="file-ready">
-                <v-icon size="14" color="success">mdi-check-circle</v-icon> File ready: {{ lecon.urlContenu.split('/').pop() }}
-              </p>
             </div>
+            <v-btn size="small" variant="tonal" color="secondary" prepend-icon="mdi-plus" @click="mod.lecons.push({ titre:'', typeContenu:'texte', ordre: (mod.lecons?.length||0)+1 })">Ajouter une leçon</v-btn>
+          </v-expansion-panel-text>
+        </v-expansion-panel>
+      </v-expansion-panels>
+      <div class="mt-4">
+        <v-btn v-if="form.modules.length > 0" size="small" variant="text" color="error" class="mb-4" prepend-icon="mdi-delete" @click="deleteModule(form.modules.length - 1)">Supprimer le dernier module</v-btn>
+      </div>
+      <div class="d-flex justify-space-between mt-6">
+        <v-btn variant="outlined" class="rounded-pill" @click="step--"><v-icon start>mdi-arrow-left</v-icon>Précédent</v-btn>
+        <v-btn color="primary" variant="flat" class="rounded-pill" @click="step++">Suivant <v-icon end>mdi-arrow-right</v-icon></v-btn>
+      </div>
+    </v-card>
 
-            <button class="zen-btn zen-btn-quiet sm" @click="mod.lecons.push({ titre:'', typeContenu:'texte', ordre: (mod.lecons?.length||0)+1 })">+ Add a lesson</button>
+    <!-- Step 4: Quiz -->
+    <v-card v-else-if="step === 4" class="glass-card rounded-xl pa-6" >
+      <div class="d-flex align-center mb-4">
+        <h2 class="text-h6 font-weight-bold"><v-icon color="primary" class="mr-2">mdi-head-question</v-icon>Quiz (optionnel)</h2>
+        <v-switch v-model="form.hasQuiz" color="primary" class="ml-4" hide-details />
+      </div>
+      <template v-if="form.hasQuiz">
+        <v-row>
+          <v-col cols="12" md="6"><v-text-field v-model="form.quiz.titre" label="Titre du quiz" variant="outlined" color="primary" /></v-col>
+          <v-col cols="6" md="3"><v-text-field v-model.number="form.quiz.dureeSecondes" label="Durée (sec)" type="number" variant="outlined" color="primary" /></v-col>
+          <v-col cols="6" md="3"><v-text-field v-model.number="form.quiz.scoreMinimal" label="Score min (%)" type="number" variant="outlined" color="primary" /></v-col>
+        </v-row>
+        <div v-for="(q, idx) in form.quiz.questions" :key="idx" class="question-block rounded-lg pa-4 mb-4">
+          <div class="d-flex align-center gap-2 mb-3">
+            <v-avatar color="primary" size="24"><span class="text-caption">{{ idx+1 }}</span></v-avatar>
+            <span class="font-weight-bold text-white">Question {{ idx+1 }}</span>
+            <v-spacer />
+            <v-btn icon="mdi-delete" size="x-small" color="error" variant="text" @click="form.quiz.questions.splice(idx,1)" />
           </div>
-        </details>
-
-        <div class="card-actions">
-          <button class="zen-btn zen-btn-quiet" @click="step--">← Previous</button>
-          <button class="zen-btn" @click="step++">Next <span aria-hidden="true">→</span></button>
+          <v-textarea v-model="q.contenu" label="Énoncé" rows="2" variant="outlined" density="compact" color="primary" class="mb-3" hide-details />
+          <v-row>
+            <v-col cols="4"><v-select v-model="q.type" :items="['qcm','vrai_faux','libre']" label="Type" variant="outlined" density="compact" color="primary" hide-details /></v-col>
+            <v-col cols="4"><v-text-field v-model="q.bonneReponse" label="Bonne réponse" variant="outlined" density="compact" color="primary" hide-details /></v-col>
+            <v-col cols="4"><v-text-field v-model.number="q.points" label="Points" type="number" variant="outlined" density="compact" color="primary" hide-details /></v-col>
+          </v-row>
+          <v-text-field v-if="q.type==='qcm'" v-model="q.choixStr" class="mt-3" label="Choix (séparés par ;)" variant="outlined" density="compact" color="primary" hide-details />
         </div>
-      </section>
+        <v-btn variant="tonal" color="primary" prepend-icon="mdi-plus" @click="form.quiz.questions.push({ contenu:'', type:'qcm', bonneReponse:'', choixStr:'', ordre:form.quiz.questions.length+1, points:2 })">Ajouter une question</v-btn>
+      </template>
+      <div class="d-flex justify-space-between mt-6">
+        <v-btn variant="outlined" class="rounded-pill" @click="step--"><v-icon start>mdi-arrow-left</v-icon>Précédent</v-btn>
+        <v-btn color="primary" variant="flat" class="rounded-pill" @click="step++">Suivant <v-icon end>mdi-arrow-right</v-icon></v-btn>
+      </div>
+    </v-card>
 
-      <!-- Step 4: Quiz -->
-      <section v-else-if="step === 4" class="paper-card">
-        <div class="card-head">
-          <h2 class="card-title"><v-icon color="primary" size="20">mdi-head-question-outline</v-icon> Quiz (optional)</h2>
-          <v-switch v-model="form.hasQuiz" color="primary" hide-details class="zen-switch" />
-        </div>
-
-        <template v-if="form.hasQuiz">
-          <div class="quiz-meta-grid">
-            <v-text-field v-model="form.quiz.titre" label="Quiz title" variant="outlined" color="primary" class="zen-input" />
-            <v-text-field v-model.number="form.quiz.dureeSecondes" label="Duration (sec)" type="number" variant="outlined" color="primary" class="zen-input" />
-            <v-text-field v-model.number="form.quiz.scoreMinimal" label="Minimum score (%)" type="number" variant="outlined" color="primary" class="zen-input" />
-          </div>
-
-          <div v-for="(q, idx) in form.quiz.questions" :key="idx" class="question-block">
-            <div class="question-head">
-              <span class="index-badge">{{ idx + 1 }}</span>
-              <span class="question-title">Question {{ idx + 1 }}</span>
-              <button class="icon-btn is-danger ml-auto" aria-label="Delete question" @click="form.quiz.questions.splice(idx,1)"><v-icon size="18">mdi-delete-outline</v-icon></button>
-            </div>
-            <v-textarea v-model="q.contenu" label="Prompt" rows="2" variant="outlined" density="compact" color="primary" class="mb-3 zen-input" hide-details />
-            <div class="question-grid">
-              <v-select v-model="q.type" :items="['qcm','vrai_faux','libre']" label="Type" variant="outlined" density="compact" color="primary" hide-details class="zen-input" />
-              <v-text-field v-model="q.bonneReponse" label="Correct answer" variant="outlined" density="compact" color="primary" hide-details class="zen-input" />
-              <v-text-field v-model.number="q.points" label="Points" type="number" variant="outlined" density="compact" color="primary" hide-details class="zen-input" />
-            </div>
-            <v-text-field v-if="q.type==='qcm'" v-model="q.choixStr" class="mt-3 zen-input" label="Choices (separated by ;)" variant="outlined" density="compact" color="primary" hide-details />
-          </div>
-
-          <button class="zen-btn zen-btn-quiet sm" @click="form.quiz.questions.push({ contenu:'', type:'qcm', bonneReponse:'', choixStr:'', ordre:form.quiz.questions.length+1, points:2 })">+ Add a question</button>
-        </template>
-
-        <div class="card-actions">
-          <button class="zen-btn zen-btn-quiet" @click="step--">← Previous</button>
-          <button class="zen-btn" @click="step++">Next <span aria-hidden="true">→</span></button>
-        </div>
-      </section>
-
-      <!-- Step 5: Review -->
-      <section v-else-if="step === 5" class="paper-card">
-        <h2 class="card-title"><v-icon color="primary" size="20">mdi-check-all</v-icon> Review &amp; save</h2>
-
-        <v-alert v-if="globalError" type="error" variant="tonal" class="mb-6" rounded="lg" closable @click:close="globalError = ''">
-          {{ globalError }}
-        </v-alert>
-
-        <div class="review-row"><span>Title</span><strong>{{ form.titre }}</strong></div>
-        <div class="review-row"><span>Category</span><strong>{{ form.categorie }}</strong></div>
-        <div class="review-row"><span>Modules</span><strong>{{ form.modules.length }} modules / {{ totalLessons }} lessons</strong></div>
-        <div class="review-row"><span>Quiz</span><strong>{{ form.hasQuiz ? form.quiz.titre + ' (' + form.quiz.questions.length + ' questions)' : 'None' }}</strong></div>
-
-        <p class="review-note">
-          The course will be created as a <strong>draft</strong>. Publish it from your dashboard when it's ready.
-        </p>
-
-        <div class="card-actions">
-          <button class="zen-btn zen-btn-quiet" @click="step--">← Previous</button>
-          <button class="zen-btn" :disabled="saving" @click="saveCourse">
-            <v-icon size="18">mdi-check</v-icon>{{ saving ? 'Saving…' : (isEdit ? 'Update course' : 'Create course') }}
-          </button>
-        </div>
-      </section>
-    </div>
-  </div>
+    <!-- Step 5: Review & Save -->
+    <v-card v-else-if="step === 5" class="glass-card rounded-xl pa-6" >
+      <h2 class="text-h6 font-weight-bold mb-6"><v-icon color="primary" class="mr-2">mdi-check-all</v-icon>Récapitulatif</h2>
+      <v-alert v-if="globalError" type="error" variant="tonal" class="mb-6" rounded="lg" closable @click:close="globalError = ''">
+        {{ globalError }}
+      </v-alert>
+      <div class="review-row"><span class="text-grey-lighten-1">Titre</span><span class="font-weight-bold text-white">{{ form.titre }}</span></div>
+      <div class="review-row"><span class="text-grey-lighten-1">Catégorie</span><span class="font-weight-bold text-white">{{ form.categorie }}</span></div>
+      <div class="review-row"><span class="text-grey-lighten-1">Modules</span><span class="font-weight-bold text-white">{{ form.modules.length }} modules / {{ totalLessons }} leçons</span></div>
+      <div class="review-row mb-6"><span class="text-grey-lighten-1">Quiz</span><span class="font-weight-bold text-white">{{ form.hasQuiz ? form.quiz.titre + ' (' + form.quiz.questions.length + ' questions)' : 'Aucun' }}</span></div>
+      <v-alert type="info" variant="tonal" class="mb-6" rounded="lg">Le cours sera créé en <strong>brouillon</strong>. Publiez-le depuis votre tableau de bord quand il est prêt.</v-alert>
+      <div class="d-flex justify-space-between">
+        <v-btn variant="outlined" class="rounded-pill" @click="step--"><v-icon start>mdi-arrow-left</v-icon>Précédent</v-btn>
+        <v-btn color="primary" variant="flat" class="rounded-pill font-weight-bold btn-glow" :loading="saving" @click="saveCourse">
+          <v-icon start>mdi-check</v-icon>{{ isEdit ? 'Mettre à jour' : 'Créer le cours' }}
+        </v-btn>
+      </div>
+    </v-card>
+  </v-container>
 </template>
 
 <script setup>
@@ -183,7 +185,7 @@ const form = ref({
   titre: '', categorie: '', description: '',
   modules: [],
   hasQuiz: false,
-  quiz: { titre: 'Course quiz', dureeSecondes: 600, scoreMinimal: 60, questions: [] },
+  quiz: { titre: 'Quiz du cours', dureeSecondes: 600, scoreMinimal: 60, questions: [] },
 });
 
 const step1Valid   = computed(() => form.value.titre && form.value.categorie && form.value.description);
@@ -233,7 +235,7 @@ async function saveCourse() {
     for (let mIdx = 0; mIdx < form.value.modules.length; mIdx++) {
       const mod = form.value.modules[mIdx];
       let mData = { id: mod.id };
-
+      
       if (mod.id) {
         await api.put(`/modules/${mod.id}`, { titre: mod.titre, ordre: mIdx + 1 });
       } else {
@@ -244,7 +246,7 @@ async function saveCourse() {
       for (let lIdx = 0; lIdx < (mod.lecons || []).length; lIdx++) {
         const l = mod.lecons[lIdx];
         const payload = { titre: l.titre, typeContenu: l.typeContenu, ordre: lIdx + 1 };
-
+        
         if (l.typeContenu === 'texte') {
           payload.urlContenu = l.urlContenu;
         }
@@ -257,6 +259,7 @@ async function saveCourse() {
           lData.id = resData.id;
         }
 
+        // If a file was selected, upload it immediately
         if (l.file && l.typeContenu !== 'texte') {
           l.uploading = true;
           try {
@@ -271,7 +274,8 @@ async function saveCourse() {
         }
       }
     }
-
+    
+    // Process deletions
     for (const id of deletedLecons.value) await api.delete(`/lecons/${id}`);
     for (const id of deletedModules.value) await api.delete(`/modules/${id}`);
     if (form.value.hasQuiz && form.value.quiz.titre) {
@@ -288,7 +292,7 @@ async function saveCourse() {
     }
     router.push('/formateur');
   } catch(e) {
-    globalError.value = e.response?.data?.message || 'Something went wrong while saving the course. Please check the information you entered.';
+    globalError.value = e.response?.data?.message || "Une erreur est survenue lors de l'enregistrement du cours. Veuillez vérifier les informations saisies.";
     if (e.response?.data?.errors) errors.value = e.response.data.errors;
   } finally { saving.value = false; }
 }
@@ -305,221 +309,84 @@ onMounted(async () => {
         lecons: m.lecons?.map(l => ({ id: l.id, titre: l.titre, typeContenu: l.typeContenu, urlContenu: l.urlContenu, ordre: l.ordre })) || [],
       })) || [];
     } catch(e) {
-      showErrorToast(e, 'Could not load this course for editing.');
+      showErrorToast(e, 'Impossible de charger ce cours pour modification.');
     }
   }
 });
 </script>
 
 <style scoped>
-.create-page {
-  min-height: calc(100vh - var(--el-app-bar-h, 72px));
-  padding: 65px 24px 100px;
-  background: #fbfaf6;
-  color: #28382e;
+/* Hero Header */
+.create-hero-glow {
+  display: none;
 }
-.create-inner { max-width: 860px; margin: 0 auto; }
+.z-1 { position: relative; z-index: 1; }
 
-/* ── Head ──────────────────────────────────────────────── */
-.page-head { margin-bottom: 26px; }
-.eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: #648069;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .13em;
-}
-.focus-dot { width: 7px; height: 7px; border-radius: 50%; background: #749578; }
-.page-head h1 {
-  margin: 14px 0 10px;
-  font-family: 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
-  font-size: clamp(34px, 4.3vw, 48px);
-  font-weight: 400;
-  line-height: 1.04;
-  letter-spacing: -.04em;
-}
-.page-lede { margin: 0; color: #7d867e; font-size: 13px; }
-
-/* ── Step bar ──────────────────────────────────────────── */
-.step-bar { display: flex; gap: 8px; margin-bottom: 30px; }
+/* Timeline Indicators */
 .step-dot {
-  flex: 1;
-  height: 5px;
-  border-radius: 4px;
-  background: #e7e9e2;
-  transition: background .3s ease;
+  flex-grow: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--el-border);
+  transition: background 0.2s ease;
 }
-.step-active { background: #9db99f; }
-.step-done { background: #6f9276; }
-
-/* ── Cards ─────────────────────────────────────────────── */
-.paper-card {
-  padding: 28px;
-  border: 1px solid #e5e7df;
-  border-radius: 10px;
-  background: #fff;
+.step-active {
+  background: var(--el-accent);
 }
-.card-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
-.card-title {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  margin: 0 0 22px;
-  font-family: 'Iowan Old Style', Georgia, serif;
-  font-size: 22px;
-  font-weight: 400;
-  letter-spacing: -.02em;
-}
-.card-head .card-title { margin: 0; }
-.card-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 26px; }
-.card-actions.end { justify-content: flex-end; }
-
-.zen-input :deep(.v-field) { border-radius: 8px; }
-.zen-switch { flex: 0 0 auto; }
-
-/* ── Modules ───────────────────────────────────────────── */
-.empty-inline { padding: 34px 0; text-align: center; }
-.empty-symbol {
-  display: grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
-  margin: 0 auto 10px;
-  border-radius: 50%;
-  background: #edf1e9;
-  color: #65816a;
-  font-size: 22px;
-}
-.empty-inline p { margin: 0; color: #828a82; font-size: 13px; }
-
-.module-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-.index-badge {
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
-  background: #e7eee5;
-  color: #46704f;
-  font-size: 12px;
-  font-weight: 700;
+.step-done {
+  background: #86bd97;
 }
 
-/* ── Lesson modules (details) ──────────────────────────── */
-.module-block {
-  margin-bottom: 14px;
-  border: 1px solid #e5e7df;
-  border-radius: 9px;
-  background: #fcfcfa;
+/* Form Elements */
+.question-block {
+  background: var(--el-surface);
+  backdrop-filter: none;
+  border: 1px solid var(--el-border);
+  transition: border-color 0.15s ease;
 }
-.module-block > summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 15px 18px;
-  cursor: pointer;
-  list-style: none;
+.question-block:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: var(--el-border-strong);
 }
-.module-block > summary::-webkit-details-marker { display: none; }
-.module-block-title { color: #33473a; font-size: 14px; font-weight: 650; }
-.module-chevron { color: #8b938b; transition: transform .2s ease; }
-.module-block[open] .module-chevron { transform: rotate(180deg); }
-.module-block-body { padding: 4px 18px 18px; }
 
-.lesson-row { padding: 14px; margin-bottom: 12px; border: 1px solid #eceee7; border-radius: 8px; background: #fff; }
-.lesson-grid { display: grid; grid-template-columns: 1.2fr 0.7fr 1.6fr 40px; gap: 10px; align-items: start; }
-.file-ready { display: flex; align-items: center; gap: 5px; margin: 8px 0 0; color: #46704f; font-size: 11px; }
-
-/* ── Quiz ──────────────────────────────────────────────── */
-.quiz-meta-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 14px; margin-bottom: 22px; }
-.question-block { padding: 18px; margin-bottom: 14px; border: 1px solid #eceee7; border-radius: 9px; background: #fcfcfa; }
-.question-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
-.question-title { color: #33473a; font-size: 14px; font-weight: 650; }
-.question-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-.ml-auto { margin-left: auto; }
-
-/* ── Review ────────────────────────────────────────────── */
 .review-row {
   display: flex;
-  align-items: baseline;
   justify-content: space-between;
-  gap: 16px;
-  padding: 15px 0;
-  border-bottom: 1px solid #eff0ea;
+  padding: 16px 0;
+  border-bottom: 1px dashed rgba(15, 21, 29, 0.12);
+  transition: background 0.3s ease;
 }
-.review-row span { color: #7d867d; font-size: 13px; }
-.review-row strong { color: #28382e; font-size: 13px; font-weight: 650; text-align: right; }
-.review-note {
-  margin: 22px 0 0;
-  padding: 14px 16px;
-  border: 1px solid #e2e8dd;
+.review-row:hover {
+  background: var(--el-surface-2);
   border-radius: 8px;
-  background: #f3f6f0;
-  color: #55735c;
-  font-size: 12px;
-  line-height: 1.6;
+  padding: 16px 8px;
+  margin: 0 -8px;
 }
-.review-note strong { color: #3f5f49; }
 
-/* ── Buttons ───────────────────────────────────────────── */
-.zen-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 46px;
-  padding: 0 20px;
-  border: 0;
-  border-radius: 7px;
-  background: #537a62;
-  color: #fff;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 650;
-  cursor: pointer;
-  transition: background .18s ease, transform .18s ease;
+/* Custom Vuetify Overrides */
+:deep(.v-field) {
+  border-radius: var(--el-radius-sm);
+  background: var(--el-bg-1);
+  border: 1px solid var(--el-border);
+  transition: border-color 0.15s ease;
 }
-.zen-btn:hover:not(:disabled) { background: #456c54; transform: translateY(-1px); }
-.zen-btn:disabled { opacity: .55; cursor: default; }
-.zen-btn.sm { min-height: 40px; padding: 0 16px; font-size: 12px; }
-.zen-btn-quiet { background: #fff; color: #55735c; border: 1px solid #dfe5db; }
-.zen-btn-quiet:hover:not(:disabled) { background: #f4f6f1; border-color: #c3cfc1; }
-.icon-btn {
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-  border: 1px solid #e4e7df;
-  border-radius: 8px;
-  background: #fff;
-  color: #55735c;
-  cursor: pointer;
-  transition: background .16s ease, border-color .16s ease;
+:deep(.v-field--focused) {
+  border-color: var(--el-accent);
+  box-shadow: none;
 }
-.icon-btn:hover { background: #f2f5ef; border-color: #c3cfc1; }
-.icon-btn.is-danger { color: #a4574f; }
-.icon-btn.is-danger:hover { background: #f7efed; border-color: #e0c9c4; }
-.flex-grow-1 { flex: 1 1 auto; }
 
-/* ── Responsive ────────────────────────────────────────── */
-@media (max-width: 720px) {
-  .create-page { padding: 50px 18px 72px; }
-  .paper-card { padding: 20px; }
-  .card-actions { flex-direction: column-reverse; align-items: stretch; }
-  .card-actions .zen-btn { width: 100%; }
-  .lesson-grid { grid-template-columns: 1fr; }
-  .quiz-meta-grid { grid-template-columns: 1fr; }
-  .question-grid { grid-template-columns: 1fr; }
+/* ── Custom Expansion Panels ────────────────── */
+.custom-panels { background: transparent !important; }
+.glass-panel {
+  background: var(--el-surface) !important;
+  backdrop-filter: none;
+  transition: border-color 0.15s ease;
 }
-@media (prefers-reduced-motion: reduce) {
-  .create-page *, .create-page *::before, .create-page *::after {
-    transition-duration: .01ms !important;
-    animation-duration: .01ms !important;
-  }
+.glass-panel:hover {
+  border-color: var(--el-border-strong) !important;
+}
+.glass-panel:deep(.v-expansion-panel-title--active) {
+  background: var(--el-surface-2);
 }
 </style>

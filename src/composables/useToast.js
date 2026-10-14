@@ -26,7 +26,7 @@ export function dismissToast(id) {
   if (index !== -1) toasts.value.splice(index, 1);
 }
 
-export function showErrorToast(error, fallback = 'Something went wrong. Please try again.') {
+export function showErrorToast(error, fallback = 'Une erreur est survenue. Veuillez réessayer.') {
   const message =
     error?.response?.data?.message ||
     error?.message ||

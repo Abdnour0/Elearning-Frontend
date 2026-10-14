@@ -124,6 +124,6 @@ describe('CatalogView', () => {
     await flushPromises();
 
     expect(wrapper.find('.empty-icon').exists()).toBe(true);
-    expect(wrapper.text()).toContain('No results');
+    expect(wrapper.text()).toContain('Aucun résultat');
   });
 });

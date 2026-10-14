@@ -21,6 +21,10 @@ vi.mock('../src/composables/useToast.js', () => ({
   showErrorToast: vi.fn(),
 }));
 
+vi.mock('canvas-confetti', () => ({
+  default: vi.fn(),
+}));
+
 const MOCK_QUIZ = {
   quiz: { id: 1, titre: 'Test Quiz', minuterie: null },
   questions: [
@@ -79,11 +83,11 @@ describe('QuizView', () => {
     vi.useRealTimers();
   });
 
-  it('renders loading state initially', async () => {
+  it('renders loading spinner initially', async () => {
     const wrapper = await mountQuiz();
 
-    expect(wrapper.find('.skeleton-block').exists()).toBe(true);
-    expect(wrapper.text()).toContain('Loading quiz');
+    expect(wrapper.find('.v-progress-circular').exists()).toBe(true);
+    expect(wrapper.text()).toContain('Chargement du quiz');
   });
 
   it('shows quiz questions after load', async () => {
@@ -91,7 +95,7 @@ describe('QuizView', () => {
     await flushPromises();
 
     expect(wrapper.text()).toContain('Test Quiz');
-    expect(wrapper.text()).toContain('Question 1 of 3');
+    expect(wrapper.text()).toContain('Question 1 sur 3');
     expect(wrapper.text()).toContain('Question 1?');
     expect(wrapper.findAll('.choice-btn').length).toBe(3);
   });
@@ -102,14 +106,14 @@ describe('QuizView', () => {
 
     expect(wrapper.vm.currentIndex).toBe(0);
 
-    const nextBtn = wrapper.findAll('button').filter(b => b.text().includes('Next'));
+    const nextBtn = wrapper.findAll('button').filter(b => b.text().includes('Suivant'));
     if (nextBtn.length) {
       await nextBtn[0].trigger('click');
       await wrapper.vm.$nextTick();
       expect(wrapper.vm.currentIndex).toBe(1);
     }
 
-    const prevBtn = wrapper.findAll('button').filter(b => b.text().includes('Previous'));
+    const prevBtn = wrapper.findAll('button').filter(b => b.text().includes('Précédent'));
     if (prevBtn.length) {
       await prevBtn[0].trigger('click');
       await wrapper.vm.$nextTick();
@@ -138,7 +142,7 @@ describe('QuizView', () => {
       [MOCK_QUIZ.questions[2].id]: 'Answer',
     };
 
-    const terminers = wrapper.findAll('button').filter(b => b.text().includes('Finish quiz'));
+    const terminers = wrapper.findAll('button').filter(b => b.text().includes('Terminer'));
     if (terminers.length) {
       await terminers[0].trigger('click');
       await flushPromises();
@@ -148,9 +152,9 @@ describe('QuizView', () => {
       });
 
       expect(wrapper.text()).toContain('80');
-      expect(wrapper.text()).toContain('Passed');
-      expect(wrapper.text()).toContain('Correct');
-      expect(wrapper.text()).toContain('Incorrect');
+      expect(wrapper.text()).toContain('Félicitations');
+      expect(wrapper.text()).toContain('Correctes');
+      expect(wrapper.text()).toContain('Incorrectes');
     }
   });
 
@@ -160,7 +164,7 @@ describe('QuizView', () => {
     const wrapper = await mountQuiz();
     await flushPromises();
 
-    expect(wrapper.text()).toContain("We couldn't load this quiz");
+    expect(wrapper.text()).toContain('Impossible de charger ce quiz');
   });
 
   it('displays timer when quiz has minuterie', async () => {

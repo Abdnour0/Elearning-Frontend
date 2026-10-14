@@ -32,13 +32,13 @@ Three roles — `apprenant`, `formateur`, `admin`. Enforced via Laravel gates, r
 - Axios interceptor handles 401, 419 (CSRF retry), 403/429/500
 - Catalog search debounced at 350ms
 - Skeleton loaders on all major views
-- Restrained "zen" design language (calm palette, full English UI, no decorative motion)
+- Confetti animation on lesson completion and quiz passing
 - Course learn hub with sidebar curriculum, progress tracking, content player
 - Admin dashboard with KPI cards, bar/doughnut/line charts
 
 ## Testing
 
-32 Vitest tests across 5 suites — CatalogView, DashboardView, QuizView, the auth store, and a smoke suite covering all 15 views.
+7 Vitest component tests covering CatalogView, DashboardView, QuizView + 3 auth store tests.
 
 ## Links
 

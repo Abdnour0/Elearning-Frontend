@@ -7,11 +7,8 @@
     >
       <!-- Brand -->
       <div class="nav-inner d-flex align-center w-100 px-5">
-      <router-link to="/" class="text-decoration-none d-flex align-center gap-3">
-        <span class="brand-icon-wrap">
-          <v-icon color="primary" size="20">mdi-school-outline</v-icon>
-        </span>
-        <span class="brand-mark">E-Learning Hub</span>
+      <router-link to="/" class="brand-link text-decoration-none d-flex align-center" aria-label="E-Learning Hub — accueil">
+        <BrandLogo :size="38" />
       </router-link>
 
       <v-spacer />
@@ -20,30 +17,30 @@
       <nav class="d-none d-md-flex align-center gap-1">
         <!-- Unauthenticated -->
         <template v-if="!authStore.isAuthenticated">
-          <v-btn key="unauth-catalogue" variant="text" to="/catalogue" exact class="nav-link text-none font-weight-medium">Courses</v-btn>
+          <v-btn key="unauth-catalogue" variant="text" to="/catalogue" exact class="nav-link text-none font-weight-medium">Catalogue</v-btn>
           <v-btn key="unauth-login" color="primary" variant="flat" to="/login" class="nav-cta text-none font-weight-bold ml-2 rounded-lg" height="38">
-            Sign in
+            Connexion
           </v-btn>
         </template>
 
         <!-- Apprenant -->
         <template v-else-if="authStore.isApprenant">
-          <v-btn key="app-dashboard" variant="text" to="/dashboard" exact class="nav-link text-none font-weight-medium" :ripple="false">My learning</v-btn>
-          <v-btn key="app-catalogue" variant="text" to="/catalogue" exact class="nav-link text-none font-weight-medium" :ripple="false">Courses</v-btn>
+          <v-btn key="app-dashboard" variant="text" to="/dashboard" exact class="nav-link text-none font-weight-medium" :ripple="false">Mon espace</v-btn>
+          <v-btn key="app-catalogue" variant="text" to="/catalogue" exact class="nav-link text-none font-weight-medium" :ripple="false">Catalogue</v-btn>
         </template>
 
         <!-- Formateur -->
         <template v-else-if="authStore.isFormateur">
-          <v-btn variant="text" to="/formateur" class="nav-link text-none font-weight-medium">My courses</v-btn>
-          <v-btn variant="text" to="/formateur/cours/creer" class="nav-link text-none font-weight-medium">Create</v-btn>
-          <v-btn variant="text" to="/catalogue" class="nav-link text-none font-weight-medium">Courses</v-btn>
+          <v-btn variant="text" to="/formateur" class="nav-link text-none font-weight-medium">Mes cours</v-btn>
+          <v-btn variant="text" to="/formateur/cours/creer" class="nav-link text-none font-weight-medium">Créer</v-btn>
+          <v-btn variant="text" to="/catalogue" class="nav-link text-none font-weight-medium">Catalogue</v-btn>
         </template>
 
         <!-- Admin -->
         <template v-else-if="authStore.isAdmin">
-          <v-btn variant="text" to="/admin" class="nav-link text-none font-weight-medium">Overview</v-btn>
-          <v-btn variant="text" to="/admin/users" class="nav-link text-none font-weight-medium">People</v-btn>
-          <v-btn variant="text" to="/catalogue" class="nav-link text-none font-weight-medium">Courses</v-btn>
+          <v-btn variant="text" to="/admin" class="nav-link text-none font-weight-medium">Dashboard</v-btn>
+          <v-btn variant="text" to="/admin/users" class="nav-link text-none font-weight-medium">Utilisateurs</v-btn>
+          <v-btn variant="text" to="/catalogue" class="nav-link text-none font-weight-medium">Catalogue</v-btn>
         </template>
 
         <!-- Avatar Menu -->
@@ -53,7 +50,6 @@
             <template #activator="{ props }">
               <v-avatar
                 v-bind="props"
-                :color="roleColor"
                 size="36"
                 class="nav-avatar cursor-pointer"
                 @click="$router.push('/profil')"
@@ -61,21 +57,43 @@
                 <span class="text-caption font-weight-black text-white">{{ initials }}</span>
               </v-avatar>
             </template>
-            <v-card class="user-menu-card rounded-lg overflow-hidden" width="260">
-              <div class="menu-head">
-                <span class="menu-avatar">{{ initials }}</span>
-                <div class="menu-id">
-                  <span class="menu-name">{{ authStore.user?.name }}</span>
-                  <span class="menu-email">{{ authStore.user?.email }}</span>
-                  <span class="role-badge" :class="`role-${authStore.userRole}`">{{ authStore.userRole }}</span>
+            <v-card class="user-menu-card rounded-xl border-subtle overflow-hidden" width="260" >
+              <!-- Profile Header (Glass Island) -->
+              <div class="pa-4 position-relative" style="background: var(--el-surface-2); border-bottom: 1px solid var(--el-border);">
+                <div class="d-flex align-center gap-3">
+                  <v-avatar size="48" class="premium-avatar">
+                    <span :class="`text-${roleColor}`" class="font-weight-black text-h6">{{ initials }}</span>
+                  </v-avatar>
+                  <div class="min-w-0 flex-grow-1">
+                    <div class="text-body-2 font-weight-black text-white text-truncate leading-tight mb-0">{{ authStore.user?.name }}</div>
+                    <div class="text-caption text-grey text-truncate mb-2" style="font-size: 0.7rem;">{{ authStore.user?.email }}</div>
+                    <div class="role-badge" :class="`role-${authStore.userRole}`">
+                      {{ authStore.userRole }}
+                    </div>
+                  </div>
                 </div>
               </div>
-
-              <v-list density="compact" bg-color="transparent" class="pa-2">
-                <v-list-item to="/profil" prepend-icon="mdi-account-circle-outline" title="My profile" class="menu-item rounded-lg" :ripple="false" />
-                <v-divider class="my-1" />
-                <v-list-item prepend-icon="mdi-logout-variant" title="Sign out" class="menu-item menu-logout rounded-lg" :ripple="false" @click="handleLogout" />
-              </v-list>
+              
+              <!-- Menu Items -->
+              <div class="pa-2 bg-glass-dark">
+                <v-list density="compact" bg-color="transparent" class="pa-0">
+                  <v-list-item to="/profil" class="rounded-lg mb-1 premium-menu-item text-white transition-all" :ripple="false">
+                    <template #prepend>
+                      <v-icon size="20" class="mr-3 opacity-70">mdi-account-circle-outline</v-icon>
+                    </template>
+                    <v-list-item-title class="font-weight-medium text-body-2">Mon profil</v-list-item-title>
+                  </v-list-item>
+                  
+                  <v-divider class="my-2 opacity-25" />
+                  
+                  <v-list-item class="rounded-lg premium-menu-item premium-logout transition-all" :ripple="false" @click="handleLogout">
+                    <template #prepend>
+                      <v-icon size="20" class="mr-3 text-error opacity-90">mdi-logout-variant</v-icon>
+                    </template>
+                    <v-list-item-title class="font-weight-bold text-error text-body-2">Déconnexion</v-list-item-title>
+                  </v-list-item>
+                </v-list>
+              </div>
             </v-card>
           </v-menu>
         </template>
@@ -87,32 +105,32 @@
           <template #activator="{ props }">
             <v-btn v-bind="props" icon="mdi-menu" variant="text" />
           </template>
-          <v-card class="user-menu-card rounded-lg pa-2" width="220">
+          <v-card class="user-menu-card rounded-xl pa-2" width="220" >
             <v-list density="compact" bg-color="transparent" class="pa-1">
               <template v-if="!authStore.isAuthenticated">
-                <v-list-item to="/catalogue" title="Courses" prepend-icon="mdi-bookshelf" class="rounded-lg text-body-2 menu-item" />
-                <v-list-item to="/login" title="Sign in" prepend-icon="mdi-login" class="rounded-lg text-body-2 menu-item" />
-                <v-list-item to="/register" title="Create account" prepend-icon="mdi-account-plus" base-color="primary" class="rounded-lg text-body-2 menu-item font-weight-bold" />
+                <v-list-item to="/catalogue" title="Catalogue" prepend-icon="mdi-bookshelf" class="rounded-lg text-body-2 menu-item" />
+                <v-list-item to="/login" title="Connexion" prepend-icon="mdi-login" class="rounded-lg text-body-2 menu-item" />
+                <v-list-item to="/register" title="S'inscrire" prepend-icon="mdi-account-plus" base-color="primary" class="rounded-lg text-body-2 menu-item font-weight-bold" />
               </template>
               <template v-else-if="authStore.isApprenant">
-                <v-list-item to="/dashboard" title="My learning" prepend-icon="mdi-view-dashboard" class="rounded-lg text-body-2 menu-item" />
-                <v-list-item to="/catalogue" title="Courses" prepend-icon="mdi-bookshelf" class="rounded-lg text-body-2 menu-item" />
+                <v-list-item to="/dashboard" title="Mon espace" prepend-icon="mdi-view-dashboard" class="rounded-lg text-body-2 menu-item" />
+                <v-list-item to="/catalogue" title="Catalogue" prepend-icon="mdi-bookshelf" class="rounded-lg text-body-2 menu-item" />
               </template>
               <template v-else-if="authStore.isFormateur">
-                <v-list-item to="/formateur" title="My courses" prepend-icon="mdi-school" class="rounded-lg text-body-2 menu-item" />
-                <v-list-item to="/formateur/cours/creer" title="Create a course" prepend-icon="mdi-plus-box" class="rounded-lg text-body-2 menu-item" />
-                <v-list-item to="/catalogue" title="Courses" prepend-icon="mdi-bookshelf" class="rounded-lg text-body-2 menu-item" />
+                <v-list-item to="/formateur" title="Mes cours" prepend-icon="mdi-school" class="rounded-lg text-body-2 menu-item" />
+                <v-list-item to="/formateur/cours/creer" title="Créer un cours" prepend-icon="mdi-plus-box" class="rounded-lg text-body-2 menu-item" />
+                <v-list-item to="/catalogue" title="Catalogue" prepend-icon="mdi-bookshelf" class="rounded-lg text-body-2 menu-item" />
               </template>
               <template v-else-if="authStore.isAdmin">
-                <v-list-item to="/admin" title="Overview" prepend-icon="mdi-shield-crown" class="rounded-lg text-body-2 menu-item" />
-                <v-list-item to="/admin/users" title="People" prepend-icon="mdi-account-group" class="rounded-lg text-body-2 menu-item" />
-                <v-list-item to="/catalogue" title="Courses" prepend-icon="mdi-bookshelf" class="rounded-lg text-body-2 menu-item" />
+                <v-list-item to="/admin" title="Dashboard" prepend-icon="mdi-shield-crown" class="rounded-lg text-body-2 menu-item" />
+                <v-list-item to="/admin/users" title="Utilisateurs" prepend-icon="mdi-account-group" class="rounded-lg text-body-2 menu-item" />
+                <v-list-item to="/catalogue" title="Catalogue" prepend-icon="mdi-bookshelf" class="rounded-lg text-body-2 menu-item" />
               </template>
-
+              
               <template v-if="authStore.isAuthenticated">
                 <v-divider class="my-2 opacity-10" />
-                <v-list-item to="/profil" prepend-icon="mdi-account-circle-outline" title="My profile" class="rounded-lg text-body-2 menu-item" />
-                <v-list-item prepend-icon="mdi-logout-variant" title="Sign out" base-color="error" class="rounded-lg text-body-2 menu-item" @click="handleLogout" />
+                <v-list-item to="/profil" prepend-icon="mdi-account-circle-outline" title="Mon profil" class="rounded-lg text-body-2 menu-item" />
+                <v-list-item prepend-icon="mdi-logout-variant" title="Déconnexion" base-color="error" class="rounded-lg text-body-2 menu-item" @click="handleLogout" />
               </template>
             </v-list>
           </v-card>
@@ -130,40 +148,39 @@
     </v-main>
 
     <!-- ── Minimal Footer ────────────────────────────────────── -->
-    <v-footer class="el-footer pa-0 overflow-hidden" :class="{ 'footer-hidden': hideFooter }">
+    <v-footer class="el-footer section-dark border-t-subtle pa-0 overflow-hidden" :class="{ 'footer-hidden': hideFooter }">
       <v-container class="py-8">
         <v-row align="center" justify="space-between" class="flex-column flex-md-row">
-          <!-- Brand & Copyright -->
+<!-- Brand & Copyright -->
           <v-col cols="12" md="4" class="text-center text-md-left mb-4 mb-md-0">
-            <div class="d-flex align-center justify-center justify-md-start gap-3 mb-2">
-              <v-icon color="primary" size="20">mdi-school-outline</v-icon>
-              <span class="footer-brand">E-Learning Hub</span>
+            <div class="d-flex align-center justify-center justify-md-start mb-2">
+              <BrandLogo :size="34" />
             </div>
-            <div class="footer-copy">
-              &copy; 2026 E-Learning Hub. Learn with intention.
+            <div class="text-caption text-grey">
+              &copy; 2026 E-Learning Hub. Tous droits réservés.
             </div>
           </v-col>
 
           <!-- Essential Links -->
           <v-col cols="12" md="4" class="d-flex justify-center gap-6 mb-4 mb-md-0">
-            <a href="#" class="footer-link">About</a>
-            <a href="mailto:hello@elearninghub.example" class="footer-link">Contact</a>
-            <a href="#" class="footer-link">Privacy</a>
+            <a href="#" class="text-body-2 text-grey-lighten-1 text-decoration-none footer-link transition-colors">À propos</a>
+            <a href="#" class="text-body-2 text-grey-lighten-1 text-decoration-none footer-link transition-colors">Contact</a>
+            <a href="#" class="text-body-2 text-grey-lighten-1 text-decoration-none footer-link transition-colors">Confidentialité</a>
           </v-col>
 
           <!-- Social Icons -->
           <v-col cols="12" md="4" class="d-flex justify-center justify-md-end gap-3">
-            <a href="#" class="social-icon-wrapper" aria-label="LinkedIn">
-              <v-icon size="18">mdi-linkedin</v-icon>
+            <a href="#" class="social-icon-wrapper rounded-circle d-flex align-center justify-center transition-all">
+              <v-icon size="18" color="primary">mdi-linkedin</v-icon>
             </a>
-            <a href="#" class="social-icon-wrapper" aria-label="Twitter">
-              <v-icon size="18">mdi-twitter</v-icon>
+            <a href="#" class="social-icon-wrapper rounded-circle d-flex align-center justify-center transition-all">
+              <v-icon size="18" color="primary">mdi-twitter</v-icon>
             </a>
-            <a href="#" class="social-icon-wrapper" aria-label="GitHub">
-              <v-icon size="18">mdi-github</v-icon>
+            <a href="#" class="social-icon-wrapper rounded-circle d-flex align-center justify-center transition-all">
+              <v-icon size="18" color="primary">mdi-github</v-icon>
             </a>
           </v-col>
-        </v-row>
+</v-row>
       </v-container>
     </v-footer>
 
@@ -179,7 +196,7 @@
             {{ toastIcon(toast.type) }}
           </v-icon>
           <span class="toast-message">{{ toast.message }}</span>
-          <button class="toast-close" aria-label="Close" @click="dismissToast(toast.id)">
+          <button class="toast-close" aria-label="Fermer" @click="dismissToast(toast.id)">
             <v-icon size="16">mdi-close</v-icon>
           </button>
         </div>
@@ -193,6 +210,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useAuthStore } from './stores/auth';
 import { useRouter, useRoute } from 'vue-router';
 import { toasts, dismissToast } from './composables/useToast.js';
+import BrandLogo from './components/BrandLogo.vue';
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -227,11 +245,11 @@ const toastIcon = (type) => ({
 }[type] || 'mdi-information-outline');
 
 const toastIconColor = (type) => ({
-  success: '#6d9271',
-  error:   '#bc7168',
-  warning: '#b08d53',
-  info:    '#6d8b8e',
-}[type] || '#6d8b8e');
+  success: '#86bd97',
+  error:   '#e5645a',
+  warning: '#d9a441',
+  info:    '#ff7448',
+}[type] || '#ff7448');
 </script>
 
 <style scoped>
@@ -241,188 +259,198 @@ const toastIconColor = (type) => ({
   max-width: 100%;
 }
 
-/* ── Nav links ───────────────────────────────────────────── */
+/* Brand lockup */
+.brand-link {
+  border-radius: 14px;
+  padding: 4px 6px;
+  margin-left: -6px;
+  transition: background 0.2s ease;
+}
+.brand-link:hover {
+  background: var(--el-hover);
+}
+
+/* Nav links — all identical text style */
 .nav-link {
-  color: #69766c !important;
-  font-size: 12px;
-  font-weight: 550 !important;
-  letter-spacing: 0;
-  padding: 0 14px !important;
+  color: rgba(15, 21, 29, 0.62) !important;
+  font-size: 0.875rem;
+  font-weight: 500 !important;
+  letter-spacing: 0.01em;
+  padding: 0 16px !important;
   height: 38px !important;
-  border-radius: 8px !important;
+  border-radius: 10px !important;
+  transition: color 0.2s ease, background 0.2s ease !important;
+  /* Never show filled/active background by default */
   background: transparent !important;
   box-shadow: none !important;
-  transition: color .18s ease, background .18s ease !important;
 }
 .nav-link:hover {
-  color: #425f49 !important;
-  background: #f0f2ec !important;
+  color: var(--el-text) !important;
+  background: var(--el-hover) !important;
 }
-.nav-link.v-btn--active,
+/* Active route — subtle underline indicator instead of filled background */
+.nav-link.v-btn--active, 
 .v-btn.nav-link--active {
-  color: #3f5f49 !important;
+  color: var(--el-accent) !important;
+  background: transparent !important;
+  background-color: transparent !important;
   position: relative;
 }
 .nav-link.v-btn--active::after {
   content: '';
   position: absolute;
   bottom: 4px;
-  left: 14px;
-  right: 14px;
+  left: 16px;
+  right: 16px;
   height: 2px;
   border-radius: 2px;
-  background: #6f9276;
+  background: var(--el-accent);
 }
 
 .nav-cta {
-  font-size: 12px !important;
-  letter-spacing: 0;
+  font-size: 0.875rem !important;
   height: 38px !important;
 }
 
 .nav-divider {
   width: 1px;
   height: 24px;
-  background: #e2e6de;
+  background: var(--el-border-strong);
 }
 
 .nav-avatar {
-  border: 2px solid #e7eee6;
-  transition: border-color .18s ease;
+  background: var(--el-surface-2);
+  border: 1px solid var(--el-border-strong);
+  transition: border-color 0.2s ease;
 }
 .nav-avatar:hover {
-  border-color: #b9cfb8;
+  border-color: var(--el-text-subtle);
 }
 .cursor-pointer { cursor: pointer; }
 
-/* ── Dropdown card ───────────────────────────────────────── */
+/* Dropdown card */
+/* ── Custom Popups & Menus ───────────────────────────────── */
+.border-subtle { border: 1px solid var(--el-border) !important; }
+.shadow-subtle { box-shadow: var(--el-shadow-sm) !important; }
+.bg-glass-light { background: var(--el-surface-2); backdrop-filter: none; }
+.bg-glass-dark { background: var(--el-surface); }
+
+.premium-menu-item {
+  padding: 10px 16px !important;
+  min-height: 44px !important;
+}
+.premium-menu-item:hover {
+  background: var(--el-hover) !important;
+}
+.premium-menu-item:hover .v-icon {
+  opacity: 1 !important;
+  color: var(--el-accent) !important;
+  transform: none;
+}
+.premium-logout:hover {
+  background: rgba(214, 75, 63, 0.08) !important;
+}
+.premium-logout:hover .v-icon {
+  color: #d64b3f !important;
+  transform: translateX(2px);
+}
+
 .user-menu-card {
-  background: #ffffff !important;
-  border: 1px solid #e7e8e1 !important;
-  box-shadow: 0 18px 40px rgba(42, 56, 43, .12) !important;
+  background: var(--el-surface-2) !important;
+  border: 1px solid var(--el-border) !important;
+  backdrop-filter: none;
+  box-shadow: var(--el-shadow-md) !important;
 }
-
-.menu-head {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px;
-  border-bottom: 1px solid #eff0ea;
+.premium-avatar {
+  background: var(--el-surface);
+  border: 1px solid var(--el-border-strong);
+  box-shadow: var(--el-shadow-xs);
 }
-.menu-avatar {
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: #e7eee6;
-  color: #46704f;
-  font-size: 14px;
-  font-weight: 700;
-}
-.menu-id { display: grid; gap: 3px; min-width: 0; }
-.menu-name {
-  overflow: hidden;
-  color: #28382e;
-  font-size: 13px;
-  font-weight: 650;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.menu-email {
-  overflow: hidden;
-  color: #8b938b;
-  font-size: 11px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .role-badge {
   display: inline-block;
-  width: fit-content;
   padding: 2px 8px;
-  border-radius: 5px;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: .08em;
+  border-radius: 4px;
+  font-size: 0.55rem;
+  font-weight: 900;
   text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
-.role-apprenant { background: #e7eee6; color: #46704f; }
-.role-formateur { background: #f1ebe0; color: #8a6d3b; }
-.role-admin { background: #f3e8e6; color: #a4574f; }
+.role-apprenant { background: rgba(126, 166, 207, 0.14); color: #7ea6cf; border: 1px solid rgba(126, 166, 207, 0.3); }
+.role-formateur { background: rgba(217, 164, 65, 0.14); color: #d9a441; border: 1px solid rgba(217, 164, 65, 0.3); }
+.role-admin { background: rgba(229, 100, 90, 0.14); color: #e5645a; border: 1px solid rgba(229, 100, 90, 0.3); }
 
-.menu-item { color: #4a5a4f !important; }
-.menu-item:hover { background: #f2f5ef !important; }
-.menu-logout { color: #a4574f !important; }
+.menu-item:hover { background: var(--el-hover) !important; }
 
-/* ── Footer ──────────────────────────────────────────────── */
+/* ── Footer Styles (dark-ink section) ────────────────────── */
 .el-footer {
-  background: #f4f4ee !important;
-  border-top: 1px solid #e8e8e1 !important;
-  color: #737e73 !important;
+  background-color: var(--el-ink) !important;
+  color: var(--el-on-ink) !important;
 }
-.footer-brand {
-  color: #314237;
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: -.02em;
+.border-t-subtle {
+  border-top: 1px solid var(--el-ink-border) !important;
 }
-.footer-copy { color: #8b938b; font-size: 12px; }
-.footer-link {
-  position: relative;
-  color: #737e73;
-  font-size: 13px;
-  text-decoration: none;
-  transition: color .18s ease;
+.footer-logo {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid var(--el-ink-border) !important;
 }
-.footer-link:hover { color: #537a62 !important; }
-.footer-link::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: -2px;
-  width: 0;
-  height: 1px;
-  background: #6f9276;
-  transition: width .22s ease;
+.footer-link-item {
+  color: var(--el-on-ink-muted) !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer;
 }
-.footer-link:hover::after { width: 100%; }
-
-.social-icon-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border: 1px solid #e2e6de;
-  border-radius: 50%;
-  background: #ffffff;
-  color: #6f7a70;
-  text-decoration: none;
-  transition: background .18s ease, color .18s ease, border-color .18s ease;
+.footer-link-item:hover {
+  color: var(--el-on-ink) !important;
+  transform: translateX(4px);
 }
-.social-icon-wrapper:hover {
-  background: #6f9276;
-  border-color: #6f9276;
-  color: #ffffff;
+.footer-social-btn {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid var(--el-ink-border) !important;
+  transition: all 0.3s ease !important;
+}
+.footer-social-btn:hover {
+  background: var(--el-accent) !important;
+  border-color: var(--el-accent) !important;
+  color: #fff9f6 !important;
+  transform: none;
+}
+.hover-white:hover {
+  color: var(--el-on-ink) !important;
+}
+.footer-newsletter-input :deep(.v-field__input) {
+  padding-right: 110px !important;
 }
 
-/* ── Page transitions — gentle fade ──────────────────────── */
-.page-fade-enter-active { transition: opacity .3s ease, transform .3s cubic-bezier(0.22, 1, 0.36, 1); }
-.page-fade-leave-active { transition: opacity .18s ease, transform .18s ease; }
-.page-fade-enter-from { opacity: 0; transform: translateY(10px); }
-.page-fade-leave-to { opacity: 0; transform: translateY(-6px); }
+/* Page transitions — combined fade + subtle slide */
+.page-fade-enter-active { transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
+.page-fade-leave-active { transition: opacity 0.2s ease, transform 0.2s ease; }
+.page-fade-enter-from { opacity: 0; transform: translateY(12px); }
+.page-fade-leave-to { opacity: 0; transform: translateY(-8px); }
 
 /* Layout tweaks when elements are hidden */
 .no-nav { padding-top: 0 !important; }
 .nav-hidden { display: none !important; }
 .footer-hidden { display: none !important; }
 
-@media (prefers-reduced-motion: reduce) {
-  .nav-link, .nav-avatar, .footer-link, .social-icon-wrapper,
-  .page-fade-enter-active, .page-fade-leave-active {
-    transition-duration: .01ms !important;
-  }
+.footer-link {
+  position: relative;
 }
+.footer-link:hover { color: var(--el-on-ink) !important; }
+.footer-link::after {
+  content: ''; position: absolute; bottom: -2px; left: 0; width: 0; height: 1px;
+  background: var(--el-accent); transition: width 0.3s ease;
+}
+.footer-link:hover::after { width: 100%; }
+
+.social-icon-wrapper {
+  width: 36px; height: 36px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--el-ink-border);
+  text-decoration: none;
+  transition: all 0.25s ease;
+}
+.social-icon-wrapper:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+.social-icon-wrapper:hover .v-icon { color: var(--el-accent) !important; }
 </style>

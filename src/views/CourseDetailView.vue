@@ -1,123 +1,157 @@
 <template>
-  <div class="course-detail-page">
-    <!-- Loaded -->
-    <div v-if="course" class="detail-inner">
-      <div class="detail-head">
-        <RouterLink class="back-link" to="/catalogue">← Back to catalogue</RouterLink>
-        <span class="eyebrow"><i class="focus-dot" /> {{ course.categorie || 'COURSE' }}</span>
-        <h1>{{ course.titre }}</h1>
-        <div class="detail-meta">
-          <span class="instructor-avatar">{{ (course.formateur?.name || 'E').slice(0, 1) }}</span>
-          <span>{{ course.formateur?.name || 'Expert instructor' }}</span>
-          <span class="meta-dot">·</span>
-          <span>{{ totalLessons }} lessons</span>
-          <span class="meta-dot">·</span>
-          <span>{{ course.modules?.length || 0 }} modules</span>
-        </div>
-      </div>
-
-      <div class="detail-grid">
-        <!-- Main column -->
-        <div class="detail-main">
-          <section class="paper-card about-card">
-            <h2>About this course</h2>
-            <p>{{ course.description || 'Build practical skills you can put to work right away.' }}</p>
-          </section>
-
-          <section class="curriculum">
-            <h2>Course content</h2>
-            <div class="module-list">
-              <details v-for="module in course.modules" :key="module.id" class="module-item" open>
-                <summary>
-                  <span class="module-index">{{ String(module.ordre).padStart(2, '0') }}</span>
-                  <span class="module-title">{{ module.titre }}</span>
-                  <span class="module-count">{{ module.lecons?.length || 0 }} lessons</span>
-                  <span class="module-plus">+</span>
-                </summary>
-                <ul class="lesson-list">
-                  <li v-for="lecon in module.lecons" :key="lecon.id">
-                    <span class="lesson-icon" :class="`icon-${lecon.typeContenu}`">
-                      <v-icon size="16">{{ typeIcon(lecon.typeContenu) }}</v-icon>
-                    </span>
-                    <span class="lesson-name">{{ lecon.titre }}</span>
-                    <span class="lesson-type">{{ lecon.typeContenu }}</span>
-                  </li>
-                </ul>
-              </details>
-            </div>
-          </section>
-        </div>
-
-        <!-- Sidebar -->
-        <aside class="detail-side">
-          <div class="sticky-sidebar">
-            <div class="paper-card enroll-card">
-              <div class="course-art" :class="`art-${(course.id || 0) % 3}`">
-                <span class="art-symbol">{{ ['◒', '⌘', '↗'][(course.id || 0) % 3] }}</span>
-                <span class="art-note">{{ totalLessons }} lessons</span>
-              </div>
-
-              <div class="enroll-body">
-                <template v-if="progression !== null">
-                  <div class="progress-top">
-                    <span class="preview-label">YOUR PROGRESS</span>
-                    <span class="progress-value">{{ Math.round(progression) }}%</span>
-                  </div>
-                  <div class="progress-track"><span :style="{ width: `${Math.min(100, Math.max(0, progression))}%` }" /></div>
-                  <RouterLink class="zen-btn block-btn" :to="`/cours/${course.id}/apprendre`">
-                    Continue learning <span aria-hidden="true">→</span>
-                  </RouterLink>
-                </template>
-                <template v-else>
-                  <p class="enroll-note">Enrol to track your progress and pick up where you left off.</p>
-                  <button class="zen-btn block-btn" :disabled="enrolling" @click="enroll">
-                    {{ enrolling ? 'Enrolling…' : 'Enrol in this course' }} <span aria-hidden="true">→</span>
-                  </button>
-                </template>
-              </div>
-            </div>
-
-            <div v-if="course.quizzes?.length" class="paper-card quiz-card">
-              <h3>Quizzes</h3>
-              <ul class="quiz-list">
-                <li v-for="quiz in course.quizzes" :key="quiz.id">
-                  <div class="quiz-copy">
-                    <span class="quiz-title">{{ quiz.titre }}</span>
-                    <span class="quiz-time">{{ quiz.dureeSecondes ? Math.floor(quiz.dureeSecondes / 60) + ' min' : 'No time limit' }}</span>
-                  </div>
-                  <RouterLink v-if="progression !== null" class="quiz-action" :to="`/quiz/${quiz.id}`">Start →</RouterLink>
-                  <span v-else class="quiz-locked">Enrol first</span>
-                </li>
-              </ul>
-            </div>
+  <v-container v-if="course" class="py-8">
+    <v-row>
+      <!-- Main content -->
+      <v-col cols="12" md="8" class="position-relative">
+        <div class="hero-glow" />
+        <!-- Course header -->
+        <div class="el-fade-up mb-6">
+          <v-chip :color="categoryColor" variant="tonal" class="el-d1 mb-3 font-weight-bold">{{ course.categorie }}</v-chip>
+          <h1 class="el-d2 text-h3 font-weight-black text-white mb-2">{{ course.titre }}</h1>
+          <div class="d-flex align-center gap-4 text-grey-lighten-2 flex-wrap">
+            <span><v-icon size="16" class="mr-1">mdi-school</v-icon>{{ course.formateur?.name }}</span>
+            <span><v-icon size="16" class="mr-1">mdi-book-multiple</v-icon>{{ totalLessons }} leçons</span>
           </div>
-        </aside>
-      </div>
-    </div>
-
-    <!-- Loading -->
-    <div v-else-if="isInitial || isLoading" class="detail-inner">
-      <div class="detail-grid">
-        <div class="detail-main">
-          <div class="skeleton-line short" />
-          <div class="skeleton-line title" />
-          <div class="skeleton-block" style="height: 130px;" />
-          <div class="skeleton-block" style="height: 220px;" />
         </div>
-        <div class="detail-side">
-          <div class="skeleton-block" style="height: 320px;" />
-        </div>
-      </div>
-    </div>
 
-    <!-- Error -->
-    <div v-else class="detail-inner detail-error">
-      <span class="empty-symbol">✳</span>
-      <h2>We couldn't load this course</h2>
-      <p>Check that it is still available, then try again.</p>
-      <RouterLink class="zen-btn" to="/catalogue">Back to catalogue <span aria-hidden="true">→</span></RouterLink>
-    </div>
-  </div>
+        <!-- Description -->
+        <v-card class="glass-card rounded-xl pa-6 mb-6" >
+          <h2 class="text-h6 font-weight-bold mb-3">À propos de ce cours</h2>
+          <p class="text-body-1 text-grey-lighten-1">{{ course.description }}</p>
+        </v-card>
+
+        <!-- Modules accordion -->
+        <h2 class="text-h5 font-weight-bold text-white mb-4 position-relative z-1">Contenu du cours</h2>
+        <v-expansion-panels variant="popout" class="custom-panels mb-6 position-relative z-1">
+          <v-expansion-panel v-for="module in course.modules" :key="module.id" class="glass-panel mb-3 rounded-xl overflow-hidden border-subtle" elevation="0" bg-color="transparent">
+            <v-expansion-panel-title class="font-weight-bold py-4">
+              <v-icon class="mr-3" color="primary">mdi-layers</v-icon>
+              Module {{ module.ordre }}: {{ module.titre }}
+              <v-chip class="ml-auto" size="x-small" variant="tonal" color="grey">
+                {{ module.lecons?.length || 0 }} leçons
+              </v-chip>
+            </v-expansion-panel-title>
+            <v-expansion-panel-text class="pa-0">
+              <v-list bg-color="transparent" density="compact">
+                <v-list-item
+                  v-for="lecon in module.lecons"
+                  :key="lecon.id"
+                  class="py-3 border-b"
+                  style="border-color: var(--el-border)"
+                >
+                  <template #prepend>
+                    <div class="lesson-icon-wrap" :class="`icon-${lecon.typeContenu}`">
+                      <v-icon :color="iconColor(lecon.typeContenu)" size="18">{{ typeIcon(lecon.typeContenu) }}</v-icon>
+                    </div>
+                  </template>
+                  <v-list-item-title class="text-body-2 font-weight-medium">{{ lecon.titre }}</v-list-item-title>
+                  <v-list-item-subtitle class="text-caption">{{ lecon.typeContenu }}</v-list-item-subtitle>
+                </v-list-item>
+              </v-list>
+            </v-expansion-panel-text>
+          </v-expansion-panel>
+        </v-expansion-panels>
+      </v-col>
+
+      <!-- Sidebar -->
+      <v-col cols="12" md="4">
+        <div class="sticky-sidebar">
+          <!-- Enroll / Progress card -->
+          <v-card class="glass-card rounded-xl mb-4 overflow-hidden" >
+            <div class="course-banner" :style="{ background: gradient }">
+              <v-icon size="72" class="course-banner-icon">mdi-book-open-variant</v-icon>
+            </div>
+            <v-card-text class="pa-6">
+              <template v-if="progression !== null">
+                <p class="text-body-2 text-grey-lighten-1 mb-2">Votre progression</p>
+                <v-progress-linear
+                  :model-value="progression"
+                  color="primary"
+                  height="10"
+                  rounded
+                  bg-color="var(--el-surface-2)"
+                  class="mb-2"
+                />
+                <p class="text-right font-weight-bold text-primary">{{ Math.round(progression) }}%</p>
+                <v-btn
+                  color="primary" block variant="flat" size="large"
+                  class="rounded-lg font-weight-bold mt-4 btn-glow"
+                  :to="`/cours/${course.id}/apprendre`"
+                >
+                  <v-icon start>mdi-play</v-icon>
+                  Reprendre le cours
+                </v-btn>
+              </template>
+              <template v-else>
+                <v-btn
+                  color="primary" block variant="flat" size="large"
+                  class="rounded-lg font-weight-bold btn-glow"
+                  :loading="enrolling"
+                  @click="enroll"
+                >
+                  <v-icon start>mdi-school</v-icon>
+                  S'inscrire au cours
+                </v-btn>
+              </template>
+            </v-card-text>
+          </v-card>
+
+          <!-- Quizzes card -->
+          <v-card v-if="course.quizzes?.length" class="glass-card rounded-xl" >
+            <v-card-title class="font-weight-bold pa-4 pb-2">
+              <v-icon class="mr-2" color="warning">mdi-head-question</v-icon>
+              Quizzes
+            </v-card-title>
+            <v-list bg-color="transparent" density="compact">
+              <v-list-item v-for="quiz in course.quizzes" :key="quiz.id" class="py-3 px-4 quiz-item">
+                <v-list-item-title class="text-body-2 font-weight-medium">{{ quiz.titre }}</v-list-item-title>
+                <v-list-item-subtitle class="text-caption">
+                  <v-icon size="12" class="mr-1">mdi-timer</v-icon>
+                  {{ quiz.dureeSecondes ? Math.floor(quiz.dureeSecondes / 60) + ' min' : 'Sans limite' }}
+                </v-list-item-subtitle>
+                <template #append>
+                  <v-btn
+                    v-if="progression !== null"
+                    size="small" color="warning" variant="flat"
+                    class="rounded-pill font-weight-bold"
+                    :to="`/quiz/${quiz.id}`"
+                  >
+                    Passer
+                  </v-btn>
+                  <v-btn v-else size="small" variant="outlined" disabled>Inscrivez-vous</v-btn>
+                </template>
+              </v-list-item>
+            </v-list>
+          </v-card>
+        </div>
+      </v-col>
+    </v-row>
+  </v-container>
+
+  <v-container v-else-if="isInitial || isLoading" class="py-8">
+    <v-row>
+      <!-- Skeleton Main Content -->
+      <v-col cols="12" md="8">
+        <div class="mb-6">
+          <v-skeleton-loader type="chip" color="var(--el-surface-2)" class="mb-3" />
+          <v-skeleton-loader type="heading" color="var(--el-surface-2)" class="mb-2" width="60%" />
+          <v-skeleton-loader type="text" color="var(--el-surface-2)" width="30%" />
+        </div>
+        <v-skeleton-loader type="card" color="var(--el-surface-2)" class="rounded-xl mb-6 glass-card border-subtle" height="150" />
+        <v-skeleton-loader v-for="i in 3" :key="i" type="list-item" color="var(--el-surface-2)" class="rounded-xl mb-3 glass-card border-subtle" height="60" />
+      </v-col>
+      <!-- Skeleton Sidebar -->
+      <v-col cols="12" md="4">
+        <v-skeleton-loader type="image, article" color="var(--el-surface-2)" class="rounded-xl glass-card border-subtle" />
+      </v-col>
+    </v-row>
+  </v-container>
+
+  <v-container v-else class="py-12">
+    <v-alert type="error" variant="tonal" class="rounded-xl">
+      Impossible de charger ce cours. Vérifiez qu'il est encore disponible, puis réessayez.
+    </v-alert>
+  </v-container>
 </template>
 
 <script setup>
@@ -137,10 +171,21 @@ const course = ref(null);
 const progression = ref(null);
 const enrolling = ref(false);
 
+const gradients = ['#ffe7de', '#e4edf6', '#e4eee0'];
+const gradient = computed(() => gradients[(course.value?.id || 0) % gradients.length]);
+
 const totalLessons = computed(() => course.value?.modules?.reduce((acc, m) => acc + (m.lecons?.length || 0), 0) || 0);
+
+const categoryColor = computed(() => {
+  const map = { 'Développement Web': 'primary', 'Backend': 'secondary', 'Base de Données': 'warning' };
+  return map[course.value?.categorie] || 'primary';
+});
 
 function typeIcon(type) {
   return { video: 'mdi-play', pdf: 'mdi-file-pdf-box', image: 'mdi-image', texte: 'mdi-text' }[type] || 'mdi-file';
+}
+function iconColor(type) {
+  return { video: 'primary', pdf: 'warning', image: 'info', texte: 'secondary' }[type] || 'grey';
 }
 
 async function enroll() {
@@ -167,7 +212,7 @@ onMounted(async () => {
       } catch { /* not enrolled */ }
     }
   } catch (e) {
-    showErrorToast(e, 'Could not load this course.');
+    showErrorToast(e, 'Impossible de charger ce cours.');
   } finally {
     markLoaded();
   }
@@ -175,269 +220,63 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.course-detail-page {
-  min-height: calc(100vh - var(--el-app-bar-h, 72px));
-  padding: 72px 24px 100px;
-  background: #fbfaf6;
-  color: #28382e;
-}
-.detail-inner { max-width: 1060px; margin: 0 auto; }
-
-/* ── Head ──────────────────────────────────────────────── */
-.back-link {
-  display: inline-block;
-  margin-bottom: 26px;
-  color: #55735c;
-  font-size: 12px;
-  font-weight: 650;
-  text-decoration: none;
-}
-.back-link:hover { color: #3f5f49; }
-.eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: #648069;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .13em;
-}
-.focus-dot { width: 7px; height: 7px; border-radius: 50%; background: #749578; }
-.detail-head h1 {
-  margin: 16px 0 14px;
-  font-family: 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
-  font-size: clamp(38px, 5vw, 60px);
-  font-weight: 400;
-  line-height: 1.02;
-  letter-spacing: -.04em;
-}
-.detail-meta {
+.sticky-sidebar { position: sticky; top: 100px; }
+.course-banner {
+  height: 140px;
   display: flex;
   align-items: center;
-  gap: 9px;
-  color: #7d867d;
-  font-size: 12px;
-}
-.instructor-avatar {
-  display: grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: #e7eee5;
-  color: #557258;
-  font-size: 11px;
-  font-weight: 700;
-}
-.meta-dot { color: #b6bcb4; }
-
-/* ── Layout ────────────────────────────────────────────── */
-.detail-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr);
-  gap: 40px;
-  margin-top: 46px;
-  align-items: start;
-}
-.paper-card {
-  padding: 26px;
-  border: 1px solid #e5e7df;
-  border-radius: 8px;
-  background: #fff;
-}
-
-/* ── About ─────────────────────────────────────────────── */
-.about-card h2, .curriculum h2 {
-  margin: 0 0 14px;
-  font-family: 'Iowan Old Style', Georgia, serif;
-  font-size: 24px;
-  font-weight: 400;
-  letter-spacing: -.02em;
-}
-.about-card p { margin: 0; color: #6f7a70; font-size: 14px; line-height: 1.75; }
-.curriculum { margin-top: 40px; }
-
-/* ── Curriculum ────────────────────────────────────────── */
-.module-list { border-top: 1px solid #e8e8df; }
-.module-item { border-bottom: 1px solid #e8e8df; }
-.module-item summary {
-  display: grid;
-  grid-template-columns: 34px 1fr auto 22px;
-  align-items: center;
-  gap: 12px;
-  padding: 18px 4px;
-  cursor: pointer;
-  list-style: none;
-}
-.module-item summary::-webkit-details-marker { display: none; }
-.module-index { color: #a1a79f; font-size: 11px; }
-.module-title { color: #28382e; font-size: 15px; font-weight: 650; }
-.module-count { color: #8b938b; font-size: 11px; }
-.module-plus { color: #658069; font-size: 18px; transition: transform .18s ease; }
-.module-item[open] .module-plus { transform: rotate(45deg); }
-.lesson-list { margin: 0; padding: 0 4px 12px; list-style: none; }
-.lesson-list li {
-  display: grid;
-  grid-template-columns: 30px 1fr auto;
-  align-items: center;
-  gap: 11px;
-  padding: 10px 0 10px 22px;
-}
-.lesson-icon {
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 7px;
-  background: #eef1ea;
-  color: #5f7d66;
-}
-.icon-video { background: #e6eef0; color: #4f7d84; }
-.icon-pdf { background: #f1ebe0; color: #8a6d3b; }
-.icon-image { background: #e7eee6; color: #57745e; }
-.icon-texte { background: #eceef1; color: #5c6b7a; }
-.lesson-name { color: #3a4a3f; font-size: 13px; }
-.lesson-type { color: #98a097; font-size: 10px; text-transform: capitalize; }
-
-/* ── Sidebar ───────────────────────────────────────────── */
-.sticky-sidebar { position: sticky; top: 96px; display: grid; gap: 16px; }
-.enroll-card { padding: 0; overflow: hidden; }
-.course-art {
+  justify-content: center;
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 150px;
-  background: #dfe8df;
-}
-.art-1 { background: #e8e1d4; }
-.art-2 { background: #dfe5e8; }
-.art-symbol {
-  font-family: 'Iowan Old Style', Georgia, serif;
-  font-size: 74px;
-  line-height: 1;
-  color: rgba(72, 101, 76, .68);
-}
-.art-1 .art-symbol { color: rgba(143, 107, 70, .64); }
-.art-2 .art-symbol { color: rgba(74, 101, 121, .65); }
-.art-note {
-  position: absolute;
-  right: 15px;
-  bottom: 13px;
-  color: #5b6f5e;
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-}
-.enroll-body { padding: 20px; }
-.enroll-note { margin: 0 0 14px; color: #7d867d; font-size: 12px; line-height: 1.6; }
-.progress-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-.preview-label { color: #939a91; font-size: 9px; font-weight: 700; letter-spacing: .12em; }
-.progress-value { color: #52775c; font-size: 14px; font-weight: 700; }
-.progress-track {
-  height: 5px;
   overflow: hidden;
-  border-radius: 4px;
-  background: #eef0eb;
 }
-.progress-track span { display: block; height: 100%; border-radius: 4px; background: #6f9276; }
+.course-banner::after {
+  display: none;
+}
+.course-banner-icon {
+  color: var(--el-accent);
+  opacity: 0.9;
+}
 
-.zen-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  min-height: 48px;
-  padding: 0 20px;
-  border: 0;
-  border-radius: 7px;
-  background: #537a62;
-  color: #fff;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 650;
-  text-decoration: none;
-  cursor: pointer;
-  transition: background .18s ease, transform .18s ease;
+.hero-glow {
+  display: none;
 }
-.zen-btn:hover:not(:disabled) { background: #456c54; transform: translateY(-1px); }
-.zen-btn:disabled { opacity: .6; cursor: default; }
-.block-btn { width: 100%; margin-top: 16px; }
+.z-1 { position: relative; z-index: 1; }
 
-.quiz-card h3 {
-  margin: 0 0 4px;
-  font-family: 'Iowan Old Style', Georgia, serif;
-  font-size: 20px;
-  font-weight: 400;
-}
-.quiz-list { margin: 0; padding: 0; list-style: none; }
-.quiz-list li {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 13px 0;
-  border-top: 1px solid #eff0ea;
-}
-.quiz-list li:first-child { border-top: 0; }
-.quiz-copy { display: grid; gap: 3px; }
-.quiz-title { color: #3a4a3f; font-size: 13px; font-weight: 600; }
-.quiz-time { color: #939a91; font-size: 11px; }
-.quiz-action { color: #55735c; font-size: 12px; font-weight: 700; text-decoration: none; }
-.quiz-action:hover { color: #3f5f49; }
-.quiz-locked { color: #a1a79f; font-size: 11px; }
+.border-subtle { border: 1px solid var(--el-border) !important; }
 
-/* ── Skeletons & error ─────────────────────────────────── */
-.skeleton-block, .skeleton-line {
-  border-radius: 6px;
-  background: #eceee7;
-  animation: pulse 1.6s ease-in-out infinite alternate;
-}
-.skeleton-block { margin-top: 16px; }
-.skeleton-line { height: 12px; margin-top: 12px; }
-.skeleton-line.short { width: 26%; }
-.skeleton-line.title { width: 62%; height: 34px; }
-@keyframes pulse { to { opacity: .52; } }
+.btn-glow { box-shadow: none; }
 
-.detail-error {
-  padding: 70px 16px;
-  text-align: center;
+.quiz-item {
+  transition: background 0.15s ease;
+  border-bottom: 1px solid var(--el-border);
 }
-.detail-error .empty-symbol {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  margin: 0 auto 14px;
-  border-radius: 50%;
-  background: #edf1e9;
-  color: #65816a;
-  font-size: 24px;
+.quiz-item:hover {
+  background: var(--el-surface-2);
 }
-.detail-error h2 {
-  margin: 0;
-  font-family: 'Iowan Old Style', Georgia, serif;
-  font-size: 26px;
-  font-weight: 400;
-}
-.detail-error p { margin: 8px 0 20px; color: #828a82; font-size: 13px; }
+.quiz-item:last-child { border-bottom: none; }
 
-/* ── Responsive ────────────────────────────────────────── */
-@media (max-width: 880px) {
-  .detail-grid { grid-template-columns: 1fr; gap: 28px; }
-  .sticky-sidebar { position: static; }
+/* ── Custom Expansion Panels ────────────────── */
+.custom-panels { background: transparent !important; }
+.glass-panel {
+  background: var(--el-surface) !important;
+  backdrop-filter: none;
+  transition: border-color 0.15s ease;
 }
-@media (max-width: 560px) {
-  .course-detail-page { padding: 56px 20px 72px; }
-  .module-item summary { grid-template-columns: 28px 1fr 18px; }
-  .module-count { display: none; }
-  .lesson-list li { padding-left: 8px; }
+.glass-panel:hover {
+  border-color: var(--el-border-strong) !important;
 }
-@media (prefers-reduced-motion: reduce) {
-  .course-detail-page *, .course-detail-page *::before, .course-detail-page *::after {
-    transition-duration: .01ms !important;
-    animation-duration: .01ms !important;
-  }
+.glass-panel:deep(.v-expansion-panel-title--active) {
+  background: var(--el-surface-2);
 }
+
+.lesson-icon-wrap {
+  width: 32px; height: 32px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  margin-right: 12px;
+  background: var(--el-surface-2);
+}
+.icon-video { background: var(--el-surface-2); }
+.icon-pdf { background: var(--el-surface-2); }
+.icon-image { background: var(--el-surface-2); }
+.icon-texte { background: var(--el-surface-2); }
 </style>

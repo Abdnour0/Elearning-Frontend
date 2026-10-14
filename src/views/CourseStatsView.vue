@@ -1,87 +1,81 @@
 <template>
-  <div class="stats-page">
-    <!-- Loaded -->
-    <div v-if="statsData" class="stats-inner">
-      <RouterLink class="back-link" to="/formateur">← Back to my courses</RouterLink>
-      <span class="eyebrow"><i class="focus-dot" /> COURSE ANALYTICS</span>
-      <h1>{{ statsData.cours }}</h1>
-      <p class="stats-lede">How learners are moving through this course.</p>
+  <v-container v-if="statsData" class="py-8">
+    <v-row align="center" class="el-fade-up mb-6">
+      <v-col>
+        <v-btn variant="text" to="/formateur" prepend-icon="mdi-arrow-left" class="el-d1 text-none mb-2">Retour</v-btn>
+        <h1 class="el-d2 text-h4 font-weight-black text-white">{{ statsData.cours }}</h1>
+        <p class="el-d2 text-grey-lighten-1">Statistiques du cours</p>
+      </v-col>
+    </v-row>
 
-      <!-- KPIs -->
-      <section class="kpi-row">
-        <div class="stat-card">
-          <span class="stat-label">ENROLLED LEARNERS</span>
-          <strong>{{ statsData.enrollments }}</strong>
-          <span class="stat-detail">learners enrolled</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-label">AVERAGE PROGRESS</span>
-          <strong>{{ statsData.avg_progression }}<small>%</small></strong>
-          <span class="stat-detail">across all learners</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-label">QUIZZES</span>
-          <strong>{{ statsData.quiz_stats?.length || 0 }}</strong>
-          <span class="stat-detail">available in this course</span>
-        </div>
-      </section>
+    <!-- KPIs -->
+    <v-row class="mb-8">
+      <v-col cols="12" sm="4">
+        <v-card class="glass-card kpi-card rounded-xl pa-5 text-center" >
+          <v-icon color="primary" size="32" class="mb-2">mdi-account-group</v-icon>
+          <div class="text-h3 font-weight-black text-primary">{{ statsData.enrollments }}</div>
+          <div class="text-caption text-grey-lighten-1 mt-1">Apprenants inscrits</div>
+        </v-card>
+      </v-col>
+      <v-col cols="12" sm="4">
+        <v-card class="glass-card kpi-card rounded-xl pa-5 text-center" >
+          <v-icon color="secondary" size="32" class="mb-2">mdi-trending-up</v-icon>
+          <div class="text-h3 font-weight-black text-secondary">{{ statsData.avg_progression }}%</div>
+          <div class="text-caption text-grey-lighten-1 mt-1">Progression moyenne</div>
+        </v-card>
+      </v-col>
+      <v-col cols="12" sm="4">
+        <v-card class="glass-card kpi-card rounded-xl pa-5 text-center" >
+          <v-icon color="warning" size="32" class="mb-2">mdi-head-question</v-icon>
+          <div class="text-h3 font-weight-black text-warning">{{ statsData.quiz_stats?.length || 0 }}</div>
+          <div class="text-caption text-grey-lighten-1 mt-1">Quiz disponibles</div>
+        </v-card>
+      </v-col>
+    </v-row>
 
-      <!-- Quiz stats -->
-      <section v-if="statsData.quiz_stats && statsData.quiz_stats.length > 0" class="paper-card">
-        <h2>Quiz performance</h2>
-        <div class="table-wrap">
-          <table class="zen-table">
-            <thead>
-              <tr>
-                <th>QUIZ</th>
-                <th>ATTEMPTS</th>
-                <th>PASSED</th>
-                <th>PASS RATE</th>
-                <th>AVG SCORE</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="qs in statsData.quiz_stats" :key="qs.quiz_titre">
-                <td class="cell-strong">{{ qs.quiz_titre }}</td>
-                <td>{{ qs.total_attempts }}</td>
-                <td class="cell-pass">{{ qs.passed }}</td>
-                <td>
-                  <div class="rate-cell">
-                    <div class="rate-track"><span :class="qs.pass_rate >= 60 ? 'is-pass' : 'is-warn'" :style="{ width: `${Math.min(100, Math.max(0, qs.pass_rate))}%` }" /></div>
-                    <span class="rate-value" :class="qs.pass_rate >= 60 ? 'is-pass-text' : 'is-warn-text'">{{ qs.pass_rate }}%</span>
-                  </div>
-                </td>
-                <td class="cell-strong">{{ qs.avg_score }}%</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <section v-else class="paper-card empty-card">
-        <span class="empty-symbol">✳</span>
-        <h2>No quiz data yet</h2>
-        <p>This course doesn't have any quizzes to report on yet.</p>
-      </section>
-    </div>
-
-    <!-- Loading -->
-    <div v-else-if="isLoading || isInitial" class="stats-inner stats-loading">
-      <div class="skeleton-line" />
-      <div class="kpi-row">
-        <div v-for="i in 3" :key="i" class="skeleton-block" style="height: 104px;" />
-      </div>
-      <div class="skeleton-block" style="height: 220px;" />
-    </div>
-
-    <!-- Error -->
-    <div v-else class="stats-inner stats-error">
-      <span class="empty-symbol">✳</span>
-      <h2>We couldn't load these statistics</h2>
-      <p>Check the course still exists, then try again.</p>
-      <RouterLink class="zen-btn" to="/formateur">Back to my courses <span aria-hidden="true">→</span></RouterLink>
-    </div>
-  </div>
+    <!-- Quiz stats table -->
+    <v-card v-if="statsData.quiz_stats && statsData.quiz_stats.length > 0" class="glass-card rounded-xl pa-6" >
+      <h2 class="text-h6 font-weight-bold mb-4">Performance des quiz</h2>
+      <v-table class="transparent-table">
+        <thead>
+          <tr>
+            <th class="text-caption font-weight-bold text-grey-lighten-1">QUIZ</th>
+            <th class="text-caption font-weight-bold text-grey-lighten-1">TENTATIVES</th>
+            <th class="text-caption font-weight-bold text-grey-lighten-1">RÉUSSIES</th>
+            <th class="text-caption font-weight-bold text-grey-lighten-1">TAUX</th>
+            <th class="text-caption font-weight-bold text-grey-lighten-1">SCORE MOY.</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="qs in statsData.quiz_stats" :key="qs.quiz_titre">
+            <td class="font-weight-medium text-white py-3">{{ qs.quiz_titre }}</td>
+            <td class="text-grey-lighten-1">{{ qs.total_attempts }}</td>
+            <td class="text-success font-weight-bold">{{ qs.passed }}</td>
+            <td>
+              <div class="d-flex align-center gap-2">
+                <v-progress-linear :model-value="qs.pass_rate" :color="qs.pass_rate >= 60 ? 'success' : 'warning'" height="6" rounded bg-color="var(--el-surface-2)" style="width:80px" />
+                <span class="text-body-2 font-weight-bold" :class="qs.pass_rate >= 60 ? 'text-success' : 'text-warning'">{{ qs.pass_rate }}%</span>
+              </div>
+            </td>
+            <td class="font-weight-bold text-white">{{ qs.avg_score }}%</td>
+          </tr>
+        </tbody>
+      </v-table>
+    </v-card>
+    <v-card v-else class="glass-card rounded-xl pa-8 text-center" >
+      <v-icon size="48" color="grey-darken-1" class="mb-4">mdi-clipboard-text-off-outline</v-icon>
+      <h2 class="text-h6 font-weight-bold text-white">Aucune donnée de quiz</h2>
+      <p class="text-grey-lighten-1">Ce cours ne contient pas encore de quiz pour afficher des performances.</p>
+    </v-card>
+  </v-container>
+  <v-container v-else-if="isLoading || isInitial" class="text-center py-16">
+    <v-progress-circular indeterminate color="primary" size="64" />
+  </v-container>
+  <v-container v-else class="py-12">
+    <v-alert type="error" variant="tonal" class="rounded-xl">
+      Impossible de charger les statistiques de ce cours.
+    </v-alert>
+  </v-container>
 </template>
 
 <script setup>
@@ -101,185 +95,22 @@ onMounted(async () => {
     const { data } = await api.get(`/cours/${route.params.id}/stats`);
     statsData.value = data;
   } catch(e) {
-    showErrorToast(e, 'Could not load the statistics for this course.');
+    showErrorToast(e, 'Impossible de charger les statistiques de ce cours.');
   } finally {
     markLoaded();
   }
 });
 </script>
-
 <style scoped>
-.stats-page {
-  min-height: calc(100vh - var(--el-app-bar-h, 72px));
-  padding: 72px 24px 100px;
-  background: #fbfaf6;
-  color: #28382e;
-}
-.stats-inner { max-width: 1060px; margin: 0 auto; }
+.transparent-table { background: transparent !important; }
 
-.back-link {
-  display: inline-block;
-  margin-bottom: 26px;
-  color: #55735c;
-  font-size: 12px;
-  font-weight: 650;
-  text-decoration: none;
+/* KPI Cards */
+.kpi-card {
+  transition: border-color 0.2s ease, transform 0.28s var(--el-ease), box-shadow 0.28s var(--el-ease);
 }
-.back-link:hover { color: #3f5f49; }
-.eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: #648069;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .13em;
-}
-.focus-dot { width: 7px; height: 7px; border-radius: 50%; background: #749578; }
-.stats-inner h1 {
-  margin: 14px 0 10px;
-  font-family: 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
-  font-size: clamp(34px, 4.2vw, 50px);
-  font-weight: 400;
-  line-height: 1.05;
-  letter-spacing: -.04em;
-}
-.stats-lede { margin: 0; color: #7d867e; font-size: 13px; }
-
-/* ── KPIs ──────────────────────────────────────────────── */
-.kpi-row {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-  margin: 34px 0 40px;
-}
-.stat-card {
-  display: grid;
-  padding: 18px 20px;
-  border: 1px solid #e7e8e1;
-  border-radius: 8px;
-  background: #fff;
-}
-.stat-label { color: #778778; font-size: 9px; font-weight: 700; letter-spacing: .12em; }
-.stat-card strong {
-  margin-top: 10px;
-  font-family: 'Iowan Old Style', Georgia, serif;
-  font-size: 34px;
-  font-weight: 400;
-  letter-spacing: -.02em;
-  color: #28382e;
-}
-.stat-card strong small { font-size: 18px; }
-.stat-detail { margin-top: 4px; color: #929990; font-size: 11px; }
-
-/* ── Table ─────────────────────────────────────────────── */
-.paper-card {
-  padding: 26px;
-  border: 1px solid #e5e7df;
-  border-radius: 8px;
-  background: #fff;
-}
-.paper-card h2 {
-  margin: 0 0 18px;
-  font-family: 'Iowan Old Style', Georgia, serif;
-  font-size: 24px;
-  font-weight: 400;
-  letter-spacing: -.02em;
-}
-.table-wrap { overflow-x: auto; }
-.zen-table { width: 100%; border-collapse: collapse; }
-.zen-table th {
-  padding: 0 12px 12px;
-  border-bottom: 1px solid #e8e8df;
-  color: #929a91;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: .1em;
-  text-align: left;
-  white-space: nowrap;
-}
-.zen-table td {
-  padding: 15px 12px;
-  border-bottom: 1px solid #eff0ea;
-  color: #5f6c62;
-  font-size: 13px;
-}
-.zen-table tbody tr:last-child td { border-bottom: 0; }
-.cell-strong { color: #33473a; font-weight: 650; }
-.cell-pass { color: #46704f; font-weight: 650; }
-.rate-cell { display: flex; align-items: center; gap: 10px; }
-.rate-track {
-  width: 84px;
-  height: 6px;
-  overflow: hidden;
-  border-radius: 4px;
-  background: #eef0eb;
-}
-.rate-track span { display: block; height: 100%; border-radius: 4px; }
-.rate-track .is-pass { background: #6f9276; }
-.rate-track .is-warn { background: #c9a15f; }
-.rate-value { font-size: 12px; font-weight: 700; }
-.is-pass-text { color: #46704f; }
-.is-warn-text { color: #9a7a3f; }
-
-/* ── Empty / error ─────────────────────────────────────── */
-.empty-card, .stats-error { text-align: center; padding: 56px 24px; }
-.empty-card h2, .stats-error h2 {
-  margin: 0;
-  font-family: 'Iowan Old Style', Georgia, serif;
-  font-size: 24px;
-  font-weight: 400;
-}
-.empty-card p, .stats-error p { margin: 8px 0 0; color: #828a82; font-size: 13px; }
-.stats-error p { margin-bottom: 20px; }
-.empty-symbol {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  margin: 0 auto 14px;
-  border-radius: 50%;
-  background: #edf1e9;
-  color: #65816a;
-  font-size: 24px;
-}
-
-/* ── Loading ───────────────────────────────────────────── */
-.stats-loading .skeleton-block, .stats-loading .skeleton-line {
-  border-radius: 6px;
-  background: #eceee7;
-  animation: pulse 1.6s ease-in-out infinite alternate;
-}
-.stats-loading .skeleton-line { height: 12px; width: 30%; margin-bottom: 22px; }
-@keyframes pulse { to { opacity: .52; } }
-
-/* ── Button ────────────────────────────────────────────── */
-.zen-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  min-height: 46px;
-  padding: 0 20px;
-  border-radius: 7px;
-  background: #537a62;
-  color: #fff;
-  font-size: 13px;
-  font-weight: 650;
-  text-decoration: none;
-  transition: background .18s ease, transform .18s ease;
-}
-.zen-btn:hover { background: #456c54; transform: translateY(-1px); }
-
-/* ── Responsive ────────────────────────────────────────── */
-@media (max-width: 700px) {
-  .kpi-row { grid-template-columns: 1fr; }
-  .stats-page { padding: 56px 20px 72px; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .stats-page *, .stats-page *::before, .stats-page *::after {
-    transition-duration: .01ms !important;
-    animation-duration: .01ms !important;
-  }
+.kpi-card:hover {
+  border-color: var(--el-border-strong) !important;
+  transform: translateY(-4px);
+  box-shadow: var(--el-shadow-md) !important;
 }
 </style>
