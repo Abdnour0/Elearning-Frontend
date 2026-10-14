@@ -1,301 +1,189 @@
 <template>
-  <div class="cinema-mode-bg">
-    <v-container v-if="course" fluid class="pa-0 cinema-container">
-      <!-- Premium Ambient Background -->
-      <div class="ambient-glow" :style="{ background: ambientGlowColor }" />
-      
-      <v-row no-gutters class="fill-height overflow-hidden">
-<!-- Main: Lesson Content -->
-        <v-col class="lesson-main d-flex flex-column position-relative h-100 transition-all" :class="sidebarVisible ? 'cols-main-with-sidebar' : 'cols-12'">
-<!-- Top Navigation Header -->
-          <div class="cinema-header d-flex align-center justify-space-between px-6 py-4">
-            <div class="d-flex align-center gap-4">
-              <v-btn 
-                variant="tonal" 
-                color="white" 
-                to="/dashboard" 
-                prepend-icon="mdi-arrow-left" 
-                class="text-none rounded-pill glass-button px-6"
-              >
-                Dashboard
-              </v-btn>
-              <v-btn
-                icon
-                variant="text"
-                color="white"
-                class="glass-button rounded-circle"
-                @click="sidebarVisible = !sidebarVisible"
-              >
+  <div class="learn-page">
+    <template v-if="course">
+      <div class="learn-layout" :class="{ 'with-sidebar': sidebarVisible }">
+        <!-- ── Main: lesson content ──────────────────────── -->
+        <main class="lesson-main">
+          <header class="learn-header">
+            <div class="header-left">
+              <RouterLink class="quiet-btn" to="/dashboard">← Dashboard</RouterLink>
+              <button class="icon-btn" :aria-label="sidebarVisible ? 'Hide curriculum' : 'Show curriculum'" @click="sidebarVisible = !sidebarVisible">
                 <v-icon size="20">{{ sidebarVisible ? 'mdi-backburger' : 'mdi-menu' }}</v-icon>
-              </v-btn>
+              </button>
+            </div>
+            <span class="lesson-counter">LESSON {{ currentLessonIndex + 1 }} / {{ allLecons.length }}</span>
+          </header>
+
+          <div class="content-scroll">
+            <div v-if="!activeLecon" class="empty-state">
+              <span class="empty-symbol">✳</span>
+              <h2>Select a lesson</h2>
+              <p>Pick a module from the curriculum to start learning.</p>
             </div>
 
-            <div class="d-flex align-center gap-3">
-              <div class="lesson-counter-chip d-none d-md-flex align-center gap-2 px-4 py-2 rounded-pill border-glass">
-                <span class="text-caption text-grey-lighten-1">LEÇON</span>
-                <span class="text-body-2 font-weight-black text-white tabular-nums">{{ currentLessonIndex + 1 }} / {{ allLecons.length }}</span>
-              </div>
-              <div class="premium-badge d-none d-sm-flex align-center px-4 py-2 rounded-pill border-glass bg-glass-dark">
-                <v-icon size="16" color="primary" class="mr-2">mdi-school-outline</v-icon>
-                <span class="text-caption font-weight-bold text-white tracking-widest text-uppercase" style="font-size: 0.7rem;">Apprenant Hub</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Content Area -->
-          <div class="content-scroll-area flex-grow-1 overflow-y-auto px-4 px-md-10 pb-10 pt-32 custom-scrollbar">
-            <div v-if="!activeLecon" class="empty-state-hero d-flex flex-column align-center justify-center h-100">
-               <v-icon size="100" color="primary" class="opacity-10 mb-6">mdi-play-box-multiple-outline</v-icon>
-               <h2 class="text-h4 font-weight-black text-white">Sélectionnez une leçon</h2>
-               <p class="text-grey-lighten-1 mt-2">Choisissez un module dans le menu pour commencer votre apprentissage.</p>
-            </div>
-
-            <div v-else class="content-max-width mx-auto">
-              <!-- Lesson Header -->
-              <div v-motion class="lesson-header mb-8" :initial="{ opacity: 0, y: 20 }" :enter="{ opacity: 1, y: 0 }">
-                <div class="d-flex align-center gap-3 mb-3">
-                  <v-chip :color="iconColor(activeLecon.typeContenu)" size="small" variant="flat" class="font-weight-black text-uppercase px-3" style="height: 22px; font-size: 0.6rem;">
-                    {{ activeLecon.typeContenu }}
-                  </v-chip>
-                  <div class="divider-v" />
-                  <span class="text-overline text-primary font-weight-black" style="font-size: 0.7rem;">MODULE {{ currentModuleIndex + 1 }}</span>
+            <div v-else class="content-max">
+              <!-- Lesson header -->
+              <div class="lesson-head">
+                <div class="lesson-tags">
+                  <span class="type-chip" :class="`type-${activeLecon.typeContenu}`">{{ activeLecon.typeContenu }}</span>
+                  <span class="module-label-text">MODULE {{ currentModuleIndex + 1 }}</span>
                 </div>
-                <h1 class="text-h2 font-weight-black text-white leading-tight mb-2 title-responsive">{{ activeLecon.titre }}</h1>
+                <h1>{{ activeLecon.titre }}</h1>
               </div>
 
-              <!-- Main Content Player -->
-              <v-card class="player-surface rounded-3xl overflow-hidden border-subtle" theme="dark">
-                <div class="player-ambient-glow" :style="{ background: iconColor(activeLecon.typeContenu) + '15' }" />
-                
-                <div class="position-relative z-1">
-                  <div v-if="activeLecon.typeContenu === 'video'" class="video-stage">
-                    <div v-if="mediaLoading" class="player-loading-overlay">
-                      <v-progress-circular indeterminate color="primary" size="64" />
-                    </div>
-                    <video 
-                      v-else-if="inlineMediaSrc" 
-                      ref="videoPlayer" 
-                      :key="activeLecon.id" 
-                      :src="inlineMediaSrc"
-                      class="w-100 h-100 object-fit-contain" 
-                      controls 
-                      @timeupdate="onTimeUpdate" 
-                      @loadedmetadata="onLoadedMetadata" 
-                    />
-                    <div v-else class="player-error-stage d-flex flex-column align-center">
-                      <v-icon size="80" color="grey-darken-3">mdi-video-off-outline</v-icon>
-                      <p class="mt-4 text-grey">Flux vidéo indisponible</p>
-                    </div>
-                  </div>
-
-                  <div v-else-if="activeLecon.typeContenu === 'pdf'" class="pdf-stage">
-                    <div v-if="mediaLoading" class="player-loading-overlay">
-                      <v-progress-circular indeterminate color="warning" size="64" />
-                    </div>
-                    <div v-else-if="mediaError" class="player-error-stage d-flex flex-column align-center justify-center h-100 w-100">
-                      <v-icon size="64" color="error" class="mb-4">mdi-alert-circle-outline</v-icon>
-                      <p class="text-white font-weight-bold">Impossible de charger le document PDF</p>
-                      <p class="text-grey-lighten-1 text-caption mt-1">{{ mediaError }}</p>
-                      <v-btn color="primary" size="small" class="mt-4 rounded-pill" prepend-icon="mdi-refresh" @click="loadAuthenticatedMedia">Réessayer</v-btn>
-                    </div>
-                    <iframe v-else-if="inlineMediaSrc" :key="activeLecon.id" :src="inlineMediaSrc" class="w-100 h-100 border-none" />
-                  </div>
-
-                  <div v-else-if="activeLecon.typeContenu === 'image'" class="image-stage d-flex justify-center align-center h-100 pa-6">
-                    <v-img :src="inlineMediaSrc" max-height="600" contain />
-                  </div>
-
-                  <div v-else-if="activeLecon.typeContenu === 'td'" class="td-stage d-flex flex-column justify-center align-center h-100 pa-10">
-                    <v-icon size="80" color="info" class="mb-4">mdi-file-document-outline</v-icon>
-                    <h3 class="text-h5 font-weight-bold text-white text-center">Document Associé</h3>
-                    <p class="text-grey-lighten-1 mt-2 text-center">Ce fichier est disponible en téléchargement ci-dessous.</p>
-                  </div>
-
-                  <div v-else class="text-stage pa-10 pa-md-16">
-                    <!-- eslint-disable-next-line vue/no-v-html -->
-                    <div class="text-content-rich" v-html="sanitizedLessonContent" />
+              <!-- Player -->
+              <div class="player-surface">
+                <!-- Video -->
+                <div v-if="activeLecon.typeContenu === 'video'" class="video-stage">
+                  <div v-if="mediaLoading" class="stage-center"><v-progress-circular indeterminate color="primary" size="52" /></div>
+                  <video
+                    v-else-if="inlineMediaSrc"
+                    ref="videoPlayer"
+                    :key="activeLecon.id"
+                    :src="inlineMediaSrc"
+                    class="stage-media"
+                    controls
+                    @timeupdate="onTimeUpdate"
+                    @loadedmetadata="onLoadedMetadata"
+                  />
+                  <div v-else class="stage-center stage-copy">
+                    <v-icon size="60" class="stage-icon">mdi-video-off-outline</v-icon>
+                    <p>Video stream unavailable</p>
                   </div>
                 </div>
-              </v-card>
 
-              <!-- Unified Command Dock -->
-              <div class="action-bar-container mt-10 d-flex justify-center">
-                <div class="command-dock pa-2 rounded-pill border-glass d-flex align-center justify-space-between flex-wrap gap-4 w-100" style="max-width: 900px; background: rgba(10, 15, 25, 0.85); backdrop-filter: blur(24px); box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
-                  <div class="d-flex align-center gap-2 pl-2">
-                    <v-btn 
-                      v-if="prevLecon" 
-                      variant="text" color="white" height="44"
-                      class="rounded-pill px-5 font-weight-bold text-none dock-btn-secondary" 
-                      prepend-icon="mdi-chevron-left" 
-                      @click="selectLecon(prevLecon)"
-                    >
-                      Précédent
-                    </v-btn>
-                    
-                    <v-btn
-                      v-if="['pdf', 'image', 'td'].includes(activeLecon.typeContenu)"
-                      variant="text" color="white" height="44"
-                      class="rounded-pill px-5 font-weight-bold text-none dock-btn-secondary"
-                      prepend-icon="mdi-download"
-                      @click="downloadLecon"
-                    >
-                      Télécharger
-                    </v-btn>
+                <!-- PDF -->
+                <div v-else-if="activeLecon.typeContenu === 'pdf'" class="pdf-stage">
+                  <div v-if="mediaLoading" class="stage-center"><v-progress-circular indeterminate color="primary" size="52" /></div>
+                  <div v-else-if="mediaError" class="stage-center stage-copy">
+                    <v-icon size="56" class="stage-icon">mdi-alert-circle-outline</v-icon>
+                    <p>Could not load the PDF document</p>
+                    <span class="stage-note">{{ mediaError }}</span>
+                    <button class="zen-btn mt-4" @click="loadAuthenticatedMedia">Try again</button>
                   </div>
+                  <iframe v-else-if="inlineMediaSrc" :key="activeLecon.id" :src="inlineMediaSrc" class="stage-frame" />
+                </div>
 
-                  <div class="d-flex align-center gap-2 pr-2">
-                    <v-btn
-                      v-if="!completedIds.has(activeLecon.id)"
-                      color="success" height="44"
-                      class="rounded-pill px-6 font-weight-black text-none dock-btn-success"
-                      :loading="completing"
-                      prepend-icon="mdi-check-decagram"
-                      @click="markComplete"
-                    >
-                      Terminer
-                    </v-btn>
-                    <div v-else class="d-flex align-center gap-2">
-                      <div class="dock-success-pill px-5 h-44 rounded-pill d-flex align-center gap-2" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);">
-                        <v-icon color="success" size="18">mdi-check-circle</v-icon>
-                        <span class="text-success font-weight-bold text-caption text-uppercase tracking-widest">Terminée</span>
-                      </div>
-                      <v-tooltip text="Refaire la leçon" location="top">
-                        <template #activator="{ props }">
-                          <v-btn
-                            v-bind="props"
-                            icon="mdi-refresh"
-                            variant="tonal" color="white"
-                            width="44" height="44"
-                            class="rounded-circle dock-btn-icon border-glass"
-                            :loading="uncompleting"
-                            @click="unmarkComplete"
-                          />
-                        </template>
-                      </v-tooltip>
-                    </div>
+                <!-- Image -->
+                <div v-else-if="activeLecon.typeContenu === 'image'" class="image-stage">
+                  <v-img :src="inlineMediaSrc" max-height="600" contain />
+                </div>
 
-                    <v-btn
-                      v-if="nextLecon"
-                      color="primary" height="44"
-                      class="rounded-pill px-8 font-weight-black text-none dock-btn-primary"
-                      :disabled="!completedIds.has(activeLecon.id)"
-                      append-icon="mdi-arrow-right"
-                      @click="selectLecon(nextLecon)"
-                    >
-                      Suivant
-                    </v-btn>
-                    <v-btn
-                      v-else-if="course?.quizzes?.length"
-                      color="warning" height="44"
-                      class="rounded-pill px-8 font-weight-black text-none dock-btn-warning"
-                      append-icon="mdi-arrow-right"
-                      :to="`/quiz/${course.quizzes[0].id}`"
-                    >
-                      Passer au Quiz
-                    </v-btn>
-                  </div>
+                <!-- Downloadable document -->
+                <div v-else-if="activeLecon.typeContenu === 'td'" class="stage-center stage-copy doc-stage">
+                  <v-icon size="60" class="stage-icon">mdi-file-document-outline</v-icon>
+                  <h3>Associated document</h3>
+                  <p>This file is available for download below.</p>
+                </div>
+
+                <!-- Rich text -->
+                <div v-else class="text-stage">
+                  <!-- eslint-disable-next-line vue/no-v-html -->
+                  <div class="text-content-rich" v-html="sanitizedLessonContent" />
+                </div>
+              </div>
+
+              <!-- Command dock -->
+              <div class="command-dock">
+                <div class="dock-left">
+                  <button v-if="prevLecon" class="zen-btn zen-btn-quiet" @click="selectLecon(prevLecon)">← Previous</button>
+                  <button
+                    v-if="['pdf', 'image', 'td'].includes(activeLecon.typeContenu)"
+                    class="zen-btn zen-btn-quiet"
+                    @click="downloadLecon"
+                  >
+                    <v-icon size="17">mdi-download</v-icon> Download
+                  </button>
+                </div>
+
+                <div class="dock-right">
+                  <template v-if="!completedIds.has(activeLecon.id)">
+                    <button class="zen-btn zen-btn-success" :disabled="completing" @click="markComplete">
+                      <v-icon size="18">mdi-check-decagram</v-icon> {{ completing ? 'Saving…' : 'Mark complete' }}
+                    </button>
+                  </template>
+                  <template v-else>
+                    <span class="completed-pill"><v-icon size="17" color="success">mdi-check-circle</v-icon> Completed</span>
+                    <button class="icon-btn" :disabled="uncompleting" aria-label="Redo lesson" @click="unmarkComplete">
+                      <v-icon size="18">mdi-refresh</v-icon>
+                    </button>
+                  </template>
+
+                  <button v-if="nextLecon" class="zen-btn" :disabled="!completedIds.has(activeLecon.id)" @click="selectLecon(nextLecon)">
+                    Next <span aria-hidden="true">→</span>
+                  </button>
+                  <RouterLink v-else-if="course?.quizzes?.length" class="zen-btn" :to="`/quiz/${course.quizzes[0].id}`">
+                    Go to quiz <span aria-hidden="true">→</span>
+                  </RouterLink>
                 </div>
               </div>
             </div>
           </div>
-        </v-col>
+        </main>
 
-        <!-- Sidebar: Curriculum -->
-        <v-col 
-          v-if="sidebarVisible" 
-          class="sidebar-panel h-100 d-flex flex-column transition-all"
-        >
-          <div class="sidebar-top pa-6 pa-xl-8">
-            <div class="overline-text text-primary font-weight-black mb-2">PROGRESSION DU COURS</div>
-            <div class="d-flex justify-space-between align-end mb-4">
-              <h3 class="text-h5 font-weight-black text-white leading-none">Programme</h3>
-              <div class="text-h4 font-weight-black text-primary tabular-nums">{{ Math.round(progression) }}%</div>
+        <!-- ── Sidebar: curriculum ───────────────────────── -->
+        <aside v-if="sidebarVisible" class="sidebar-panel">
+          <div class="sidebar-top">
+            <span class="eyebrow"><i class="focus-dot" /> COURSE PROGRESS</span>
+            <div class="progress-head">
+              <h3>Curriculum</h3>
+              <span class="progress-value">{{ Math.round(progression) }}%</span>
             </div>
-            <v-progress-linear 
-              :model-value="progression" 
-              color="primary" height="8" rounded 
-              bg-color="rgba(255,255,255,0.05)"
-              class="mb-3 premium-progress"
-            />
-            <div class="d-flex align-center justify-space-between">
-               <span class="text-caption text-grey font-weight-bold uppercase">{{ completedIds.size }} / {{ allLecons.length }} COMPLÉTÉ</span>
-               <v-icon color="grey-darken-1" size="14">mdi-information-outline</v-icon>
-            </div>
+            <div class="progress-track"><span :style="{ width: `${progression}%` }" /></div>
+            <span class="progress-foot">{{ completedIds.size }} / {{ allLecons.length }} COMPLETED</span>
           </div>
 
-          <div class="sidebar-scroll flex-grow-1 overflow-y-auto pa-4 custom-scrollbar">
-            <div v-for="(module, mIdx) in course.modules" :key="module.id" class="mb-8">
-              <div class="module-label px-4 mb-3 d-flex align-center">
-                <span class="text-caption font-weight-black text-grey-darken-1 uppercase tracking-widest">MODULE {{ mIdx + 1 }}</span>
-                <v-divider class="ml-4 opacity-10" />
-              </div>
-              
-              <div class="lesson-list">
-                <button 
-                  v-for="(lecon, lIdx) in module.lecons" 
-                  :key="lecon.id"
-                  class="lesson-item-btn pa-4 rounded-2xl mb-2 d-flex align-center text-left transition-all"
-                  :class="{ 
-                    'lib-active': activeLecon?.id === lecon.id,
-                    'lib-locked': isLocked(lecon),
-                    'lib-completed': completedIds.has(lecon.id)
-                  }"
-                  @click="!isLocked(lecon) && selectLecon(lecon)"
-                >
-                  <div class="lib-icon-wrap mr-4">
-                    <v-icon v-if="completedIds.has(lecon.id)" color="success" size="18">mdi-check-circle</v-icon>
-                    <v-icon v-else-if="isLocked(lecon)" color="grey-darken-3" size="18">mdi-lock-outline</v-icon>
-                    <v-icon v-else :color="activeLecon?.id === lecon.id ? 'primary' : 'grey'" size="18">
-                      {{ activeLecon?.id === lecon.id ? 'mdi-play' : 'mdi-circle-medium' }}
-                    </v-icon>
-                  </div>
-                  <div class="flex-grow-1 min-w-0">
-                    <div class="text-subtitle-2 font-weight-bold text-white text-truncate mb-1">{{ lIdx + 1 }}. {{ lecon.titre }}</div>
-                    <div class="d-flex align-center gap-2">
-                       <v-icon size="12" :color="iconColor(lecon.typeContenu)">{{ typeIcon(lecon.typeContenu) }}</v-icon>
-                       <span class="text-caption text-uppercase font-weight-black opacity-60" style="font-size: 0.55rem;">{{ lecon.typeContenu }}</span>
-                    </div>
-                  </div>
-                </button>
-              </div>
+          <div class="sidebar-scroll">
+            <div v-for="(module, mIdx) in course.modules" :key="module.id" class="module-group">
+              <div class="module-label">MODULE {{ mIdx + 1 }}</div>
+              <button
+                v-for="(lecon, lIdx) in module.lecons"
+                :key="lecon.id"
+                class="lesson-btn"
+                :class="{
+                  'lib-active': activeLecon?.id === lecon.id,
+                  'lib-locked': isLocked(lecon),
+                  'lib-completed': completedIds.has(lecon.id)
+                }"
+                :disabled="isLocked(lecon)"
+                @click="selectLecon(lecon)"
+              >
+                <span class="lib-icon">
+                  <v-icon v-if="completedIds.has(lecon.id)" color="success" size="17">mdi-check-circle</v-icon>
+                  <v-icon v-else-if="isLocked(lecon)" size="16" class="lib-lock">mdi-lock-outline</v-icon>
+                  <v-icon v-else size="16" :color="iconColor(lecon.typeContenu)">{{ typeIcon(lecon.typeContenu) }}</v-icon>
+                </span>
+                <span class="lib-copy">
+                  <span class="lib-title">{{ lIdx + 1 }}. {{ lecon.titre }}</span>
+                  <span class="lib-type">{{ lecon.typeContenu }}</span>
+                </span>
+              </button>
             </div>
-            
-            <!-- Quizzes Section -->
-            <div v-if="course?.quizzes?.length" class="mb-8">
-              <div class="module-label px-4 mb-3 d-flex align-center">
-                <span class="text-caption font-weight-black text-warning uppercase tracking-widest">ÉVALUATIONS (OPTIONNEL)</span>
-                <v-divider class="ml-4 opacity-10" />
-              </div>
-              <div class="lesson-list">
-                <button
-                  v-for="quiz in course.quizzes"
-                  :key="quiz.id"
-                  class="lesson-item-btn pa-4 rounded-2xl mb-2 d-flex align-center text-left transition-all"
-                  @click="$router.push(`/quiz/${quiz.id}`)"
-                >
-                  <div class="lib-icon-wrap mr-4">
-                    <v-icon color="warning" size="18">mdi-clipboard-check-outline</v-icon>
-                  </div>
-                  <div class="flex-grow-1 min-w-0">
-                    <div class="text-subtitle-2 font-weight-bold text-white text-truncate mb-1">Quiz: {{ quiz.titre }}</div>
-                    <div class="d-flex align-center gap-2">
-                      <span class="text-caption text-uppercase font-weight-black opacity-60" style="font-size: 0.55rem;">Testez vos connaissances</span>
-                    </div>
-                  </div>
-                </button>
-              </div>
+
+            <div v-if="course?.quizzes?.length" class="module-group">
+              <div class="module-label is-quiz">ASSESSMENTS (OPTIONAL)</div>
+              <button
+                v-for="quiz in course.quizzes"
+                :key="quiz.id"
+                class="lesson-btn"
+                @click="$router.push(`/quiz/${quiz.id}`)"
+              >
+                <span class="lib-icon"><v-icon size="17" color="warning">mdi-clipboard-check-outline</v-icon></span>
+                <span class="lib-copy">
+                  <span class="lib-title">Quiz: {{ quiz.titre }}</span>
+                  <span class="lib-type">Test your knowledge</span>
+                </span>
+              </button>
             </div>
           </div>
-        </v-col>
-      </v-row>
-    </v-container>
-
-    <div v-else class="h-100 d-flex flex-column align-center justify-center bg-black">
-      <div class="loading-stage">
-        <div class="loading-orbit" />
-        <v-progress-circular indeterminate color="primary" size="64" width="3" />
+        </aside>
       </div>
-      <p class="mt-8 text-grey text-overline tracking-widest animate-pulse">Initialisation du Hub...</p>
+    </template>
+
+    <!-- Loading -->
+    <div v-else class="learn-loading">
+      <v-progress-circular indeterminate color="primary" size="52" />
+      <p>Loading your course…</p>
     </div>
   </div>
 </template>
@@ -306,7 +194,6 @@ import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import api from '../axios';
 import DOMPurify from 'dompurify';
-import confetti from 'canvas-confetti';
 import { showErrorToast, showToast } from '../composables/useToast.js';
 
 const route = useRoute();
@@ -335,19 +222,12 @@ const currentLessonIndex = computed(() => {
 });
 
 const sanitizedLessonContent = computed(() =>
-  DOMPurify.sanitize(activeLecon.value?.urlContenu || 'Contenu en cours de rédaction...')
+  DOMPurify.sanitize(activeLecon.value?.urlContenu || 'Content is being written…')
 );
 
 const currentModuleIndex = computed(() => {
   if (!course.value || !activeLecon.value) return 0;
   return course.value.modules.findIndex(m => m.lecons.some(l => l.id === activeLecon.value.id));
-});
-
-const ambientGlowColor = computed(() => {
-  if (!activeLecon.value) return 'rgba(59, 130, 246, 0.05)';
-  const colorMap = { video: '#3b82f6', pdf: '#f97316', image: '#06b6d4', texte: '#8b5cf6' };
-  const baseColor = colorMap[activeLecon.value.typeContenu] || '#3b82f6';
-  return `radial-gradient(circle at 50% 50%, ${baseColor}12 0%, transparent 70%)`;
 });
 
 function onTimeUpdate(e) { currentTime.value = e.target.currentTime; }
@@ -361,7 +241,6 @@ const inlineMediaSrc = computed(() => {
   const lecon = activeLecon.value;
   if (!lecon) return '';
   if (lecon.typeContenu === 'pdf' && mediaBlobUrl.value) return mediaBlobUrl.value;
-  // Use the formatted URL provided by the backend (Cloud ready)
   return lecon.url_contenu_formattee || lecon.urlContenu || '';
 });
 
@@ -379,7 +258,7 @@ async function loadAuthenticatedMedia() {
     const res = await api.get(`/lessons/${lecon.id}/download`, { responseType: 'blob' });
     if (myGen === mediaLoadGeneration) mediaBlobUrl.value = URL.createObjectURL(res.data);
   } catch {
-    if (myGen === mediaLoadGeneration) mediaError.value = 'Erreur réseau.';
+    if (myGen === mediaLoadGeneration) mediaError.value = 'Network error.';
   } finally {
     if (myGen === mediaLoadGeneration) mediaLoading.value = false;
   }
@@ -393,7 +272,7 @@ const prevLecon = computed(() => allLecons.value[currentLessonIndex.value - 1] |
 const nextLecon = computed(() => allLecons.value[currentLessonIndex.value + 1] || null);
 
 function typeIcon(type) { return { video: 'mdi-play-circle-outline', pdf: 'mdi-file-pdf-box', image: 'mdi-image-outline', texte: 'mdi-text-box-outline' }[type] || 'mdi-file'; }
-function iconColor(type) { return { video: 'primary', pdf: 'warning', image: 'info', texte: 'secondary' }[type] || 'grey'; }
+function iconColor(type) { return { video: '#4f7d84', pdf: '#8a6d3b', image: '#57745e', texte: '#5c6b7a' }[type] || '#6f7a70'; }
 
 function isLocked(lecon) {
   if (!lecon || authStore.isAdmin || authStore.isFormateur) return false;
@@ -412,10 +291,9 @@ async function markComplete() {
     const { data } = await api.post(`/lessons/${activeLecon.value.id}/complete`);
     if (data.completed_ids) completedIds.value = new Set(data.completed_ids.map(Number));
     progression.value = data.progression;
-    confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 } });
-    if (nextLecon.value) setTimeout(() => selectLecon(nextLecon.value), 1000);
+    if (nextLecon.value) setTimeout(() => selectLecon(nextLecon.value), 700);
   } catch (e) {
-    showErrorToast(e, 'Impossible de marquer cette leçon comme terminée.');
+    showErrorToast(e, 'Could not mark this lesson as complete.');
   }
   finally { completing.value = false; }
 }
@@ -429,7 +307,7 @@ async function unmarkComplete() {
     progression.value = data.progression;
     reloadMedia();
   } catch (e) {
-    showErrorToast(e, 'Impossible de retirer la validation de cette leçon.');
+    showErrorToast(e, 'Could not undo this lesson.');
   } finally {
     uncompleting.value = false;
   }
@@ -452,19 +330,17 @@ async function downloadLecon() {
     const url = URL.createObjectURL(res.data);
     const a = document.createElement('a');
     a.href = url;
-    
-    // Extract extension from urlContenu, fallback to .file if unknown
+
     let ext = 'file';
     if (lecon.urlContenu && lecon.urlContenu.includes('.')) {
       ext = lecon.urlContenu.split('.').pop();
     }
-    
+
     a.download = `${lecon.titre}.${ext}`;
     a.click();
-    // Release the object URL after triggering the download
     setTimeout(() => URL.revokeObjectURL(url), 60_000);
   } catch (e) {
-    showErrorToast(e, 'Impossible de télécharger cette ressource.');
+    showErrorToast(e, 'Could not download this resource.');
   }
 }
 
@@ -477,13 +353,12 @@ async function initHub() {
     if (prog.completed_ids) completedIds.value = new Set(prog.completed_ids.map(Number));
     const firstUn = allLecons.value.find(l => !completedIds.value.has(l.id));
     activeLecon.value = firstUn || allLecons.value[0];
-  } catch (e) { 
+  } catch (e) {
     if (e.response?.status === 403) {
-      // Not enrolled
       router.push(`/cours/${route.params.id}`);
-      showToast('Inscription requise pour accéder à ce cours.', 'warning');
+      showToast('You need to enrol to access this course.', 'warning');
     } else {
-      showErrorToast(e, 'Impossible de charger le hub de cours.');
+      showErrorToast(e, 'Could not load this course hub.');
     }
   }
 }
@@ -493,82 +368,303 @@ watch(() => route.params.id, initHub);
 </script>
 
 <style scoped>
-.cinema-container { height: 100vh; background-color: #05070a; overflow: hidden; position: relative; }
-.ambient-glow { position: absolute; inset: 0; z-index: 0; pointer-events: none; transition: background 1s ease; }
-.lesson-main { background: transparent; z-index: 1; }
-.cols-main-with-sidebar { flex: 1 1 auto; max-width: 100%; }
+.learn-page {
+  height: calc(100vh - var(--el-app-bar-h, 72px));
+  background: #fbfaf6;
+  color: #28382e;
+}
+.learn-layout { display: flex; height: 100%; }
 
-@media (min-width: 960px) {
-  .cols-main-with-sidebar { max-width: calc(100% - 380px); flex: 0 0 calc(100% - 380px); }
-  .sidebar-panel { width: 380px; flex: 0 0 380px; }
+/* ── Main ──────────────────────────────────────────────── */
+.lesson-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.learn-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 26px;
+  border-bottom: 1px solid #e7e8e1;
+  background: #fbfaf6;
+}
+.header-left { display: flex; align-items: center; gap: 10px; }
+.lesson-counter { color: #8b938b; font-size: 11px; font-weight: 700; letter-spacing: .1em; }
+
+.content-scroll { flex: 1; overflow-y: auto; padding: 34px 26px 60px; }
+.content-max { max-width: 1040px; margin: 0 auto; }
+
+/* ── Lesson header ─────────────────────────────────────── */
+.lesson-head { margin-bottom: 26px; }
+.lesson-tags { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.type-chip {
+  padding: 5px 11px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+.type-video { background: #e6eef0; color: #4f7d84; }
+.type-pdf { background: #f1ebe0; color: #8a6d3b; }
+.type-image { background: #e7eee6; color: #57745e; }
+.type-texte { background: #eceef1; color: #5c6b7a; }
+.type-td { background: #eceef1; color: #5c6b7a; }
+.module-label-text { color: #648069; font-size: 10px; font-weight: 700; letter-spacing: .12em; }
+.lesson-head h1 {
+  margin: 0;
+  font-family: 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 400;
+  line-height: 1.08;
+  letter-spacing: -.035em;
 }
 
-.cinema-header {
-  position: absolute; top: 0; left: 0; right: 0; height: 80px;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.95) 0%, transparent 100%);
-  z-index: 100;
-}
-.pt-32 { padding-top: 120px !important; }
-.title-responsive { font-size: clamp(2rem, 5vw, 3.5rem) !important; letter-spacing: -0.03em; }
-
-.glass-button { background: rgba(255, 255, 255, 0.04) !important; backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08) !important; }
-.lesson-counter-chip { background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.05); }
-.content-max-width { max-width: 1100px; width: 100%; }
-.divider-v { width: 1px; height: 16px; background: rgba(255,255,255,0.1); }
-
+/* ── Player ────────────────────────────────────────────── */
 .player-surface {
-  background: #0a0f1c !important; border: 1px solid rgba(255, 255, 255, 0.06) !important;
-  box-shadow: 0 40px 100px -20px rgba(0,0,0,0.8) !important; position: relative;
+  overflow: hidden;
+  border: 1px solid #e5e7df;
+  border-radius: 10px;
+  background: #fff;
 }
-.player-ambient-glow { position: absolute; inset: 0; filter: blur(80px); opacity: 0.4; z-index: 0; }
-.video-stage, .pdf-stage { height: 60vh; background: black; display: flex; align-items: center; justify-content: center; }
-.text-stage { background: #0f172a; }
-.text-content-rich { color: #d1d5db; font-size: 1.1rem; line-height: 1.8; }
-
-/* ── Command Dock (Redesigned Action Bar) ──────────────── */
-.bg-glass-dark { background: rgba(5, 7, 10, 0.6); }
-.border-glass { border: 1px solid rgba(255, 255, 255, 0.08) !important; }
-
-.dock-btn-secondary { transition: all 0.2s ease; opacity: 0.8; }
-.dock-btn-secondary:hover { opacity: 1; background: rgba(255, 255, 255, 0.05); }
-
-.dock-btn-success { background: linear-gradient(135deg, #10b981, #059669) !important; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3) !important; }
-.dock-btn-primary { background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4) !important; }
-.dock-btn-warning { background: linear-gradient(135deg, #f59e0b, #d97706) !important; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4) !important; }
-
-.dock-btn-success:hover, .dock-btn-primary:hover, .dock-btn-warning:hover { transform: translateY(-1px); filter: brightness(1.1); }
-
-.h-44 { height: 44px; }
-.dock-btn-icon { transition: all 0.2s ease; background: rgba(255, 255, 255, 0.03) !important; }
-.dock-btn-icon:hover { background: rgba(255, 255, 255, 0.1) !important; transform: rotate(15deg); }
-
-/* ── Sidebar Redesign ─────────────────────────────────── */
-.sidebar-panel { background: rgba(5, 7, 10, 0.8); backdrop-filter: blur(40px); border-left: 1px solid rgba(255, 255, 255, 0.05); z-index: 5; }
-.sidebar-top { border-bottom: 1px solid rgba(255, 255, 255, 0.04); background: linear-gradient(to bottom, rgba(59, 130, 246, 0.03), transparent); }
-.overline-text { font-size: 0.65rem; letter-spacing: 0.25em; color: #3b82f6; }
-.premium-progress :deep(.v-progress-linear__determinate) { background: linear-gradient(90deg, #3b82f6, #60a5fa); box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
-
-.lesson-item-btn {
-  width: 100%; border: 1px solid transparent; background: transparent; color: #94a3b8; transition: all 0.3s ease;
+.video-stage { height: 58vh; display: flex; align-items: center; justify-content: center; background: #0b0f0c; }
+.stage-media { width: 100%; height: 100%; object-fit: contain; }
+.pdf-stage { height: 58vh; display: flex; align-items: center; justify-content: center; background: #f6f7f3; }
+.stage-frame { width: 100%; height: 100%; border: 0; }
+.image-stage { display: flex; align-items: center; justify-content: center; padding: 24px; background: #f6f7f3; }
+.stage-center { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%; }
+.stage-copy { gap: 8px; text-align: center; color: #7d867d; }
+.stage-copy h3 {
+  margin: 6px 0 0;
+  font-family: 'Iowan Old Style', Georgia, serif;
+  font-size: 24px;
+  font-weight: 400;
 }
-.lesson-item-btn:hover { background: rgba(255, 255, 255, 0.02); color: #fff; }
-.lib-active { 
-  background: linear-gradient(90deg, rgba(59, 130, 246, 0.1), transparent) !important; 
-  border-color: rgba(59, 130, 246, 0.2) !important; 
-  color: #fff !important; 
-  box-shadow: inset 3px 0 0 #3b82f6;
+.stage-copy p { margin: 0; font-size: 13px; }
+.stage-icon { color: #b6c1b4; }
+.stage-note { color: #a1a79f; font-size: 12px; }
+.doc-stage { padding: 60px 24px; }
+.text-stage { padding: 44px 48px; background: #fff; }
+.text-content-rich { color: #3a4a3f; font-size: 16px; line-height: 1.8; }
+.text-content-rich :deep(h1),
+.text-content-rich :deep(h2),
+.text-content-rich :deep(h3) { font-family: 'Iowan Old Style', Georgia, serif; font-weight: 400; letter-spacing: -.02em; color: #28382e; }
+.text-content-rich :deep(a) { color: #55735c; }
+.text-content-rich :deep(img) { max-width: 100%; border-radius: 8px; }
+
+/* ── Command dock ──────────────────────────────────────── */
+.command-dock {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 22px;
+  padding: 14px 16px;
+  border: 1px solid #e5e7df;
+  border-radius: 12px;
+  background: #fff;
 }
-.lib-locked { opacity: 0.4; cursor: not-allowed; filter: grayscale(1); }
-.lib-completed { background: rgba(16, 185, 129, 0.03); }
-.lib-icon-wrap { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.03); border-radius: 10px; }
+.dock-left, .dock-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.completed-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 14px;
+  border-radius: 20px;
+  background: #e8f0e7;
+  color: #46704f;
+  font-size: 12px;
+  font-weight: 650;
+}
 
-.loading-stage { position: relative; display: flex; align-items: center; justify-content: center; }
-.loading-orbit { position: absolute; width: 100px; height: 100px; border: 1px solid rgba(59, 130, 246, 0.1); border-radius: 50%; animation: rotate 3s linear infinite; }
-@keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+/* ── Sidebar ───────────────────────────────────────────── */
+.sidebar-panel {
+  display: flex;
+  flex-direction: column;
+  width: 360px;
+  flex: 0 0 360px;
+  border-left: 1px solid #e5e7df;
+  background: #faf9f5;
+}
+.sidebar-top { padding: 24px 22px 20px; border-bottom: 1px solid #eceee7; }
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #648069;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .13em;
+}
+.focus-dot { width: 7px; height: 7px; border-radius: 50%; background: #749578; }
+.progress-head { display: flex; align-items: baseline; justify-content: space-between; margin: 12px 0 12px; }
+.progress-head h3 {
+  margin: 0;
+  font-family: 'Iowan Old Style', Georgia, serif;
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: -.02em;
+}
+.progress-value { color: #46704f; font-family: 'Iowan Old Style', Georgia, serif; font-size: 24px; }
+.progress-track { height: 5px; overflow: hidden; border-radius: 4px; background: #eef0eb; }
+.progress-track span { display: block; height: 100%; border-radius: 4px; background: #6f9276; transition: width .4s ease; }
+.progress-foot { display: block; margin-top: 10px; color: #8b938b; font-size: 10px; font-weight: 700; letter-spacing: .1em; }
 
-.custom-scrollbar::-webkit-scrollbar { width: 4px; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
-.uppercase { text-transform: uppercase; }
-.animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+.sidebar-scroll { flex: 1; overflow-y: auto; padding: 20px 14px 40px; }
+.module-group { margin-bottom: 26px; }
+.module-label {
+  padding: 0 10px 10px;
+  color: #8b938b;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .12em;
+}
+.module-label.is-quiz { color: #9a7a3f; }
+.lesson-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 6px;
+  padding: 11px 12px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: #5f6c62;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background .18s ease, border-color .18s ease;
+}
+.lesson-btn:hover:not(:disabled) { background: #f1f4ee; }
+.lib-active { background: #eef4ec !important; border-color: #cfe0cd !important; }
+.lib-locked { opacity: .5; cursor: not-allowed; }
+.lib-completed { color: #46704f; }
+.lib-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: #f1f3ee;
+}
+.lib-lock { color: #b6bdb5; }
+.lib-copy { display: grid; gap: 3px; min-width: 0; }
+.lib-title { overflow: hidden; color: #33473a; font-size: 13px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.lib-type { color: #98a097; font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+
+/* ── Empty / loading ───────────────────────────────────── */
+.empty-state { padding: 100px 20px; text-align: center; }
+.empty-symbol {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  background: #edf1e9;
+  color: #65816a;
+  font-size: 24px;
+}
+.empty-state h2 {
+  margin: 0;
+  font-family: 'Iowan Old Style', Georgia, serif;
+  font-size: 26px;
+  font-weight: 400;
+}
+.empty-state p { margin: 8px 0 0; color: #828a82; font-size: 13px; }
+.learn-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 18px;
+}
+.learn-loading p { color: #828a82; font-size: 13px; }
+
+/* ── Buttons ───────────────────────────────────────────── */
+.zen-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 7px;
+  background: #537a62;
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background .18s ease, transform .18s ease;
+}
+.zen-btn:hover:not(:disabled) { background: #456c54; transform: translateY(-1px); }
+.zen-btn:disabled { opacity: .55; cursor: default; }
+.zen-btn-quiet { background: #fff; color: #55735c; border: 1px solid #dfe5db; }
+.zen-btn-quiet:hover:not(:disabled) { background: #f4f6f1; border-color: #c3cfc1; }
+.zen-btn-success { background: #46704f; }
+.zen-btn-success:hover:not(:disabled) { background: #3b5f43; }
+.quiet-btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid #dfe5db;
+  border-radius: 7px;
+  background: #fff;
+  color: #55735c;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  text-decoration: none;
+  transition: background .18s ease, border-color .18s ease;
+}
+.quiet-btn:hover { background: #f4f6f1; border-color: #c3cfc1; }
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #e4e7df;
+  border-radius: 8px;
+  background: #fff;
+  color: #55735c;
+  cursor: pointer;
+  transition: background .16s ease, border-color .16s ease;
+}
+.icon-btn:hover:not(:disabled) { background: #f2f5ef; border-color: #c3cfc1; }
+.icon-btn:disabled { opacity: .55; cursor: default; }
+.mt-4 { margin-top: 14px; }
+
+/* ── Responsive ────────────────────────────────────────── */
+@media (max-width: 960px) {
+  .learn-layout { position: relative; }
+  .sidebar-panel {
+    position: fixed;
+    top: var(--el-app-bar-h, 72px);
+    right: 0;
+    bottom: 0;
+    z-index: 30;
+    width: min(360px, 88vw);
+    box-shadow: -20px 0 50px rgba(40, 60, 44, .12);
+  }
+  .content-scroll { padding: 26px 18px 50px; }
+  .learn-header { padding: 14px 18px; }
+  .text-stage { padding: 30px 22px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .learn-page *, .learn-page *::before, .learn-page *::after {
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
+}
 </style>

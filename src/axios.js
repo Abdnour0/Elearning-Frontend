@@ -30,22 +30,22 @@ api.interceptors.response.use(
       return api.get('/sanctum/csrf-cookie').then(() => {
         return api(error.config);
       }).catch(() => {
-        showToast('Session expirée. Veuillez vous reconnecter.', 'error', 6000);
+        showToast('Your session expired. Please sign in again.', 'error', 6000);
         setTimeout(() => { window.location.href = '/login'; }, 2000);
         return Promise.reject(error);
       });
     }
 
     if (status === 403) {
-      showToast(message || 'Accès refusé.', 'error');
+      showToast(message || 'Access denied.', 'error');
     } else if (status === 422) {
       // Validation errors — let individual forms handle them
     } else if (status === 429) {
-      showToast(message || 'Trop de requêtes. Veuillez patienter.', 'warning', 6000);
+      showToast(message || 'Too many requests. Please wait a moment.', 'warning', 6000);
     } else if (status >= 500) {
-      showToast('Erreur serveur. Veuillez réessayer plus tard.', 'error');
+      showToast('Server error. Please try again later.', 'error');
     } else if (!error.response) {
-      showToast('Impossible de contacter le serveur. Vérifiez votre connexion.', 'error', 8000);
+      showToast('Could not reach the server. Check your connection.', 'error', 8000);
     }
 
     return Promise.reject(error);

@@ -1,165 +1,117 @@
 <template>
-  <v-container fluid class="py-6 px-lg-8 admin-bg min-vh-100 position-relative">
-    <div class="admin-hero-glow" />
-    <!-- Header -->
-    <v-row class="mb-6 align-end justify-space-between">
-      <v-col cols="12" md="6">
-        <v-btn variant="text" prepend-icon="mdi-arrow-left" class="mb-2 px-0 text-medium-emphasis" to="/admin">Retour au Dashboard</v-btn>
-        <h1 class="text-h4 font-weight-black text-white" style="letter-spacing: -0.02em">Utilisateurs</h1>
-        <p class="text-grey-lighten-1 mt-1 mb-0">{{ filteredUsers.length }} utilisateur(s) enregistré(s)</p>
-      </v-col>
-      <v-col cols="12" md="auto" class="d-flex gap-3">
-        <v-btn color="primary" variant="flat" class="rounded-lg font-weight-bold btn-glow" prepend-icon="mdi-account-plus" height="44">
-          Nouvel Utilisateur
-        </v-btn>
-      </v-col>
-    </v-row>
+  <div class="people-page">
+    <div class="people-inner">
+      <!-- Header -->
+      <header class="page-head">
+        <div>
+          <RouterLink class="back-link" to="/admin">← Back to dashboard</RouterLink>
+          <span class="eyebrow"><i class="focus-dot" /> PEOPLE</span>
+          <h1>Manage your<br><em>community.</em></h1>
+          <p class="page-lede">{{ filteredUsers.length }} registered user(s)</p>
+        </div>
+        <button class="zen-btn" @click="showToast('Creating users is coming soon.', 'info')">
+          New user <span aria-hidden="true">→</span>
+        </button>
+      </header>
 
-    <!-- Filters Bar -->
-    <v-card class="dashboard-panel rounded-xl pa-4 mb-6 d-flex flex-wrap gap-4 align-center" theme="dark">
-      <div style="flex: 1; min-width: 250px;">
-        <v-text-field
-          v-model="search" prepend-inner-icon="mdi-magnify" placeholder="Rechercher par nom ou email..."
-          variant="outlined" density="comfortable" color="primary" bg-color="rgba(0,0,0,0.2)"
-          hide-details class="rounded-lg border-subtle"
-          @update:model-value="debouncedFetchUsers"
-        />
-      </div>
-      <div style="width: 200px;">
-        <v-select
-          v-model="roleFilter"
-          :items="[{ title: 'Tous les rôles', value: '' }, { title: 'Admin', value: 'admin' }, { title: 'Formateur', value: 'formateur' }, { title: 'Apprenant', value: 'apprenant' }]"
-          variant="outlined" density="comfortable" color="primary" bg-color="rgba(0,0,0,0.2)"
-          hide-details class="rounded-lg border-subtle"
-          @update:model-value="fetchUsers"
-        >
-          <template #selection="{ item }">
-            <div class="d-flex align-center gap-2">
-              <div v-if="item.value" class="role-dot" :style="{ background: roleColors[item.value] || '#888' }" />
-              <span>{{ item.title }}</span>
-            </div>
-          </template>
-        </v-select>
-      </div>
-      <v-btn color="surface-variant" variant="flat" class="rounded-lg border-subtle text-none font-weight-medium" height="48" @click="fetchUsers">
-        <v-icon>mdi-refresh</v-icon>
-      </v-btn>
-    </v-card>
+      <!-- Filters -->
+      <section class="filter-bar">
+        <label class="search-field">
+          <span aria-hidden="true">⌕</span>
+          <input v-model="search" type="search" placeholder="Search by name or email" aria-label="Search users" @input="debouncedFetchUsers" />
+        </label>
+        <select v-model="roleFilter" class="role-select" aria-label="Filter by role" @change="fetchUsers">
+          <option value="">All roles</option>
+          <option value="admin">Admin</option>
+          <option value="formateur">Instructor</option>
+          <option value="apprenant">Learner</option>
+        </select>
+        <button class="icon-btn" aria-label="Refresh" @click="fetchUsers">
+          <v-icon size="18">mdi-refresh</v-icon>
+        </button>
+      </section>
 
-    <!-- Data Table -->
-    <v-card class="dashboard-panel rounded-xl overflow-hidden" theme="dark">
-      <v-progress-linear v-if="loading" indeterminate color="primary" class="position-absolute w-100" style="top:0; z-index: 10;" />
-      
-      <div class="table-container custom-scrollbar">
-        <v-table theme="dark" class="glass-table dense-table">
-          <thead class="sticky-header">
-            <tr>
-              <th class="text-left text-caption font-weight-black text-grey-lighten-1 text-uppercase tracking-widest px-6 py-4">Utilisateur</th>
-              <th class="text-left text-caption font-weight-black text-grey-lighten-1 text-uppercase tracking-widest py-4">Rôle</th>
-              <th class="text-center text-caption font-weight-black text-grey-lighten-1 text-uppercase tracking-widest py-4">Statut</th>
-              <th class="text-left text-caption font-weight-black text-grey-lighten-1 text-uppercase tracking-widest py-4">Inscription</th>
-              <th class="text-right text-caption font-weight-black text-grey-lighten-1 text-uppercase tracking-widest px-6 py-4">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="filteredUsers.length === 0 && !loading">
-              <td colspan="5" class="text-center text-grey py-10">
-                <v-icon size="48" color="rgba(255,255,255,0.1)" class="mb-4">mdi-account-search</v-icon>
-                <div>Aucun utilisateur trouvé</div>
-              </td>
-            </tr>
-            <tr v-for="user in filteredUsers" :key="user.id" class="user-row hover-bg transition-colors">
-              <td class="px-6 py-3">
-                <div class="d-flex align-center gap-4">
-                  <v-avatar :color="avatarColor(user.id)" size="40" class="elevation-2 text-white font-weight-bold">
-                    {{ initials(user.name) }}
-                  </v-avatar>
-                  <div>
-                    <p class="text-body-2 font-weight-bold text-white mb-0">{{ user.name }}</p>
-                    <p class="text-caption text-grey mb-0">{{ user.email }}</p>
+      <!-- Table -->
+      <section class="paper-card">
+        <div v-if="loading" class="loading-bar" />
+        <div class="table-wrap">
+          <table class="zen-table">
+            <thead>
+              <tr>
+                <th>USER</th>
+                <th>ROLE</th>
+                <th class="col-center">STATUS</th>
+                <th>JOINED</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if="filteredUsers.length === 0 && !loading">
+                <td colspan="4" class="empty-cell">
+                  <span class="empty-symbol">✳</span>
+                  <span>No users found</span>
+                </td>
+              </tr>
+              <tr v-for="user in filteredUsers" :key="user.id">
+                <td>
+                  <div class="user-cell">
+                    <span class="avatar">{{ initials(user.name) }}</span>
+                    <div class="user-copy">
+                      <span class="user-name">{{ user.name }}</span>
+                      <span class="user-email">{{ user.email }}</span>
+                    </div>
                   </div>
-                </div>
-              </td>
-              <td class="py-3">
-                <!-- Role Badge with Menu -->
-                <v-menu location="bottom start" transition="scale-transition">
-                  <template #activator="{ props }">
-                    <v-chip
-                      v-bind="props"
-                      size="small"
-                      :color="roleColorMap[user.role]"
-                      variant="tonal"
-                      class="font-weight-bold cursor-pointer"
-                      append-icon="mdi-chevron-down"
-                    >
-                      {{ user.role }}
-                    </v-chip>
-                  </template>
-                  <v-list density="compact" bg-color="surface" class="border-subtle mt-1 rounded-lg pa-1">
-                    <v-list-item v-for="r in ['admin', 'formateur', 'apprenant']" :key="r" class="rounded-md hover-bg" @click="changeRole(user, r)">
-                      <v-list-item-title class="text-caption text-capitalize" :class="user.role === r ? `text-${roleColorMap[r]}` : ''">
-                        {{ r }}
-                      </v-list-item-title>
-                    </v-list-item>
-                  </v-list>
-                </v-menu>
-              </td>
-              <td class="text-center py-3">
-                <v-switch
-                  :model-value="user.is_active"
-                  color="success" density="compact" hide-details inset
-                  class="d-inline-flex align-center justify-center m-0"
-                  @update:model-value="toggleActive(user)"
-                />
-              </td>
-              <td class="text-caption text-grey tabular-nums py-3">{{ formatDate(user.created_at) }}</td>
-              <td class="text-right px-6 py-3">
-                <!-- Action Menu -->
-                <v-menu location="bottom end" transition="slide-y-transition">
-                  <template #activator="{ props }">
-                    <v-btn v-bind="props" icon="mdi-dots-vertical" variant="text" size="small" color="grey-lighten-1" class="hover-icon" />
-                  </template>
-                  <v-card class="action-menu-card rounded-xl pa-2" width="180" theme="dark">
-                    <v-list density="compact" bg-color="transparent" class="pa-0">
-                      <v-list-item prepend-icon="mdi-pencil" title="Modifier" class="rounded-lg premium-menu-item text-caption font-weight-medium mb-1 transition-all" />
-                      <v-divider class="my-1 opacity-10 border-white" />
-                      <v-list-item prepend-icon="mdi-delete" title="Supprimer" base-color="error" class="rounded-lg premium-logout text-caption font-weight-bold transition-all" @click="confirmDelete(user)" />
+                </td>
+                <td>
+                  <v-menu location="bottom start" transition="scale-transition">
+                    <template #activator="{ props }">
+                      <button v-bind="props" class="role-pill" :class="`role-${user.role}`">
+                        <span class="role-dot" />{{ roleLabel(user.role) }}
+                        <v-icon size="14">mdi-chevron-down</v-icon>
+                      </button>
+                    </template>
+                    <v-list density="compact" class="role-menu pa-1">
+                      <v-list-item v-for="r in ['admin', 'formateur', 'apprenant']" :key="r" class="rounded-lg" @click="changeRole(user, r)">
+                        <v-list-item-title class="text-capitalize">{{ roleLabel(r) }}</v-list-item-title>
+                      </v-list-item>
                     </v-list>
-                  </v-card>
-                </v-menu>
-              </td>
-            </tr>
-          </tbody>
-        </v-table>
-      </div>
-    </v-card>
+                  </v-menu>
+                </td>
+                <td class="col-center">
+                  <v-switch
+                    :model-value="user.is_active"
+                    color="success" density="compact" hide-details inset
+                    class="status-switch"
+                    @update:model-value="toggleActive(user)"
+                  />
+                </td>
+                <td class="cell-muted">{{ formatDate(user.created_at) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
 
-    <div v-if="totalPages > 1" class="d-flex justify-center mt-6">
-      <v-pagination
-        v-model="currentPage"
-        :length="totalPages"
-        color="primary"
-        @update:model-value="fetchUsers"
-      />
+      <div v-if="totalPages > 1" class="pagination-wrap">
+        <button class="page-btn" :disabled="currentPage <= 1" @click="currentPage--; fetchUsers()">← Previous</button>
+        <span class="page-info">Page {{ currentPage }} of {{ totalPages }}</span>
+        <button class="page-btn" :disabled="currentPage >= totalPages" @click="currentPage++; fetchUsers()">Next →</button>
+      </div>
     </div>
 
     <!-- Delete dialog -->
-    <v-dialog v-model="deleteDialog" max-width="400" persistent>
-      <v-card class="dashboard-panel rounded-xl pa-6 text-center" theme="dark">
-        <div class="mx-auto mb-4 d-flex align-center justify-center" style="width:64px; height:64px; border-radius:50%; background:rgba(239,68,68,0.1)">
-          <v-icon color="error" size="32">mdi-alert</v-icon>
-        </div>
-        <h3 class="text-h6 font-weight-bold mb-2">Supprimer l'utilisateur ?</h3>
-        <p class="text-grey-lighten-1 text-body-2 mb-6">
-          L'utilisateur <strong class="text-white">{{ deletingUser?.name }}</strong> et toutes ses données associées seront définitivement supprimés.
+    <v-dialog v-model="deleteDialog" max-width="420" persistent>
+      <v-card class="zen-dialog pa-6" elevation="0" rounded="lg">
+        <h3>Delete this user?</h3>
+        <p class="dialog-lede">
+          <strong>{{ deletingUser?.name }}</strong> and all associated data will be permanently removed. This can't be undone.
         </p>
-        <div class="d-flex gap-3">
-          <v-btn variant="tonal" color="grey" class="flex-grow-1 rounded-lg text-none" @click="deleteDialog = false">Annuler</v-btn>
-          <v-btn color="error" variant="flat" class="flex-grow-1 rounded-lg text-none" :loading="deleting" @click="deleteUser">Supprimer</v-btn>
+        <div class="dialog-actions">
+          <button class="zen-btn zen-btn-quiet" @click="deleteDialog = false">Cancel</button>
+          <button class="zen-btn zen-btn-danger" :disabled="deleting" @click="deleteUser">{{ deleting ? 'Deleting…' : 'Delete user' }}</button>
         </div>
       </v-card>
     </v-dialog>
-  </v-container>
+  </div>
 </template>
 
 <script setup>
@@ -180,13 +132,8 @@ const deleting = ref(false);
 
 const filteredUsers = computed(() => users.value);
 
-const roleColors = { admin: '#ef4444', formateur: '#f97316', apprenant: '#3b82f6' };
-const roleColorMap = { admin: 'error', formateur: 'secondary', apprenant: 'primary' };
-const avatarColors = ['#3b82f6', '#10b981', '#f97316', '#8b5cf6', '#ec4899', '#06b6d4'];
-
-function avatarColor(id) {
-  return avatarColors[id % avatarColors.length] || avatarColors[0];
-}
+const roleLabels = { admin: 'Admin', formateur: 'Instructor', apprenant: 'Learner' };
+function roleLabel(role) { return roleLabels[role] || role; }
 
 let searchDebounceId = null;
 
@@ -200,7 +147,7 @@ function initials(name) {
 }
 
 function formatDate(d) {
-  return d ? new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+  return d ? new Date(d).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
 }
 
 async function fetchUsers() {
@@ -214,7 +161,7 @@ async function fetchUsers() {
     users.value = data?.data || [];
     totalPages.value = data?.last_page || 1;
   } catch(e) {
-    showErrorToast(e, 'Impossible de charger les utilisateurs.');
+    showErrorToast(e, 'Could not load users.');
   }
   finally { markLoaded(); }
 }
@@ -224,9 +171,9 @@ async function changeRole(user, newRole) {
   try {
     await api.put(`/admin/users/${user.id}`, { role: newRole });
     user.role = newRole;
-    showToast('Rôle mis à jour.', 'success');
+    showToast('Role updated.', 'success');
   } catch(e) {
-    showErrorToast(e, 'Impossible de mettre à jour le rôle.');
+    showErrorToast(e, 'Could not update the role.');
   }
 }
 
@@ -235,7 +182,7 @@ async function toggleActive(user) {
     await api.put(`/admin/users/${user.id}`, { is_active: !user.is_active });
     user.is_active = !user.is_active;
   } catch(e) {
-    showErrorToast(e, 'Impossible de changer le statut utilisateur.');
+    showErrorToast(e, 'Could not change the user status.');
   }
 }
 
@@ -250,9 +197,9 @@ async function deleteUser() {
     await api.delete(`/admin/users/${deletingUser.value.id}`);
     users.value = users.value.filter(u => u.id !== deletingUser.value.id);
     deleteDialog.value = false;
-    showToast('Utilisateur supprimé.', 'success');
+    showToast('User deleted.', 'success');
   } catch(e) {
-    showErrorToast(e, 'Impossible de supprimer cet utilisateur.');
+    showErrorToast(e, 'Could not delete this user.');
   }
   finally { deleting.value = false; }
 }
@@ -262,77 +209,265 @@ onUnmounted(() => window.clearTimeout(searchDebounceId));
 </script>
 
 <style scoped>
-.admin-bg { background-color: var(--v-theme-background); }
-.min-vh-100 { min-height: 100vh; }
-.admin-hero-glow {
-  position: absolute; top: -150px; left: 50%;
-  transform: translateX(-50%);
-  width: 700px; height: 400px;
-  background: radial-gradient(ellipse, rgba(59,130,246,0.15) 0%, transparent 70%);
-  filter: blur(80px);
-  z-index: 0;
-  pointer-events: none;
+.people-page {
+  min-height: calc(100vh - var(--el-app-bar-h, 72px));
+  padding: 65px 24px 100px;
+  background: #fbfaf6;
+  color: #28382e;
 }
-.tracking-wide { letter-spacing: 0.05em; }
-.tabular-nums { font-variant-numeric: tabular-nums; }
-.border-subtle { border: 1px solid rgba(255,255,255,0.08) !important; }
-.border-bottom-subtle { border-bottom: 1px solid rgba(255,255,255,0.05) !important; }
-.hover-bg:hover { background: rgba(255,255,255,0.05); }
-.transition-colors { transition: background-color 0.2s ease; }
-.btn-glow { box-shadow: 0 4px 20px rgba(59,130,246,0.35) !important; }
+.people-inner { max-width: 1060px; margin: 0 auto; }
 
-.dashboard-panel {
-  background: rgba(17, 24, 39, 0.6) !important;
-  border: 1px solid rgba(255,255,255,0.05);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.2) !important;
-  backdrop-filter: blur(10px);
+/* ── Head ──────────────────────────────────────────────── */
+.page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+.back-link {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: #55735c;
+  font-size: 12px;
+  font-weight: 650;
+  text-decoration: none;
+}
+.back-link:hover { color: #3f5f49; }
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #648069;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .13em;
+}
+.focus-dot { width: 7px; height: 7px; border-radius: 50%; background: #749578; }
+.page-head h1 {
+  margin: 14px 0 10px;
+  font-family: 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  font-size: clamp(34px, 4.3vw, 50px);
+  font-weight: 400;
+  line-height: 1.04;
+  letter-spacing: -.04em;
+}
+.page-head h1 em { color: #557a61; }
+.page-lede { margin: 0; color: #7d867e; font-size: 13px; }
+
+/* ── Filters ───────────────────────────────────────────── */
+.filter-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.search-field {
+  flex: 1;
+  max-width: 460px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 46px;
+  padding: 0 14px;
+  border: 1px solid #e4e7df;
+  border-radius: 7px;
+  background: #fff;
+  color: #718073;
+}
+.search-field:focus-within { border-color: #84a087; box-shadow: 0 0 0 3px rgba(87, 124, 94, .1); }
+.search-field > span { font-size: 20px; line-height: 1; }
+.search-field input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #28382d;
+  font: inherit;
+  font-size: 13px;
+}
+.search-field input::placeholder { color: #989f97; }
+.role-select {
+  height: 46px;
+  padding: 0 34px 0 14px;
+  border: 1px solid #e4e7df;
+  border-radius: 7px;
+  background: #fff;
+  color: #3a4a3f;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid #e4e7df;
+  border-radius: 7px;
+  background: #fff;
+  color: #55735c;
+  cursor: pointer;
+}
+.icon-btn:hover { background: #f2f5ef; border-color: #c3cfc1; }
+
+/* ── Table ─────────────────────────────────────────────── */
+.paper-card {
+  position: relative;
+  border: 1px solid #e5e7df;
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+}
+.loading-bar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #6f9276, transparent);
+  animation: slide 1.2s ease-in-out infinite;
+}
+@keyframes slide { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+.table-wrap { overflow-x: auto; }
+.zen-table { width: 100%; border-collapse: collapse; }
+.zen-table th {
+  padding: 14px 20px;
+  border-bottom: 1px solid #e8e8df;
+  background: #faf9f5;
+  color: #929a91;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-align: left;
+  white-space: nowrap;
+}
+.zen-table td {
+  padding: 14px 20px;
+  border-bottom: 1px solid #eff0ea;
+  color: #5f6c62;
+  font-size: 13px;
+  vertical-align: middle;
+}
+.zen-table tbody tr:last-child td { border-bottom: 0; }
+.zen-table tbody tr:hover td { background: #fafbf8; }
+.col-center { text-align: center; }
+.cell-muted { color: #8b938b; font-variant-numeric: tabular-nums; }
+
+.user-cell { display: flex; align-items: center; gap: 12px; }
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #e7eee5;
+  color: #557258;
+  font-size: 12px;
+  font-weight: 700;
+}
+.user-copy { display: grid; gap: 2px; }
+.user-name { color: #33473a; font-size: 13px; font-weight: 650; }
+.user-email { color: #8b938b; font-size: 11px; }
+
+.role-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 11px;
+  border-radius: 20px;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.role-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.role-admin { background: #f3e8e6; color: #a4574f; }
+.role-formateur { background: #f1ebe0; color: #8a6d3b; }
+.role-apprenant { background: #e8f0e7; color: #46704f; }
+
+.status-switch { display: inline-flex; }
+
+.empty-cell { padding: 54px 20px !important; text-align: center; color: #8b938b; }
+.empty-cell .empty-symbol {
+  display: block;
+  width: 42px;
+  height: 42px;
+  margin: 0 auto 10px;
+  border-radius: 50%;
+  background: #edf1e9;
+  color: #65816a;
+  font-size: 22px;
+  line-height: 42px;
 }
 
-.role-dot { width: 8px; height: 8px; border-radius: 50%; }
-
-.table-container {
-  max-height: calc(100vh - 280px);
-  overflow-y: auto;
+/* ── Pagination ────────────────────────────────────────── */
+.pagination-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 26px;
+  color: #7a837a;
+  font-size: 12px;
 }
-
-.glass-table { background: transparent !important; }
-.glass-table th { 
-  background: rgba(15, 20, 35, 0.9) !important; 
-  backdrop-filter: blur(12px); 
-  border-bottom: 1px solid rgba(255,255,255,0.08) !important; 
+.page-btn {
+  padding: 9px 14px;
+  border: 1px solid #e2e6de;
+  border-radius: 6px;
+  background: #fff;
+  color: #546b57;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
 }
-.glass-table td { border-bottom: 1px solid rgba(255,255,255,0.03) !important; transition: all 0.2s ease; }
+.page-btn:hover:not(:disabled) { background: #f2f5ef; border-color: #c3cfc1; }
+.page-btn:disabled { color: #a6aba4; cursor: default; }
 
-.dense-table td { height: 68px !important; }
-
-.user-row:hover td { 
-  background: rgba(59, 130, 246, 0.04) !important; 
+/* ── Buttons ───────────────────────────────────────────── */
+.zen-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 46px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 7px;
+  background: #537a62;
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background .18s ease, transform .18s ease;
 }
+.zen-btn:hover:not(:disabled) { background: #456c54; transform: translateY(-1px); }
+.zen-btn:disabled { opacity: .6; cursor: default; }
+.zen-btn-quiet { background: #fff; color: #55735c; border: 1px solid #dfe5db; }
+.zen-btn-quiet:hover { background: #f4f6f1; border-color: #c3cfc1; }
+.zen-btn-danger { background: #a4574f; }
+.zen-btn-danger:hover:not(:disabled) { background: #8f4a43; }
 
-.sticky-header {
-  position: sticky; top: 0; z-index: 5;
+/* ── Dialog ────────────────────────────────────────────── */
+.zen-dialog { background: #fff !important; border: 1px solid #e7e8e1; }
+.zen-dialog h3 {
+  margin: 0 0 8px;
+  font-family: 'Iowan Old Style', Georgia, serif;
+  font-size: 24px;
+  font-weight: 400;
+  letter-spacing: -.02em;
 }
+.dialog-lede { margin: 0 0 22px; color: #6f7a70; font-size: 13px; line-height: 1.6; }
+.dialog-lede strong { color: #33473a; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 10px; }
 
-.action-menu-card {
-  background: rgba(15, 20, 35, 0.95) !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
-  backdrop-filter: blur(20px);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+/* ── Responsive ────────────────────────────────────────── */
+@media (max-width: 720px) {
+  .page-head { flex-direction: column; align-items: flex-start; }
+  .filter-bar { flex-direction: column; align-items: stretch; }
+  .search-field { max-width: none; }
+  .people-page { padding: 50px 20px 72px; }
 }
-
-.premium-menu-item { padding: 8px 12px !important; min-height: 38px !important; }
-.premium-menu-item:hover { background: rgba(255, 255, 255, 0.05) !important; color: #3b82f6 !important; }
-.premium-menu-item:hover .v-icon { color: #3b82f6 !important; transform: translateX(2px); opacity: 1 !important; }
-
-.premium-logout:hover { background: rgba(239, 68, 68, 0.1) !important; color: #ef4444 !important; }
-.premium-logout:hover .v-icon { color: #ef4444 !important; transform: translateX(2px); }
-
-.hover-icon:hover { color: #fff !important; background: rgba(255,255,255,0.1); }
-
-.tracking-widest { letter-spacing: 0.1em; }
-
-.custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+@media (prefers-reduced-motion: reduce) {
+  .people-page *, .people-page *::before, .people-page *::after {
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
+}
 </style>

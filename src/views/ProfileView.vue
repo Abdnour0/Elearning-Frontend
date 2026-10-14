@@ -1,255 +1,150 @@
 <template>
   <div class="profile-page">
-    <!-- ── Ambient Scenery ──────────────────────────────── -->
-    <div class="scenery-bg">
-      <div class="light-beam lb-1" />
-      <div class="light-beam lb-2" />
-      <div class="mesh-layer" />
+    <div class="profile-inner">
+      <div class="profile-card">
+        <!-- ── Identity panel ─────────────────────────── -->
+        <aside class="identity-panel">
+          <div class="avatar-stage">
+            <v-avatar size="104" class="profile-avatar">
+              <span class="initials">{{ initials }}</span>
+            </v-avatar>
+            <span class="role-badge" :style="{ background: roleHex }">
+              <v-icon size="16" color="white">{{ roleIcon }}</v-icon>
+            </span>
+          </div>
+
+          <h2 class="identity-name">{{ authStore.user?.name }}</h2>
+          <p class="identity-email">{{ authStore.user?.email }}</p>
+          <span class="role-chip" :style="{ color: roleHex, background: roleHex + '18' }">
+            {{ authStore.user?.role }}
+          </span>
+
+          <div v-if="hasStats" class="mini-stats">
+            <template v-if="authStore.isApprenant">
+              <div class="m-stat"><span class="m-val">{{ stats.courses }}</span><span class="m-lbl">Courses</span></div>
+              <div class="m-stat"><span class="m-val">{{ stats.completed }}</span><span class="m-lbl">Completed</span></div>
+              <div class="m-stat"><span class="m-val sage">{{ stats.progress }}%</span><span class="m-lbl">Progress</span></div>
+            </template>
+            <template v-else-if="authStore.isFormateur">
+              <div class="m-stat"><span class="m-val">{{ formateurStats.courses }}</span><span class="m-lbl">Courses</span></div>
+              <div class="m-stat"><span class="m-val">{{ formateurStats.published }}</span><span class="m-lbl">Published</span></div>
+              <div class="m-stat"><span class="m-val sage">{{ formateurStats.students }}</span><span class="m-lbl">Students</span></div>
+            </template>
+            <template v-else-if="authStore.isAdmin">
+              <div class="m-stat"><span class="m-val">99+</span><span class="m-lbl">Users</span></div>
+              <div class="m-stat"><span class="m-val sage">24/7</span><span class="m-lbl">Status</span></div>
+            </template>
+          </div>
+
+          <nav class="profile-nav">
+            <span class="nav-group-label">MENU</span>
+            <button
+              v-for="m in menuItems" :key="m.value"
+              class="nav-item"
+              :class="{ 'nav-item-active': activeTab === m.value }"
+              @click="activeTab = m.value"
+            >
+              <v-icon size="18">{{ m.icon }}</v-icon>
+              <span>{{ m.label }}</span>
+            </button>
+          </nav>
+        </aside>
+
+        <!-- ── Content panel ──────────────────────────── -->
+        <section class="content-panel">
+          <v-window v-model="activeTab">
+            <!-- Information -->
+            <v-window-item value="info" class="content-section">
+              <header class="section-header">
+                <span class="eyebrow"><i class="focus-dot" /> DIGITAL IDENTITY</span>
+                <h3>Professional <em>profile</em></h3>
+              </header>
+
+              <v-form @submit.prevent="saveProfile">
+                <div class="field-grid">
+                  <div class="field">
+                    <label>Full name</label>
+                    <v-text-field v-model="form.name" variant="outlined" density="comfortable" color="primary" hide-details prepend-inner-icon="mdi-account-outline" class="zen-input" />
+                  </div>
+                  <div class="field">
+                    <label>Email address</label>
+                    <v-text-field v-model="form.email" variant="outlined" density="comfortable" color="primary" hide-details prepend-inner-icon="mdi-email-outline" class="zen-input" />
+                  </div>
+                  <div class="field">
+                    <label>Phone number</label>
+                    <v-text-field v-model="form.telephone" variant="outlined" density="comfortable" color="primary" hide-details prepend-inner-icon="mdi-phone-outline" class="zen-input" />
+                  </div>
+                </div>
+
+                <v-alert v-if="saveMessage" :type="saveSuccess ? 'success' : 'error'" variant="tonal" rounded="lg" class="mt-6">
+                  {{ saveMessage }}
+                </v-alert>
+
+                <div class="form-actions">
+                  <button type="submit" class="zen-btn" :disabled="saving">{{ saving ? 'Saving…' : 'Save changes' }}</button>
+                </div>
+              </v-form>
+            </v-window-item>
+
+            <!-- Security -->
+            <v-window-item value="security" class="content-section">
+              <header class="section-header">
+                <span class="eyebrow"><i class="focus-dot" /> DATA PROTECTION</span>
+                <h3>Security <em>&amp; access</em></h3>
+              </header>
+
+              <v-form @submit.prevent="changePassword">
+                <div class="field-grid">
+                  <div class="field full">
+                    <label>Current password</label>
+                    <v-text-field
+                      v-model="pwForm.current" :type="showCurrent ? 'text' : 'password'"
+                      variant="outlined" density="comfortable" color="primary" hide-details
+                      prepend-inner-icon="mdi-lock-outline" :append-inner-icon="showCurrent ? 'mdi-eye-off' : 'mdi-eye'"
+                      class="zen-input" @click:append-inner="showCurrent = !showCurrent"
+                    />
+                  </div>
+                  <div class="field">
+                    <label>New password</label>
+                    <v-text-field
+                      v-model="pwForm.password" :type="showNew ? 'text' : 'password'"
+                      variant="outlined" density="comfortable" color="primary" hide-details
+                      prepend-inner-icon="mdi-shield-lock-outline" :append-inner-icon="showNew ? 'mdi-eye-off' : 'mdi-eye'"
+                      class="zen-input" @click:append-inner="showNew = !showNew"
+                    />
+                  </div>
+                  <div class="field">
+                    <label>Confirm password</label>
+                    <v-text-field
+                      v-model="pwForm.password_confirmation" :type="showConfirm ? 'text' : 'password'"
+                      variant="outlined" density="comfortable" color="primary" hide-details
+                      prepend-inner-icon="mdi-shield-check-outline" :append-inner-icon="showConfirm ? 'mdi-eye-off' : 'mdi-eye'"
+                      class="zen-input" @click:append-inner="showConfirm = !showConfirm"
+                    />
+                  </div>
+                </div>
+
+                <v-alert v-if="pwMessage" :type="pwSuccess ? 'success' : 'error'" variant="tonal" rounded="lg" class="mt-6">
+                  {{ pwMessage }}
+                </v-alert>
+
+                <div class="form-actions">
+                  <button type="submit" class="zen-btn" :disabled="changingPw">{{ changingPw ? 'Updating…' : 'Update password' }}</button>
+                </div>
+              </v-form>
+
+              <div class="danger-zone">
+                <div>
+                  <h4>Danger zone</h4>
+                  <p>Deleting your account is permanent and will erase all your data.</p>
+                </div>
+                <button type="button" class="zen-btn zen-btn-danger">Delete account</button>
+              </div>
+            </v-window-item>
+          </v-window>
+        </section>
+      </div>
     </div>
-
-    <v-container class="profile-container position-relative z-10" fluid>
-      <v-row justify="center" class="fill-height align-center">
-        <v-col cols="12" lg="11" xl="10">
-<v-card class="master-profile-card rounded-3xl overflow-hidden" elevation="0">
-            <v-row no-gutters class="fill-height position-relative z-1">
-<!-- ── Side Identity Panel ────────────────────── -->
-              <v-col cols="12" md="4" class="identity-panel pa-8 pa-xl-10 d-flex flex-column">
-<!-- Compact Avatar Section -->
-                <div class="avatar-stage mb-8">
-                  <div class="avatar-glow" :style="{ background: roleHex + '33' }" />
-                  <div class="avatar-orbit" />
-                  <v-avatar size="130" class="profile-avatar-main border-glass elevation-24">
-                    <span class="text-h2 font-weight-black text-white initials-glow">{{ initials }}</span>
-                  </v-avatar>
-                  <div class="role-badge-floating" :style="{ background: roleHex }">
-                    <v-icon size="18" color="white">{{ roleIcon }}</v-icon>
-                  </div>
-                  <v-btn icon size="x-small" color="primary" class="avatar-edit-btn">
-                    <v-icon size="14">mdi-camera-outline</v-icon>
-                  </v-btn>
-                </div>
-
-                <!-- Balanced Identity Info -->
-                <div class="text-center mb-8">
-                  <h2 class="text-h5 font-weight-black text-white mb-2 tracking-tight line-clamp-1 px-4">
-                    {{ authStore.user?.name }}
-                  </h2>
-                  <div class="d-flex flex-column align-center gap-2">
-                    <div class="email-chip-v2">
-                      <v-icon start size="12" class="opacity-60">mdi-email-outline</v-icon>
-                      {{ authStore.user?.email }}
-                    </div>
-                    <v-chip variant="tonal" :color="roleHex" size="x-small" class="font-weight-black text-uppercase px-3">
-                      {{ authStore.user?.role }} Verified
-                    </v-chip>
-                  </div>
-                </div>
-
-                <!-- Intelligent Stats Panel -->
-                <div v-if="hasStats" class="mini-stats-v2 mb-10 pa-4 rounded-2xl border-glass">
-                  <template v-if="authStore.isApprenant">
-                    <div class="m-stat-item">
-                      <div class="m-val">{{ stats.courses }}</div>
-                      <div class="m-lbl">Cours</div>
-                    </div>
-                    <div class="m-stat-item">
-                      <div class="m-val">{{ stats.completed }}</div>
-                      <div class="m-lbl">Finis</div>
-                    </div>
-                    <div class="m-stat-item">
-                      <div class="m-val text-primary">{{ stats.progress }}%</div>
-                      <div class="m-lbl">Prog.</div>
-                    </div>
-                  </template>
-                  <template v-else-if="authStore.isFormateur">
-                    <div class="m-stat-item">
-                      <div class="m-val">{{ formateurStats.courses }}</div>
-                      <div class="m-lbl">Cours</div>
-                    </div>
-                    <div class="m-stat-item">
-                      <div class="m-val">{{ formateurStats.published }}</div>
-                      <div class="m-lbl">Publiés</div>
-                    </div>
-                    <div class="m-stat-item">
-                      <div class="m-val text-secondary">{{ formateurStats.students }}</div>
-                      <div class="m-lbl">Élèves</div>
-                    </div>
-                  </template>
-                  <template v-else-if="authStore.isAdmin">
-                    <div class="m-stat-item">
-                      <div class="m-val">99+</div>
-                      <div class="m-lbl">Users</div>
-                    </div>
-                    <div class="m-stat-item">
-                      <div class="m-val">24/7</div>
-                      <div class="m-lbl">Status</div>
-                    </div>
-                  </template>
-                </div>
-
-                <!-- Sleek Navigation Menu -->
-                <div class="nav-stack-v2 w-100 mt-auto">
-                  <div class="nav-group-label mb-3">MENU PRINCIPAL</div>
-                  <button 
-                    v-for="m in menuItems" :key="m.value"
-                    class="nav-item-v2 mb-2"
-                    :class="{ 'nav-item-v2-active': activeTab === m.value }"
-                    @click="activeTab = m.value"
-                  >
-                    <div class="nav-icon-box">
-                      <v-icon size="18">{{ m.icon }}</v-icon>
-                    </div>
-                    <span class="nav-label-v2">{{ m.label }}</span>
-                    <v-icon v-if="activeTab === m.value" size="16" class="ml-auto pulse-arrow">mdi-chevron-right</v-icon>
-                  </button>
-                </div>
-              </v-col>
-
-              <!-- ── Main Content Stage ────────────────────── -->
-              <v-col cols="12" md="8" class="content-panel h-100 overflow-y-auto custom-scrollbar">
-                <v-window v-model="activeTab" class="transition-section">
-<!-- Section: Information -->
-                  <v-window-item value="info" class="pa-8 pa-xl-12">
-                    <div v-motion class="section-header mb-8" :initial="{ opacity: 0, x: 20 }" :enter="{ opacity: 1, x: 0 }">
-                      <div class="overline-text text-primary mb-2">IDENTITÉ NUMÉRIQUE</div>
-                      <h3 class="text-h3 font-weight-black text-white">Profil <span class="text-gradient-primary">Professionnel</span></h3>
-                    </div>
-
-                    <v-form class="profile-form-compact" @submit.prevent="saveProfile">
-                      <v-row dense>
-                        <v-col cols="12" sm="6" class="pb-4">
-                          <div class="neo-input-group">
-                            <label class="neo-label">Nom Complet</label>
-                            <v-text-field
-                              v-model="form.name" variant="solo" flat rounded="xl"
-                              bg-color="rgba(255,255,255,0.03)" class="neo-input"
-                              placeholder="Votre nom" prepend-inner-icon="mdi-account-outline"
-                              density="comfortable" hide-details
-                            />
-                          </div>
-                        </v-col>
-                        <v-col cols="12" sm="6" class="pb-4">
-                          <div class="neo-input-group">
-                            <label class="neo-label">Email Professionnel</label>
-                            <v-text-field
-                              v-model="form.email" variant="solo" flat rounded="xl"
-                              bg-color="rgba(255,255,255,0.03)" class="neo-input"
-                              placeholder="votre@email.com" prepend-inner-icon="mdi-email-outline"
-                              density="comfortable" hide-details
-                            />
-                          </div>
-                        </v-col>
-                        <v-col cols="12" sm="6" class="pb-4">
-                          <div class="neo-input-group">
-                            <label class="neo-label">Téléphone</label>
-                            <v-text-field
-                              v-model="form.telephone" variant="solo" flat rounded="xl"
-                              bg-color="rgba(255,255,255,0.03)" class="neo-input"
-                              placeholder="+212 6..." prepend-inner-icon="mdi-phone-outline"
-                              density="comfortable" hide-details
-                            />
-                          </div>
-                        </v-col>
-</v-row>
-
-                      <v-alert v-if="saveMessage" :type="saveSuccess ? 'success' : 'error'" variant="tonal" rounded="xl" class="mt-6 border-glass glass-alert animate-in" density="compact">
-                        {{ saveMessage }}
-                      </v-alert>
-
-                      <div class="d-flex justify-end pt-8">
-                        <v-btn
-                          type="submit" height="60"
-                          class="action-btn-premium rounded-2xl px-12 font-weight-black text-none"
-                          :loading="saving"
-                        >
-                          Sauvegarder les modifications
-                        </v-btn>
-                      </div>
-                    </v-form>
-                  </v-window-item>
-
-                  <!-- Section: Security -->
-                  <v-window-item value="security" class="pa-8 pa-xl-12">
-                    <div v-motion class="section-header mb-8" :initial="{ opacity: 0, x: 20 }" :enter="{ opacity: 1, x: 0 }">
-                      <div class="overline-text text-warning mb-2">PROTECTION DES DONNÉES</div>
-                      <h3 class="text-h3 font-weight-black text-white">Sécurité <span class="text-gradient-warning">& Accès</span></h3>
-                    </div>
-
-                    <v-form class="profile-form-compact" @submit.prevent="changePassword">
-                      <v-row dense>
-                        <v-col cols="12" class="pb-4">
-                          <div class="neo-input-group">
-                            <label class="neo-label">Mot de passe actuel</label>
-                            <v-text-field
-                              v-model="pwForm.current" :type="showCurrent ? 'text' : 'password'"
-                              variant="solo" flat rounded="xl" bg-color="rgba(255,255,255,0.03)" class="neo-input"
-                              prepend-inner-icon="mdi-lock-outline" :append-inner-icon="showCurrent ? 'mdi-eye-off' : 'mdi-eye'"
-                              density="comfortable"
-                              hide-details @click:append-inner="showCurrent = !showCurrent"
-                            />
-                          </div>
-                        </v-col>
-                        <v-col cols="12" sm="6" class="pb-4">
-                          <div class="neo-input-group">
-                            <label class="neo-label">Nouveau mot de passe</label>
-                            <v-text-field
-                              v-model="pwForm.password" :type="showNew ? 'text' : 'password'"
-                              variant="solo" flat rounded="xl" bg-color="rgba(255,255,255,0.03)" class="neo-input"
-                              prepend-inner-icon="mdi-shield-lock-outline" :append-inner-icon="showNew ? 'mdi-eye-off' : 'mdi-eye'"
-                              density="comfortable"
-                              hide-details @click:append-inner="showNew = !showNew"
-                            />
-                          </div>
-                        </v-col>
-                        <v-col cols="12" sm="6" class="pb-4">
-                          <div class="neo-input-group">
-                            <label class="neo-label">Confirmation</label>
-                            <v-text-field
-                              v-model="pwForm.password_confirmation" :type="showConfirm ? 'text' : 'password'"
-                              variant="solo" flat rounded="xl" bg-color="rgba(255,255,255,0.03)" class="neo-input"
-                              prepend-inner-icon="mdi-shield-check-outline" :append-inner-icon="showConfirm ? 'mdi-eye-off' : 'mdi-eye'"
-                              density="comfortable"
-                              hide-details @click:append-inner="showConfirm = !showConfirm"
-                            />
-                          </div>
-                        </v-col>
-                      </v-row>
-
-                      <v-alert v-if="pwMessage" :type="pwSuccess ? 'success' : 'error'" variant="tonal" rounded="xl" class="mt-6 border-glass animate-in" density="compact">
-                        {{ pwMessage }}
-                      </v-alert>
-
-                      <div class="d-flex justify-end pt-8 mb-12">
-                        <v-btn
-                          type="submit" height="60"
-                          class="action-btn-warning rounded-2xl px-12 font-weight-black text-none"
-                          :loading="changingPw"
-                        >
-                          Actualiser le mot de passe
-                        </v-btn>
-                      </div>
-
-                      <!-- Danger Zone -->
-                      <div v-motion class="danger-zone-pro pa-8 rounded-3xl border-danger-glass mt-12" :initial="{ opacity: 0, scale: 0.95 }" :enter="{ opacity: 1, scale: 1 }">
-                        <div class="d-flex align-center justify-space-between flex-wrap gap-6">
-                          <div>
-                            <h4 class="text-h6 font-weight-black text-error mb-1">Zone de danger</h4>
-                            <p class="text-caption text-grey-lighten-1 mb-0">La suppression du compte est irréversible et effacera toutes vos données.</p>
-                          </div>
-                          <v-btn variant="outlined" color="error" class="rounded-xl px-8 font-weight-black text-none border-danger-btn">
-                            Supprimer le compte
-                          </v-btn>
-                        </div>
-                      </div>
-                    </v-form>
-                  </v-window-item>
-</v-window>
-              </v-col>
-</v-row>
-          </v-card>
-</v-col>
-      </v-row>
-    </v-container>
   </div>
 </template>
 
@@ -279,8 +174,8 @@ const stats = ref({ courses: 0, completed: 0, progress: 0 });
 const formateurStats = ref({ courses: 0, published: 0, students: 0 });
 
 const menuItems = [
-  { label: 'Informations', value: 'info', icon: 'mdi-account-circle-outline' },
-  { label: 'Sécurité', value: 'security', icon: 'mdi-shield-lock-outline' }
+  { label: 'Profile information', value: 'info', icon: 'mdi-account-circle-outline' },
+  { label: 'Security', value: 'security', icon: 'mdi-shield-lock-outline' }
 ];
 
 const hasStats = computed(() => authStore.isApprenant || authStore.isFormateur || authStore.isAdmin);
@@ -289,7 +184,7 @@ const initials = computed(() =>
   (authStore.user?.name || '').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
 );
 const roleHex = computed(() =>
-  ({ admin: '#ff5252', formateur: '#8b5cf6', apprenant: '#3b82f6' }[authStore.user?.role] || '#3b82f6')
+  ({ admin: '#a4574f', formateur: '#a97852', apprenant: '#6f9276' }[authStore.user?.role] || '#6f9276')
 );
 const roleIcon = computed(() =>
   ({ admin: 'mdi-shield-crown', formateur: 'mdi-school', apprenant: 'mdi-account-star' }[authStore.user?.role] || 'mdi-account')
@@ -302,10 +197,10 @@ async function saveProfile() {
     authStore.user = data;
     localStorage.setItem('user', JSON.stringify(data));
     saveSuccess.value = true;
-    saveMessage.value = 'Profil mis à jour !';
+    saveMessage.value = 'Your profile has been updated.';
   } catch(e) {
     saveSuccess.value = false;
-    saveMessage.value = e.response?.data?.message || 'Erreur.';
+    saveMessage.value = e.response?.data?.message || 'Something went wrong.';
   } finally { saving.value = false; }
 }
 
@@ -314,11 +209,11 @@ async function changePassword() {
   try {
     await api.put('/auth/password', pwForm.value);
     pwSuccess.value = true;
-    pwMessage.value = 'Mot de passe modifié !';
+    pwMessage.value = 'Your password has been updated.';
     pwForm.value = { current: '', password: '', password_confirmation: '' };
   } catch(e) {
     pwSuccess.value = false;
-    pwMessage.value = e.response?.data?.message || 'Erreur.';
+    pwMessage.value = e.response?.data?.message || 'Something went wrong.';
   } finally { changingPw.value = false; }
 }
 
@@ -336,7 +231,7 @@ onMounted(async () => {
       const avg = total ? Math.round(enrollments.reduce((sum, e) => sum + e.inscription.pourcentageProgression, 0) / total) : 0;
       stats.value = { courses: total, completed, progress: avg };
     } catch (e) {
-      showErrorToast(e, 'Impossible de charger vos statistiques.');
+      showErrorToast(e, 'Could not load your statistics.');
     }
   } else if (authStore.isFormateur) {
     try {
@@ -345,7 +240,7 @@ onMounted(async () => {
       const students = myCourses.reduce((sum, c) => sum + (c.inscriptions_count || 0), 0);
       formateurStats.value = { courses: myCourses.length, published, students };
     } catch (e) {
-      showErrorToast(e, 'Impossible de charger vos statistiques formateur.');
+      showErrorToast(e, 'Could not load your instructor statistics.');
     }
   }
   markLoaded();
@@ -354,225 +249,194 @@ onMounted(async () => {
 
 <style scoped>
 .profile-page {
-  min-height: 100vh;
-  background-color: #020408;
-  overflow-x: hidden;
-  position: relative;
+  min-height: calc(100vh - var(--el-app-bar-h, 72px));
+  padding: 65px 24px 100px;
+  background: #fbfaf6;
+  color: #28382e;
 }
-
-/* ── Scenic Background ─────────────────────────────── */
-.scenery-bg {
-  position: absolute; inset: 0;
-  z-index: 0;
-}
-.mesh-layer {
-  position: absolute; inset: 0;
-  background-image: 
-    radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.08) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.08) 0px, transparent 50%);
-}
-.light-beam {
-  position: absolute; width: 800px; height: 800px;
-  border-radius: 50%; filter: blur(150px); opacity: 0.12;
-}
-.lb-1 { top: -300px; left: -200px; background: #3b82f6; }
-.lb-2 { bottom: -300px; right: -200px; background: #8b5cf6; }
-
-/* ── Master Card ───────────────────────────────────── */
-.profile-container {
-  padding-top: calc(var(--el-app-bar-h, 72px) + 40px);
-}
-.master-profile-card {
-  background: rgba(13, 17, 28, 0.6) !important;
-  backdrop-filter: blur(40px);
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 50px 100px -20px rgba(0,0,0,0.5) !important;
-  min-height: 650px;
-}
-
-/* ── Side Identity Panel ──────────────────────────── */
-.identity-panel {
-  background: rgba(255, 255, 255, 0.012);
-  border-right: 1px solid rgba(255, 255, 255, 0.03);
-}
-
-.avatar-stage {
-  position: relative;
-  display: flex; align-items: center; justify-content: center;
-}
-.avatar-glow {
-  position: absolute; inset: -15px;
-  filter: blur(35px);
-  border-radius: 50%;
-  z-index: 1;
-}
-.avatar-orbit {
-  position: absolute; inset: -8px;
-  border: 1px solid rgba(255,255,255,0.04);
-  border-radius: 50%;
-  animation: rotate 15s linear infinite;
-}
-@keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-.profile-avatar-main {
-  z-index: 2;
-  background: #0a0f1c;
-  border: 3px solid rgba(255, 255, 255, 0.05) !important;
-}
-.initials-glow { text-shadow: 0 0 15px rgba(255,255,255,0.3); }
-
-.role-badge-floating {
-  position: absolute; bottom: 5px; right: 5px;
-  width: 38px; height: 38px;
-  border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  border: 3px solid #0a0f1c;
-  z-index: 3;
-}
-.avatar-edit-btn {
-  position: absolute; top: 0; right: 0;
-  z-index: 4;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.1);
-}
-
-.email-chip-v2 {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 14px;
-  background: rgba(255,255,255,0.02);
-  border-radius: 100px;
-  color: #94a3b8;
-  font-size: 0.75rem;
-  font-weight: 500;
-  border: 1px solid rgba(255,255,255,0.04);
-}
-
-/* ── Mini Stats v2 ────────────────────────────────── */
-.mini-stats-v2 {
+.profile-inner { max-width: 1000px; margin: 0 auto; }
+.profile-card {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
-  gap: 12px;
-  background: rgba(255, 255, 255, 0.015);
+  grid-template-columns: 320px minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid #e5e7df;
+  border-radius: 12px;
+  background: #fff;
+}
+
+/* ── Identity panel ────────────────────────────────────── */
+.identity-panel {
+  padding: 34px 28px;
+  border-right: 1px solid #e7e8e1;
+  background: #faf9f5;
+}
+.avatar-stage { position: relative; width: 104px; margin: 0 auto 18px; }
+.profile-avatar { background: #e7eee5; color: #46704f; }
+.initials { font-family: 'Iowan Old Style', Georgia, serif; font-size: 40px; }
+.role-badge {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 3px solid #faf9f5;
+  border-radius: 10px;
+}
+.identity-name {
+  margin: 0 0 4px;
+  font-family: 'Iowan Old Style', Georgia, serif;
+  font-size: 24px;
+  font-weight: 400;
+  text-align: center;
+  letter-spacing: -.02em;
+}
+.identity-email { margin: 0 0 12px; color: #8b938b; font-size: 12px; text-align: center; word-break: break-all; }
+.role-chip {
+  display: block;
+  width: fit-content;
+  margin: 0 auto;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.mini-stats {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 8px;
+  margin: 24px 0;
+  padding: 16px 10px;
+  border: 1px solid #eceee7;
+  border-radius: 10px;
+  background: #fff;
   text-align: center;
 }
-.m-stat-item { display: flex; flex-direction: column; align-items: center; }
-.m-val { font-size: 1.1rem; font-weight: 900; color: #fff; line-height: 1.2; }
-.m-lbl { font-size: 0.6rem; font-weight: 800; color: #475569; text-transform: uppercase; margin-top: 2px; }
-
-/* ── Navigation v2 ────────────────────────────────── */
-.nav-group-label {
-  font-size: 0.6rem;
-  font-weight: 900;
-  color: #334155;
-  letter-spacing: 0.15em;
-  padding-left: 12px;
+.m-stat { display: flex; flex-direction: column; align-items: center; }
+.m-val {
+  font-family: 'Iowan Old Style', Georgia, serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: #28382e;
 }
-.nav-item-v2 {
-  display: flex; align-items: center;
+.m-val.sage { color: #46704f; }
+.m-lbl { margin-top: 2px; color: #929a91; font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+
+.nav-group-label { display: block; padding-left: 12px; margin-bottom: 10px; color: #a1a79f; font-size: 9px; font-weight: 700; letter-spacing: .14em; }
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   width: 100%;
-  padding: 12px 16px;
-  border-radius: 16px;
+  margin-bottom: 6px;
+  padding: 11px 14px;
+  border: 1px solid transparent;
+  border-radius: 9px;
   background: transparent;
-  color: #64748b;
-  transition: all 0.3s ease;
-  position: relative;
+  color: #66716a;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  text-align: left;
+  cursor: pointer;
+  transition: background .18s ease, border-color .18s ease, color .18s ease;
 }
-.nav-item-v2:hover {
-  background: rgba(255, 255, 255, 0.02);
-  color: #fff;
+.nav-item:hover { background: #f1f4ee; }
+.nav-item-active { background: #eef4ec !important; border-color: #cfe0cd !important; color: #3f5f49 !important; }
+
+/* ── Content panel ─────────────────────────────────────── */
+.content-panel { min-height: 560px; }
+.content-section { padding: 40px 44px; }
+.section-header { margin-bottom: 30px; }
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #648069;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .13em;
 }
-.nav-item-v2-active {
-  background: rgba(59, 130, 246, 0.06) !important;
-  color: #3b82f6 !important;
+.focus-dot { width: 7px; height: 7px; border-radius: 50%; background: #749578; }
+.section-header h3 {
+  margin: 14px 0 0;
+  font-family: 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  font-size: clamp(28px, 3.4vw, 40px);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -.035em;
 }
-.nav-icon-box {
-  width: 32px; height: 32px;
-  display: flex; align-items: center; justify-content: center;
+.section-header h3 em { color: #557a61; }
+
+.field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.field.full { grid-column: 1 / -1; }
+.field label { display: block; margin-bottom: 8px; color: #66716a; font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+.zen-input :deep(.v-field) { border-radius: 8px; }
+
+.form-actions { display: flex; justify-content: flex-end; margin-top: 28px; }
+
+/* ── Danger zone ───────────────────────────────────────── */
+.danger-zone {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 36px;
+  padding: 22px 24px;
+  border: 1px solid #ecd9d5;
   border-radius: 10px;
-  background: rgba(255,255,255,0.02);
-  margin-right: 12px;
-  transition: inherit;
+  background: #fbf5f4;
 }
-.nav-item-v2-active .nav-icon-box {
-  background: rgba(59, 130, 246, 0.15);
-  box-shadow: 0 0 15px rgba(59, 130, 246, 0.1);
+.danger-zone h4 {
+  margin: 0 0 4px;
+  font-family: 'Iowan Old Style', Georgia, serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #a4574f;
 }
-.nav-label-v2 { font-weight: 700; font-size: 0.9rem; }
-.pulse-arrow { animation: pulseArrow 2s infinite; }
-@keyframes pulseArrow { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(4px); } }
+.danger-zone p { margin: 0; color: #8b7a77; font-size: 12px; }
 
-/* ── Main Content Stage ──────────────────────────── */
-.section-header .overline-text {
-  font-weight: 900; letter-spacing: 0.25em; font-size: 0.7rem;
+/* ── Buttons ───────────────────────────────────────────── */
+.zen-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: 7px;
+  background: #537a62;
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background .18s ease, transform .18s ease;
 }
-.text-gradient-primary {
-  background: linear-gradient(135deg, #3b82f6, #60a5fa);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-}
-.text-gradient-warning {
-  background: linear-gradient(135deg, #fbbf24, #fcd34d);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-}
-.text-gradient-secondary {
-  background: linear-gradient(135deg, #8b5cf6, #c084fc);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-}
+.zen-btn:hover:not(:disabled) { background: #456c54; transform: translateY(-1px); }
+.zen-btn:disabled { opacity: .6; cursor: default; }
+.zen-btn-danger { background: #fff; color: #a4574f; border: 1px solid #e0c9c4; flex-shrink: 0; }
+.zen-btn-danger:hover { background: #a4574f; color: #fff; border-color: #a4574f; }
 
-.neo-label {
-  display: block;
-  font-size: 0.65rem;
-  font-weight: 800;
-  color: #4b5563;
-  margin-left: 12px;
-  margin-bottom: 4px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+/* ── Responsive ────────────────────────────────────────── */
+@media (max-width: 800px) {
+  .profile-card { grid-template-columns: 1fr; }
+  .identity-panel { border-right: 0; border-bottom: 1px solid #e7e8e1; }
+  .content-section { padding: 28px 22px; }
+  .field-grid { grid-template-columns: 1fr; }
+  .danger-zone { flex-direction: column; align-items: flex-start; }
+  .profile-page { padding: 50px 18px 72px; }
 }
-.neo-input :deep(.v-field) {
-  border: 1px solid rgba(255, 255, 255, 0.04) !important;
-  transition: all 0.4s ease;
+@media (prefers-reduced-motion: reduce) {
+  .profile-page *, .profile-page *::before, .profile-page *::after {
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
 }
-.neo-input :deep(.v-field--focused) {
-  background: rgba(255, 255, 255, 0.06) !important;
-  border-color: rgba(59, 130, 246, 0.3) !important;
-  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.05);
-}
-
-.pref-icon-box {
-  width: 48px; height: 48px;
-  display: flex; align-items: center; justify-content: center;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.05);
-}
-.bg-secondary-opacity-10 { background: rgba(139, 92, 246, 0.1); }
-.bg-primary-opacity-10 { background: rgba(59, 130, 246, 0.1); }
-.bg-info-opacity-10 { background: rgba(6, 182, 212, 0.1); }
-.bg-warning-opacity-10 { background: rgba(251, 191, 36, 0.1); }
-
-.glass-alert { background: rgba(59, 130, 246, 0.05) !important; border: 1px solid rgba(59, 130, 246, 0.2) !important; }
-.border-glass { border: 1px solid rgba(255, 255, 255, 0.06) !important; }
-
-/* ── Buttons ───────────────────────────────────────── */
-.action-btn-premium {
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
-  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3) !important;
-}
-.action-btn-warning {
-  background: linear-gradient(135deg, #fbbf24, #d97706) !important;
-  box-shadow: 0 10px 25px rgba(251, 191, 36, 0.2) !important;
-}
-.action-btn-secondary {
-  background: linear-gradient(135deg, #8b5cf6, #6d28d9) !important;
-  box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3) !important;
-}
-
-/* ── Animation ─────────────────────────────────────── */
-.animate-in { animation: slideUp 0.6s cubic-bezier(0.23, 1, 0.32, 1); }
-@keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-
-.z-10 { z-index: 10; }
-.custom-scrollbar::-webkit-scrollbar { width: 4px; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-.line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
 </style>

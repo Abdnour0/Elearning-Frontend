@@ -19,12 +19,13 @@ const vuetify = createVuetify({
   theme: {
     defaultTheme: 'light',
     themes: {
-      dark: {
-        dark: true,
+      light: {
+        dark: false,
         colors: {
           background: '#fbfaf6',
           surface: '#ffffff',
           'surface-variant': '#f0f2ec',
+          'surface-bright': '#ffffff',
           'on-background': '#29382e',
           'on-surface': '#354439',
           'on-surface-variant': '#778178',

@@ -61,43 +61,21 @@
                 <span class="text-caption font-weight-black text-white">{{ initials }}</span>
               </v-avatar>
             </template>
-            <v-card class="user-menu-card rounded-xl border-subtle overflow-hidden" width="260" theme="dark">
-              <!-- Profile Header (Glass Island) -->
-              <div class="pa-4 position-relative" style="background: linear-gradient(135deg, rgba(15,20,35,0.9), rgba(5,7,10,0.95)); border-bottom: 1px solid rgba(255,255,255,0.05);">
-                <div class="d-flex align-center gap-3">
-                  <v-avatar size="48" class="premium-avatar">
-                    <span :class="`text-${roleColor}`" class="font-weight-black text-h6">{{ initials }}</span>
-                  </v-avatar>
-                  <div class="min-w-0 flex-grow-1">
-                    <div class="text-body-2 font-weight-black text-white text-truncate leading-tight mb-0">{{ authStore.user?.name }}</div>
-                    <div class="text-caption text-grey text-truncate mb-2" style="font-size: 0.7rem;">{{ authStore.user?.email }}</div>
-                    <div class="role-badge" :class="`role-${authStore.userRole}`">
-                      {{ authStore.userRole }}
-                    </div>
-                  </div>
+            <v-card class="user-menu-card rounded-lg overflow-hidden" width="260">
+              <div class="menu-head">
+                <span class="menu-avatar">{{ initials }}</span>
+                <div class="menu-id">
+                  <span class="menu-name">{{ authStore.user?.name }}</span>
+                  <span class="menu-email">{{ authStore.user?.email }}</span>
+                  <span class="role-badge" :class="`role-${authStore.userRole}`">{{ authStore.userRole }}</span>
                 </div>
               </div>
-              
-              <!-- Menu Items -->
-              <div class="pa-2 bg-glass-dark">
-                <v-list density="compact" bg-color="transparent" class="pa-0">
-                  <v-list-item to="/profil" class="rounded-lg mb-1 premium-menu-item text-white transition-all" :ripple="false">
-                    <template #prepend>
-                      <v-icon size="20" class="mr-3 opacity-70">mdi-account-circle-outline</v-icon>
-                    </template>
-                    <v-list-item-title class="font-weight-medium text-body-2">My profile</v-list-item-title>
-                  </v-list-item>
-                  
-                  <v-divider class="my-2 opacity-10 border-white" />
-                  
-                  <v-list-item class="rounded-lg premium-menu-item premium-logout transition-all" :ripple="false" @click="handleLogout">
-                    <template #prepend>
-                      <v-icon size="20" class="mr-3 text-error opacity-90">mdi-logout-variant</v-icon>
-                    </template>
-                    <v-list-item-title class="font-weight-bold text-error text-body-2">Sign out</v-list-item-title>
-                  </v-list-item>
-                </v-list>
-              </div>
+
+              <v-list density="compact" bg-color="transparent" class="pa-2">
+                <v-list-item to="/profil" prepend-icon="mdi-account-circle-outline" title="My profile" class="menu-item rounded-lg" :ripple="false" />
+                <v-divider class="my-1" />
+                <v-list-item prepend-icon="mdi-logout-variant" title="Sign out" class="menu-item menu-logout rounded-lg" :ripple="false" @click="handleLogout" />
+              </v-list>
             </v-card>
           </v-menu>
         </template>
@@ -107,9 +85,9 @@
       <div class="d-flex d-md-none align-center ml-2">
         <v-menu location="bottom end" transition="scale-transition">
           <template #activator="{ props }">
-            <v-btn v-bind="props" icon="mdi-menu" variant="text" color="white" />
+            <v-btn v-bind="props" icon="mdi-menu" variant="text" />
           </template>
-          <v-card class="user-menu-card rounded-xl pa-2" width="220" theme="dark">
+          <v-card class="user-menu-card rounded-lg pa-2" width="220">
             <v-list density="compact" bg-color="transparent" class="pa-1">
               <template v-if="!authStore.isAuthenticated">
                 <v-list-item to="/catalogue" title="Courses" prepend-icon="mdi-bookshelf" class="rounded-lg text-body-2 menu-item" />
@@ -130,7 +108,7 @@
                 <v-list-item to="/admin/users" title="People" prepend-icon="mdi-account-group" class="rounded-lg text-body-2 menu-item" />
                 <v-list-item to="/catalogue" title="Courses" prepend-icon="mdi-bookshelf" class="rounded-lg text-body-2 menu-item" />
               </template>
-              
+
               <template v-if="authStore.isAuthenticated">
                 <v-divider class="my-2 opacity-10" />
                 <v-list-item to="/profil" prepend-icon="mdi-account-circle-outline" title="My profile" class="rounded-lg text-body-2 menu-item" />
@@ -152,40 +130,40 @@
     </v-main>
 
     <!-- ── Minimal Footer ────────────────────────────────────── -->
-    <v-footer class="el-footer bg-black border-t-subtle pa-0 overflow-hidden" :class="{ 'footer-hidden': hideFooter }">
+    <v-footer class="el-footer pa-0 overflow-hidden" :class="{ 'footer-hidden': hideFooter }">
       <v-container class="py-8">
         <v-row align="center" justify="space-between" class="flex-column flex-md-row">
-<!-- Brand & Copyright -->
+          <!-- Brand & Copyright -->
           <v-col cols="12" md="4" class="text-center text-md-left mb-4 mb-md-0">
             <div class="d-flex align-center justify-center justify-md-start gap-3 mb-2">
               <v-icon color="primary" size="20">mdi-school-outline</v-icon>
-              <span class="text-h6 font-weight-black text-white tracking-tighter">E-Learning Hub</span>
+              <span class="footer-brand">E-Learning Hub</span>
             </div>
-              <div class="text-caption text-grey">
+            <div class="footer-copy">
               &copy; 2026 E-Learning Hub. Learn with intention.
             </div>
           </v-col>
 
           <!-- Essential Links -->
           <v-col cols="12" md="4" class="d-flex justify-center gap-6 mb-4 mb-md-0">
-            <a href="#" class="text-body-2 text-grey-lighten-1 text-decoration-none footer-link transition-colors">About</a>
-            <a href="mailto:hello@elearninghub.example" class="text-body-2 text-grey-lighten-1 text-decoration-none footer-link transition-colors">Contact</a>
-            <a href="#" class="text-body-2 text-grey-lighten-1 text-decoration-none footer-link transition-colors">Privacy</a>
+            <a href="#" class="footer-link">About</a>
+            <a href="mailto:hello@elearninghub.example" class="footer-link">Contact</a>
+            <a href="#" class="footer-link">Privacy</a>
           </v-col>
 
           <!-- Social Icons -->
           <v-col cols="12" md="4" class="d-flex justify-center justify-md-end gap-3">
-            <a href="#" class="social-icon-wrapper rounded-circle d-flex align-center justify-center transition-all">
-              <v-icon size="18" color="white">mdi-linkedin</v-icon>
+            <a href="#" class="social-icon-wrapper" aria-label="LinkedIn">
+              <v-icon size="18">mdi-linkedin</v-icon>
             </a>
-            <a href="#" class="social-icon-wrapper rounded-circle d-flex align-center justify-center transition-all">
-              <v-icon size="18" color="white">mdi-twitter</v-icon>
+            <a href="#" class="social-icon-wrapper" aria-label="Twitter">
+              <v-icon size="18">mdi-twitter</v-icon>
             </a>
-            <a href="#" class="social-icon-wrapper rounded-circle d-flex align-center justify-center transition-all">
-              <v-icon size="18" color="white">mdi-github</v-icon>
+            <a href="#" class="social-icon-wrapper" aria-label="GitHub">
+              <v-icon size="18">mdi-github</v-icon>
             </a>
           </v-col>
-</v-row>
+        </v-row>
       </v-container>
     </v-footer>
 
@@ -201,7 +179,7 @@
             {{ toastIcon(toast.type) }}
           </v-icon>
           <span class="toast-message">{{ toast.message }}</span>
-          <button class="toast-close" aria-label="Fermer" @click="dismissToast(toast.id)">
+          <button class="toast-close" aria-label="Close" @click="dismissToast(toast.id)">
             <v-icon size="16">mdi-close</v-icon>
           </button>
         </div>
@@ -249,11 +227,11 @@ const toastIcon = (type) => ({
 }[type] || 'mdi-information-outline');
 
 const toastIconColor = (type) => ({
-  success: '#4ade80',
-  error:   '#f87171',
-  warning: '#fbbf24',
-  info:    '#60a5fa',
-}[type] || '#60a5fa');
+  success: '#6d9271',
+  error:   '#bc7168',
+  warning: '#b08d53',
+  info:    '#6d8b8e',
+}[type] || '#6d8b8e');
 </script>
 
 <style scoped>
@@ -263,186 +241,188 @@ const toastIconColor = (type) => ({
   max-width: 100%;
 }
 
-/* Nav links — all identical text style */
+/* ── Nav links ───────────────────────────────────────────── */
 .nav-link {
-  color: rgba(255,255,255,0.6) !important;
-  font-size: 0.875rem;
-  font-weight: 500 !important;
-  letter-spacing: 0.01em;
-  padding: 0 16px !important;
+  color: #69766c !important;
+  font-size: 12px;
+  font-weight: 550 !important;
+  letter-spacing: 0;
+  padding: 0 14px !important;
   height: 38px !important;
-  border-radius: 10px !important;
-  transition: color 0.2s ease, background 0.2s ease !important;
-  /* Never show filled/active background by default */
+  border-radius: 8px !important;
   background: transparent !important;
   box-shadow: none !important;
+  transition: color .18s ease, background .18s ease !important;
 }
 .nav-link:hover {
-  color: #fff !important;
-  background: rgba(255,255,255,0.07) !important;
+  color: #425f49 !important;
+  background: #f0f2ec !important;
 }
-/* Active route — subtle underline indicator instead of filled background */
-.nav-link.v-btn--active, 
+.nav-link.v-btn--active,
 .v-btn.nav-link--active {
-  color: #60a5fa !important;
-  background: transparent !important;
-  background-color: transparent !important;
+  color: #3f5f49 !important;
   position: relative;
 }
 .nav-link.v-btn--active::after {
   content: '';
   position: absolute;
   bottom: 4px;
-  left: 16px;
-  right: 16px;
+  left: 14px;
+  right: 14px;
   height: 2px;
   border-radius: 2px;
-  background: #3b82f6;
+  background: #6f9276;
 }
 
 .nav-cta {
-  font-size: 0.875rem !important;
+  font-size: 12px !important;
+  letter-spacing: 0;
   height: 38px !important;
 }
 
 .nav-divider {
   width: 1px;
   height: 24px;
-  background: rgba(255,255,255,0.12);
+  background: #e2e6de;
 }
 
 .nav-avatar {
-  border: 2px solid rgba(255,255,255,0.15);
-  transition: border-color 0.2s ease, transform 0.2s ease;
+  border: 2px solid #e7eee6;
+  transition: border-color .18s ease;
 }
 .nav-avatar:hover {
-  border-color: rgba(255,255,255,0.35);
-  transform: scale(1.05);
+  border-color: #b9cfb8;
 }
 .cursor-pointer { cursor: pointer; }
 
-/* Dropdown card */
-/* ── Custom Popups & Menus ───────────────────────────────── */
-.border-subtle { border: 1px solid rgba(255, 255, 255, 0.08) !important; }
-.shadow-subtle { box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important; }
-.bg-glass-light { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); }
-.bg-glass-dark { background: rgba(5, 7, 10, 0.8); }
-
-.premium-menu-item {
-  padding: 10px 16px !important;
-  min-height: 44px !important;
-}
-.premium-menu-item:hover {
-  background: rgba(255, 255, 255, 0.06) !important;
-}
-.premium-menu-item:hover .v-icon {
-  opacity: 1 !important;
-  color: #3b82f6 !important;
-  transform: translateX(2px);
-}
-.premium-logout:hover {
-  background: rgba(239, 68, 68, 0.1) !important;
-}
-.premium-logout:hover .v-icon {
-  color: #ef4444 !important;
-  transform: translateX(2px);
-}
-
+/* ── Dropdown card ───────────────────────────────────────── */
 .user-menu-card {
-  background: rgba(10, 15, 25, 0.95) !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
-  backdrop-filter: blur(24px);
-  box-shadow: 0 24px 50px rgba(0,0,0,0.6) !important;
+  background: #ffffff !important;
+  border: 1px solid #e7e8e1 !important;
+  box-shadow: 0 18px 40px rgba(42, 56, 43, .12) !important;
 }
-.premium-avatar {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.1);
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+
+.menu-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid #eff0ea;
 }
+.menu-avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #e7eee6;
+  color: #46704f;
+  font-size: 14px;
+  font-weight: 700;
+}
+.menu-id { display: grid; gap: 3px; min-width: 0; }
+.menu-name {
+  overflow: hidden;
+  color: #28382e;
+  font-size: 13px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.menu-email {
+  overflow: hidden;
+  color: #8b938b;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .role-badge {
   display: inline-block;
+  width: fit-content;
   padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 0.55rem;
-  font-weight: 900;
+  border-radius: 5px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .08em;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
 }
-.role-apprenant { background: rgba(59, 130, 246, 0.1); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.2); }
-.role-formateur { background: rgba(245, 158, 11, 0.1); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.2); }
-.role-admin { background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); }
+.role-apprenant { background: #e7eee6; color: #46704f; }
+.role-formateur { background: #f1ebe0; color: #8a6d3b; }
+.role-admin { background: #f3e8e6; color: #a4574f; }
 
-.menu-item:hover { background: rgba(255,255,255,0.05) !important; }
+.menu-item { color: #4a5a4f !important; }
+.menu-item:hover { background: #f2f5ef !important; }
+.menu-logout { color: #a4574f !important; }
 
-/* ── Footer Styles ───────────────────────────────────────── */
+/* ── Footer ──────────────────────────────────────────────── */
 .el-footer {
-  background-color: #000000 !important;
+  background: #f4f4ee !important;
+  border-top: 1px solid #e8e8e1 !important;
+  color: #737e73 !important;
 }
-.border-t-subtle {
-  border-top: 1px solid rgba(255,255,255,0.08) !important;
+.footer-brand {
+  color: #314237;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -.02em;
 }
-.footer-logo {
-  background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(59,130,246,0.05)) !important;
-  border: 1px solid rgba(59,130,246,0.2) !important;
+.footer-copy { color: #8b938b; font-size: 12px; }
+.footer-link {
+  position: relative;
+  color: #737e73;
+  font-size: 13px;
+  text-decoration: none;
+  transition: color .18s ease;
 }
-.footer-link-item {
-  color: #9ca3af !important;
-  transition: all 0.2s ease !important;
-  cursor: pointer;
+.footer-link:hover { color: #537a62 !important; }
+.footer-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 0;
+  height: 1px;
+  background: #6f9276;
+  transition: width .22s ease;
 }
-.footer-link-item:hover {
-  color: #fff !important;
-  transform: translateX(4px);
+.footer-link:hover::after { width: 100%; }
+
+.social-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #e2e6de;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #6f7a70;
+  text-decoration: none;
+  transition: background .18s ease, color .18s ease, border-color .18s ease;
 }
-.footer-social-btn {
-  background: rgba(255,255,255,0.03) !important;
-  border: 1px solid rgba(255,255,255,0.1) !important;
-  transition: all 0.3s ease !important;
-}
-.footer-social-btn:hover {
-  background: #3b82f6 !important;
-  border-color: #3b82f6 !important;
-  color: white !important;
-  transform: translateY(-4px);
-}
-.hover-white:hover {
-  color: white !important;
-}
-.footer-newsletter-input :deep(.v-field__input) {
-  padding-right: 110px !important;
+.social-icon-wrapper:hover {
+  background: #6f9276;
+  border-color: #6f9276;
+  color: #ffffff;
 }
 
-/* Page transitions — combined fade + subtle slide */
-.page-fade-enter-active { transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
-.page-fade-leave-active { transition: opacity 0.2s ease, transform 0.2s ease; }
-.page-fade-enter-from { opacity: 0; transform: translateY(12px); }
-.page-fade-leave-to { opacity: 0; transform: translateY(-8px); }
+/* ── Page transitions — gentle fade ──────────────────────── */
+.page-fade-enter-active { transition: opacity .3s ease, transform .3s cubic-bezier(0.22, 1, 0.36, 1); }
+.page-fade-leave-active { transition: opacity .18s ease, transform .18s ease; }
+.page-fade-enter-from { opacity: 0; transform: translateY(10px); }
+.page-fade-leave-to { opacity: 0; transform: translateY(-6px); }
 
 /* Layout tweaks when elements are hidden */
 .no-nav { padding-top: 0 !important; }
 .nav-hidden { display: none !important; }
 .footer-hidden { display: none !important; }
 
-.footer-link {
-  position: relative;
+@media (prefers-reduced-motion: reduce) {
+  .nav-link, .nav-avatar, .footer-link, .social-icon-wrapper,
+  .page-fade-enter-active, .page-fade-leave-active {
+    transition-duration: .01ms !important;
+  }
 }
-.footer-link:hover { color: #fff !important; }
-.footer-link::after {
-  content: ''; position: absolute; bottom: -2px; left: 0; width: 0; height: 1px;
-  background: #3b82f6; transition: width 0.3s ease;
-}
-.footer-link:hover::after { width: 100%; }
-
-.social-icon-wrapper {
-  width: 36px; height: 36px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  text-decoration: none;
-}
-.social-icon-wrapper:hover {
-  background: rgba(59, 130, 246, 0.1);
-  border-color: rgba(59, 130, 246, 0.3);
-  transform: translateY(-2px);
-}
-.social-icon-wrapper:hover .v-icon { color: #3b82f6 !important; }
 </style>
