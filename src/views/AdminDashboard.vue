@@ -124,7 +124,7 @@
               <RouterLink class="panel-link" to="/admin/users">View all</RouterLink>
             </div>
             <div v-if="stats.recent_enrollments?.length" class="activity-list">
-              <div v-for="(enr, index) in stats.recent_enrollments.slice(0, 5)" :key="enr.id" class="activity-row">
+              <div v-for="enr in stats.recent_enrollments.slice(0, 5)" :key="enr.id" class="activity-row">
                 <span class="avatar">{{ enr.utilisateur?.name?.charAt(0) || 'U' }}</span>
                 <div class="activity-copy">
                   <span class="activity-name">{{ enr.utilisateur?.name }}</span>
@@ -149,8 +149,6 @@ import {
   Title, Tooltip, Legend, Filler
 } from 'chart.js';
 import api from '../axios';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
 import { showErrorToast, showToast } from '../composables/useToast.js';
 import { useViewLoadState } from '../composables/useViewLoadState.js';
 
@@ -285,6 +283,9 @@ async function doExport(type, format = 'csv') {
     try {
       const { data } = await api.get(`/admin/export?type=${type}&format=json`);
       if (!data?.length) return;
+      // Load the PDF libraries on demand so they stay out of the route bundle.
+      const { default: jsPDF } = await import('jspdf');
+      await import('jspdf-autotable');
       const doc = new jsPDF();
       doc.text(`Export - ${type.toUpperCase()}`, 14, 15);
       doc.autoTable({ head: [Object.keys(data[0])], body: data.map(o => Object.values(o).map(v => String(v ?? ''))), startY: 20, theme: 'grid', styles: { fontSize: 9 }, headStyles: { fillColor: [85,122,97] } });

@@ -21,10 +21,6 @@ vi.mock('../src/composables/useToast.js', () => ({
   showErrorToast: vi.fn(),
 }));
 
-vi.mock('canvas-confetti', () => ({
-  default: vi.fn(),
-}));
-
 const MOCK_QUIZ = {
   quiz: { id: 1, titre: 'Test Quiz', minuterie: null },
   questions: [

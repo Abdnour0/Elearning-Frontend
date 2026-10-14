@@ -18,7 +18,7 @@
       <section class="filter-bar">
         <label class="search-field">
           <span aria-hidden="true">⌕</span>
-          <input v-model="search" type="search" placeholder="Search by name or email" aria-label="Search users" @input="debouncedFetchUsers" />
+          <input v-model="search" type="search" placeholder="Search by name or email" aria-label="Search users" @input="debouncedFetchUsers">
         </label>
         <select v-model="roleFilter" class="role-select" aria-label="Filter by role" @change="fetchUsers">
           <option value="">All roles</option>
@@ -42,11 +42,12 @@
                 <th>ROLE</th>
                 <th class="col-center">STATUS</th>
                 <th>JOINED</th>
+                <th class="col-center">ACTIONS</th>
               </tr>
             </thead>
             <tbody>
               <tr v-if="filteredUsers.length === 0 && !loading">
-                <td colspan="4" class="empty-cell">
+                <td colspan="5" class="empty-cell">
                   <span class="empty-symbol">✳</span>
                   <span>No users found</span>
                 </td>
@@ -85,6 +86,11 @@
                   />
                 </td>
                 <td class="cell-muted">{{ formatDate(user.created_at) }}</td>
+                <td class="col-center">
+                  <button class="icon-btn icon-btn-danger" :aria-label="`Delete ${user.name}`" @click="confirmDelete(user)">
+                    <v-icon size="18">mdi-delete-outline</v-icon>
+                  </button>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -306,6 +312,8 @@ onUnmounted(() => window.clearTimeout(searchDebounceId));
   cursor: pointer;
 }
 .icon-btn:hover { background: #f2f5ef; border-color: #c3cfc1; }
+.icon-btn-danger { width: 34px; height: 34px; color: #a4574f; }
+.icon-btn-danger:hover { background: #f7efed; border-color: #e2c8c4; }
 
 /* ── Table ─────────────────────────────────────────────── */
 .paper-card {

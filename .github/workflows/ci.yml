@@ -1,0 +1,44 @@
+name: Frontend CI
+
+# This workflow lives inside the frontend subtree so that it ships with the
+# standalone frontend repository (Abdnour0/Elearning-Frontend), where it runs at
+# the repository root. In the monorepo the root .github/workflows/main.yml drives
+# CI instead, so this file is simply carried along.
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+# Cancel superseded runs on the same ref to save CI minutes.
+concurrency:
+  group: frontend-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    name: 🖥️ Lint, Test & Build (Vue 3 + Vitest)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint (ESLint)
+        run: npm run lint
+
+      - name: Unit tests (Vitest)
+        run: npx vitest run
+
+      - name: Build (production bundle)
+        run: npm run build
+        env:
+          VITE_API_URL: http://localhost:8000/api
