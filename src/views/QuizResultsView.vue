@@ -43,7 +43,7 @@
           :class="c.est_correct ? 'correction-correct' : 'correction-wrong'"
         >
           <div class="correction-head">
-            <span class="correction-mark">{{ c.est_correct ? '✓' : '✕' }}</span>
+            <span class="correction-mark" :aria-label="c.est_correct ? 'Correct' : 'Incorrect'" role="img">{{ c.est_correct ? '✓' : '✕' }}</span>
             <span class="correction-index">Question {{ idx + 1 }}</span>
           </div>
           <p class="correction-line">
@@ -62,7 +62,7 @@
 
       <!-- Error -->
       <template v-else>
-        <span class="empty-symbol">✳</span>
+        <span class="empty-symbol" aria-hidden="true">✳</span>
         <h2 class="corrections-title">We couldn't show these results</h2>
         <p class="results-lede">The results for this quiz aren't available right now.</p>
         <div class="results-actions">

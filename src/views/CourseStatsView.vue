@@ -59,7 +59,7 @@
       </section>
 
       <section v-else class="paper-card empty-card">
-        <span class="empty-symbol">✳</span>
+        <span class="empty-symbol" aria-hidden="true">✳</span>
         <h2>No quiz data yet</h2>
         <p>This course doesn't have any quizzes to report on yet.</p>
       </section>
@@ -76,7 +76,7 @@
 
     <!-- Error -->
     <div v-else class="stats-inner stats-error">
-      <span class="empty-symbol">✳</span>
+      <span class="empty-symbol" aria-hidden="true">✳</span>
       <h2>We couldn't load these statistics</h2>
       <p>Check the course still exists, then try again.</p>
       <RouterLink class="zen-btn" to="/formateur">Back to my courses <span aria-hidden="true">→</span></RouterLink>

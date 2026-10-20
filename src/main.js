@@ -39,12 +39,18 @@ const vuetify = createVuetify({
           'on-surface': '#354439',
           'on-surface-variant': '#606a63',
           primary: '#537a62',
-          secondary: '#a97852',
-          accent: '#718b74',
+          // secondary/accent/warning are all used as a solid fill behind white
+          // text (avatar chips) and as coloured text on white (KPI figures), so
+          // both uses must clear 4.5:1. The originals did not: secondary
+          // 3.82:1, accent 3.72:1, warning 4.42:1. These are the closest
+          // same-hue shades that do (4.61-4.65:1), so the palette keeps its
+          // character while the contrast is correct.
+          secondary: '#976c4a',
+          accent: '#647a66',
           error: '#a94e46',
           info: '#557c82',
           success: '#527a5c',
-          warning: '#92733f',
+          warning: '#8f703e',
         },
       },
     },

@@ -30,7 +30,7 @@
       </div>
 
       <div v-else-if="courses.length === 0" class="empty-card">
-        <span class="empty-symbol">✳</span>
+        <span class="empty-symbol" aria-hidden="true">✳</span>
         <h2>No courses yet</h2>
         <p>Your teaching space is ready. Create your first course to get started.</p>
         <RouterLink class="zen-btn" to="/formateur/cours/creer">Create your first course <span aria-hidden="true">→</span></RouterLink>

@@ -188,7 +188,13 @@ const initials = computed(() =>
   (authStore.user?.name || '').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
 );
 const roleHex = computed(() =>
-  ({ admin: '#a4574f', formateur: '#a97852', apprenant: '#6f9276' }[authStore.user?.role] || '#6f9276')
+  // Each role colour is used twice: as a solid fill behind white text
+  // (.role-badge) and as the chip text on its own 9%-alpha tint. Both uses must
+  // clear 4.5:1. Measured in the browser, the originals did not: as chip text
+  // admin 3.88:1, formateur 2.93:1, apprenant 2.69:1, and formateur/apprenant
+  // also failed as a fill behind white (3.82:1 and 3.47:1). These are the
+  // closest same-hue shades that satisfy both (4.60-4.63:1, fill 6.2:1).
+  ({ admin: '#924d46', formateur: '#7e593d', apprenant: '#4e6753' }[authStore.user?.role] || '#4e6753')
 );
 const roleIcon = computed(() =>
   ({ admin: 'mdi-shield-crown', formateur: 'mdi-school', apprenant: 'mdi-account-star' }[authStore.user?.role] || 'mdi-account')

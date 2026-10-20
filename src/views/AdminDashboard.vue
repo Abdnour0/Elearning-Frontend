@@ -168,11 +168,16 @@ const kpis = [
   { key: 'total_courses',     label: 'TOTAL COURSES',     caption: 'in the catalogue' },
 ];
 
-const roleColors = { admin: '#a4574f', formateur: '#a97852', apprenant: '#6f9276' };
+// Role accents. Must match ProfileView's roleHex so the same role is never two
+// different colours, and each one has to clear 4.5:1 as text on white - the
+// originals did not (formateur 3.82:1, apprenant 2.69:1).
+const roleColors = { admin: '#924d46', formateur: '#7e593d', apprenant: '#4e6753' };
 
 const passRateColor = computed(() => {
   const r = stats.value.quiz_pass_rate || 0;
-  return r >= 75 ? '#46704f' : r >= 50 ? '#9a7a3f' : '#a4574f';
+  // The middle band is coloured text on a white card, so it needs 4.5:1; the
+  // original #9a7a3f was 4.02:1.
+  return r >= 75 ? '#46704f' : r >= 50 ? '#7d6132' : '#a4574f';
 });
 
 function titleCase(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }

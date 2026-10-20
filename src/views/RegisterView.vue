@@ -38,27 +38,27 @@
             </div>
 
             <v-text-field
-              v-model="form.name" label="Full name" prepend-inner-icon="mdi-account-outline"
+              v-model="form.name" label="Full name" autocomplete="name" prepend-inner-icon="mdi-account-outline"
               variant="outlined" color="primary" class="mb-4 zen-input"
               :rules="[v => !!v || 'Name is required']"
               :error-messages="fieldErrors.name"
             />
 
             <v-text-field
-              v-model="form.email" label="Email address" type="email" prepend-inner-icon="mdi-email-outline"
+              v-model="form.email" label="Email address" type="email" autocomplete="email" prepend-inner-icon="mdi-email-outline"
               variant="outlined" color="primary" class="mb-4 zen-input"
               :rules="[v => !!v || 'Email is required', v => /.+@.+\..+/.test(v) || 'Invalid email']"
               :error-messages="fieldErrors.email"
             />
 
             <v-text-field
-              v-model="form.telephone" label="Phone number" prepend-inner-icon="mdi-phone-outline"
+              v-model="form.telephone" label="Phone number" type="tel" autocomplete="tel" prepend-inner-icon="mdi-phone-outline"
               variant="outlined" color="primary" class="mb-4 zen-input"
               :error-messages="fieldErrors.telephone"
             />
 
             <v-text-field
-              v-model="form.password" label="Password" :type="showPassword ? 'text' : 'password'"
+              v-model="form.password" label="Password" :type="showPassword ? 'text' : 'password'" autocomplete="new-password"
               prepend-inner-icon="mdi-lock-outline" :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
               variant="outlined"
               color="primary" class="mb-4 zen-input" :rules="[v => !!v || 'Password is required', v => v.length >= 8 || 'At least 8 characters']"
@@ -67,7 +67,7 @@
             />
 
             <v-text-field
-              v-model="form.password_confirmation" label="Confirm password" :type="showPassword ? 'text' : 'password'"
+              v-model="form.password_confirmation" label="Confirm password" :type="showPassword ? 'text' : 'password'" autocomplete="new-password"
               prepend-inner-icon="mdi-lock-check-outline"
               variant="outlined" color="primary" class="mb-6 zen-input"
               :rules="[v => v === form.password || 'Passwords do not match']"

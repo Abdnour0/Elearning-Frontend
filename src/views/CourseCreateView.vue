@@ -36,7 +36,7 @@
         </div>
 
         <div v-if="form.modules.length === 0" class="empty-inline">
-          <span class="empty-symbol">✳</span>
+          <span class="empty-symbol" aria-hidden="true">✳</span>
           <p>Add at least one module to structure your course.</p>
         </div>
 

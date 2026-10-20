@@ -10,7 +10,7 @@
 
       <!-- ═══════════════ BLOCKED (no attempts left / expired) ═══════════════ -->
       <div v-else-if="blocked" class="paper-card error-panel">
-        <span class="empty-symbol">{{ blocked.symbol }}</span>
+        <span class="empty-symbol" aria-hidden="true">{{ blocked.symbol }}</span>
         <h2>{{ blocked.title }}</h2>
         <p>{{ blocked.message }}</p>
         <RouterLink class="zen-btn" to="/dashboard">Back to my learning <span aria-hidden="true">→</span></RouterLink>
@@ -168,7 +168,7 @@
             :class="c.est_correct ? 'correction-correct' : 'correction-wrong'"
           >
             <div class="correction-head">
-              <span class="correction-mark">{{ c.est_correct ? '✓' : '✕' }}</span>
+              <span class="correction-mark" :aria-label="c.est_correct ? 'Correct' : 'Incorrect'" role="img">{{ c.est_correct ? '✓' : '✕' }}</span>
               <span class="correction-index">Question {{ idx + 1 }}</span>
             </div>
             <p class="correction-line">Your answer: <strong>{{ c.reponse_soumise || 'None' }}</strong></p>
@@ -184,7 +184,7 @@
 
       <!-- ═══════════════ ERROR / EMPTY ═══════════════ -->
       <div v-else class="paper-card error-panel">
-        <span class="empty-symbol">✳</span>
+        <span class="empty-symbol" aria-hidden="true">✳</span>
         <h2>{{ quizData ? 'No questions yet' : "We couldn't load this quiz" }}</h2>
         <p>{{ quizData ? 'This quiz has no questions to answer right now.' : 'Check that the quiz is still available, then try again.' }}</p>
         <RouterLink class="zen-btn" to="/catalogue">Back to catalogue <span aria-hidden="true">→</span></RouterLink>

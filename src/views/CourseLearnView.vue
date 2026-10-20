@@ -16,8 +16,8 @@
 
           <div class="content-scroll">
             <div v-if="!activeLecon" class="empty-state">
-              <span class="empty-symbol">✳</span>
-              <h2>Select a lesson</h2>
+              <span class="empty-symbol" aria-hidden="true">✳</span>
+              <h1>Select a lesson</h1>
               <p>Pick a module from the curriculum to start learning.</p>
             </div>
 
@@ -72,7 +72,7 @@
                 <!-- Downloadable document -->
                 <div v-else-if="activeLecon.typeContenu === 'td'" class="stage-center stage-copy doc-stage">
                   <v-icon size="60" class="stage-icon">mdi-file-document-outline</v-icon>
-                  <h3>Associated document</h3>
+                  <h2>Associated document</h2>
                   <p>This file is available for download below.</p>
                 </div>
 
@@ -126,7 +126,7 @@
           <div class="sidebar-top">
             <span class="eyebrow"><i class="focus-dot" /> COURSE PROGRESS</span>
             <div class="progress-head">
-              <h3>Curriculum</h3>
+              <h2>Curriculum</h2>
               <span class="progress-value">{{ Math.round(progression) }}%</span>
             </div>
             <div class="progress-track"><span :style="{ width: `${progression}%` }" /></div>
@@ -180,6 +180,16 @@
       </div>
     </template>
 
+    <!-- Error: the hub could not be loaded (e.g. the course is unpublished or
+         was removed). Without this branch the template stayed on the loading
+         state forever, because `course` never becomes non-null on failure. -->
+    <div v-else-if="loadFailed" class="learn-loading learn-error">
+      <span class="empty-symbol" aria-hidden="true">✳</span>
+      <h1>We couldn't open this course</h1>
+      <p>It may have been unpublished or removed. Check the catalogue for anything similar.</p>
+      <RouterLink class="zen-btn" to="/catalogue">Back to catalogue <span aria-hidden="true">→</span></RouterLink>
+    </div>
+
     <!-- Loading -->
     <div v-else class="learn-loading">
       <v-progress-circular indeterminate color="primary" size="52" />
@@ -200,6 +210,7 @@ const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
 const course = ref(null);
+const loadFailed = ref(false);
 const activeLecon = ref(null);
 const progression = ref(0);
 const completedIds = ref(new Set());
@@ -345,6 +356,7 @@ async function downloadLecon() {
 }
 
 async function initHub() {
+  loadFailed.value = false;
   try {
     const { data } = await api.get(`/cours/${route.params.id}`);
     course.value = data;
@@ -355,9 +367,13 @@ async function initHub() {
     activeLecon.value = firstUn || allLecons.value[0];
   } catch (e) {
     if (e.response?.status === 403) {
+      // Not enrolled: send them to the detail page, which lets them enrol.
       router.push(`/cours/${route.params.id}`);
       showToast('You need to enrol to access this course.', 'warning');
     } else {
+      // Set the flag as well as the toast: the toast is transient, and the
+      // template needs a durable state for this branch.
+      loadFailed.value = true;
       showErrorToast(e, 'Could not load this course hub.');
     }
   }
@@ -410,7 +426,7 @@ watch(() => route.params.id, initHub);
 }
 .type-video { background: #e6eef0; color: #487278; }
 .type-pdf { background: #f1ebe0; color: #816738; }
-.type-image { background: #e7eee6; color: #55725c; }
+.type-image { background: #e7eee6; color: #4d6753; }
 .type-texte { background: #eceef1; color: #5c6b7a; }
 .type-td { background: #eceef1; color: #5c6b7a; }
 .module-label-text { color: #59715e; font-size: 10px; font-weight: 700; letter-spacing: .12em; }
@@ -437,7 +453,7 @@ watch(() => route.params.id, initHub);
 .image-stage { display: flex; align-items: center; justify-content: center; padding: 24px; background: #f6f7f3; }
 .stage-center { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%; }
 .stage-copy { gap: 8px; text-align: center; color: #686f68; }
-.stage-copy h3 {
+.stage-copy h2 {
   margin: 6px 0 0;
   font-family: 'Iowan Old Style', Georgia, serif;
   font-size: 24px;
@@ -502,7 +518,7 @@ watch(() => route.params.id, initHub);
 }
 .focus-dot { width: 7px; height: 7px; border-radius: 50%; background: #749578; }
 .progress-head { display: flex; align-items: baseline; justify-content: space-between; margin: 12px 0 12px; }
-.progress-head h3 {
+.progress-head h2 {
   margin: 0;
   font-family: 'Iowan Old Style', Georgia, serif;
   font-size: 22px;
@@ -571,7 +587,7 @@ watch(() => route.params.id, initHub);
   color: #59715e;
   font-size: 24px;
 }
-.empty-state h2 {
+.empty-state h1 {
   margin: 0;
   font-family: 'Iowan Old Style', Georgia, serif;
   font-size: 26px;
@@ -587,6 +603,11 @@ watch(() => route.params.id, initHub);
   gap: 18px;
 }
 .learn-loading p { color: #686f68; font-size: 13px; }
+.learn-error { gap: 12px; text-align: center; }
+.learn-error h1 { margin: 0; font-size: 20px; color: var(--el-ink, #28382e); }
+.learn-error p { max-width: 420px; line-height: 1.6; }
+.learn-error .empty-symbol { font-family: Georgia, serif; font-size: 34px; color: #647a66; }
+.learn-error .zen-btn { margin-top: 6px; }
 
 /* ── Buttons ───────────────────────────────────────────── */
 .zen-btn {

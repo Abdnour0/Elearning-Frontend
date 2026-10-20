@@ -53,7 +53,7 @@
           <div class="sticky-sidebar">
             <div class="paper-card enroll-card">
               <div class="course-art" :class="`art-${(course.id || 0) % 3}`">
-                <span class="art-symbol">{{ ['◒', '⌘', '↗'][(course.id || 0) % 3] }}</span>
+                <span class="art-symbol" aria-hidden="true">{{ ['◒', '⌘', '↗'][(course.id || 0) % 3] }}</span>
                 <span class="art-note">{{ totalLessons }} lessons</span>
               </div>
 
@@ -85,7 +85,7 @@
                     <span class="quiz-title">{{ quiz.titre }}</span>
                     <span class="quiz-time">{{ quiz.dureeSecondes ? Math.floor(quiz.dureeSecondes / 60) + ' min' : 'No time limit' }}</span>
                   </div>
-                  <RouterLink v-if="progression !== null" class="quiz-action" :to="`/quiz/${quiz.id}`">Start →</RouterLink>
+                  <RouterLink v-if="progression !== null" class="quiz-action" :to="`/quiz/${quiz.id}`">Start <span aria-hidden="true">→</span></RouterLink>
                   <span v-else class="quiz-locked">Enrol first</span>
                 </li>
               </ul>
@@ -112,8 +112,8 @@
 
     <!-- Error -->
     <div v-else class="detail-inner detail-error">
-      <span class="empty-symbol">✳</span>
-      <h2>We couldn't load this course</h2>
+      <span class="empty-symbol" aria-hidden="true">✳</span>
+      <h1>We couldn't load this course</h1>
       <p>Check that it is still available, then try again.</p>
       <RouterLink class="zen-btn" to="/catalogue">Back to catalogue <span aria-hidden="true">→</span></RouterLink>
     </div>
@@ -294,7 +294,7 @@ onMounted(async () => {
 }
 .icon-video { background: #e6eef0; color: #487278; }
 .icon-pdf { background: #f1ebe0; color: #816738; }
-.icon-image { background: #e7eee6; color: #55725c; }
+.icon-image { background: #e7eee6; color: #4d6753; }
 .icon-texte { background: #eceef1; color: #5c6b7a; }
 .lesson-name { color: #3a4a3f; font-size: 13px; }
 .lesson-type { color: #696e68; font-size: 10px; text-transform: capitalize; }
@@ -415,7 +415,7 @@ onMounted(async () => {
   color: #59715e;
   font-size: 24px;
 }
-.detail-error h2 {
+.detail-error h1 {
   margin: 0;
   font-family: 'Iowan Old Style', Georgia, serif;
   font-size: 26px;

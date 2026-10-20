@@ -48,7 +48,7 @@
             <tbody>
               <tr v-if="filteredUsers.length === 0 && !loading">
                 <td colspan="5" class="empty-cell">
-                  <span class="empty-symbol">✳</span>
+                  <span class="empty-symbol" aria-hidden="true">✳</span>
                   <span>No users found</span>
                 </td>
               </tr>
@@ -100,7 +100,7 @@
       <div v-if="totalPages > 1" class="pagination-wrap">
         <button class="page-btn" :disabled="currentPage <= 1" @click="currentPage--; fetchUsers()">← Previous</button>
         <span class="page-info">Page {{ currentPage }} of {{ totalPages }}</span>
-        <button class="page-btn" :disabled="currentPage >= totalPages" @click="currentPage++; fetchUsers()">Next →</button>
+        <button class="page-btn" :disabled="currentPage >= totalPages" @click="currentPage++; fetchUsers()">Next <span aria-hidden="true">→</span></button>
       </div>
     </div>
 
