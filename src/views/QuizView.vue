@@ -8,6 +8,14 @@
         <p class="loading-note">Loading quiz…</p>
       </div>
 
+      <!-- ═══════════════ BLOCKED (no attempts left / expired) ═══════════════ -->
+      <div v-else-if="blocked" class="paper-card error-panel">
+        <span class="empty-symbol">{{ blocked.symbol }}</span>
+        <h2>{{ blocked.title }}</h2>
+        <p>{{ blocked.message }}</p>
+        <RouterLink class="zen-btn" to="/dashboard">Back to my learning <span aria-hidden="true">→</span></RouterLink>
+      </div>
+
       <!-- ═══════════════ QUIZ FLOW ═══════════════ -->
       <template v-else-if="quizData && quizData.questions?.length && !result">
         <!-- Header -->
@@ -15,7 +23,10 @@
           <div class="quiz-head-row">
             <div>
               <h1>{{ quizData.quiz?.titre }}</h1>
-              <p class="quiz-count">Question <strong>{{ currentIndex + 1 }}</strong> of <strong>{{ totalQuestions }}</strong></p>
+              <p class="quiz-count">
+                Question <strong>{{ currentIndex + 1 }}</strong> of <strong>{{ totalQuestions }}</strong>
+                <span v-if="attempt && attempt.tentatives_max != null"> · Attempt {{ attempt.tentative_numero }} of {{ attempt.tentatives_max }}</span>
+              </p>
             </div>
             <div v-if="quizData.minuterie" class="timer-pill" :class="{ 'timer-danger': timeLeft < 60 }">
               <v-icon size="17">mdi-timer-outline</v-icon>
@@ -165,7 +176,7 @@
           </div>
 
           <div class="results-actions">
-            <button class="zen-btn zen-btn-quiet" @click="restart">Try again</button>
+            <button v-if="canRetry" class="zen-btn zen-btn-quiet" @click="restart">Try again</button>
             <RouterLink class="zen-btn" to="/catalogue">Back to catalogue <span aria-hidden="true">→</span></RouterLink>
           </div>
         </div>
@@ -194,6 +205,8 @@ const { isInitial, isLoading, markLoading, markLoaded } = useViewLoadState();
 const quizData  = ref(null);
 const answers   = ref({});
 const result    = ref(null);
+const attempt   = ref(null);
+const blocked   = ref(null);
 const timeLeft  = ref(0);
 const timer     = ref(null);
 const submitting = ref(false);
@@ -213,6 +226,12 @@ const unansweredCount = computed(() => {
 
 const correctCount = computed(() => result.value?.corrections?.filter(c => c.est_correct).length || 0);
 const wrongCount = computed(() => result.value?.corrections?.filter(c => !c.est_correct).length || 0);
+const canRetry = computed(() => {
+  const r = result.value;
+  if (!r) return false;
+  // null = unlimited attempts
+  return r.tentatives_restantes == null || r.tentatives_restantes > 0;
+});
 
 const circumference = 2 * Math.PI * 52;
 const scoreOffset = computed(() => {
@@ -227,6 +246,7 @@ const formattedTime = computed(() => {
 });
 
 function startTimer(seconds) {
+  if (timer.value) clearInterval(timer.value);
   timeLeft.value = seconds;
   timer.value = setInterval(() => {
     timeLeft.value--;
@@ -235,6 +255,34 @@ function startTimer(seconds) {
       submitQuiz();
     }
   }, 1000);
+}
+
+/**
+ * Ask the server to open (or resume) an attempt. The server owns the attempt
+ * count and the quiz window; the client only mirrors what it returns.
+ */
+async function startAttempt() {
+  try {
+    const { data } = await api.post(`/quiz/${route.params.id}/demarrer`);
+    attempt.value = data;
+    const seconds = data.temps_restant ?? quizData.value?.minuterie;
+    if (seconds) startTimer(seconds);
+  } catch (e) {
+    const payload = e.response?.data || {};
+    if (e.response?.status === 422 && payload.tentatives_max != null) {
+      blocked.value = {
+        symbol: '⏳',
+        title: 'No attempts left',
+        message: `You have used all ${payload.tentatives_max} attempt(s) for this quiz. Review your results to see how you did.`,
+      };
+    } else {
+      blocked.value = {
+        symbol: '✳',
+        title: 'This quiz is unavailable',
+        message: payload.message || 'You cannot start this quiz right now.',
+      };
+    }
+  }
 }
 
 function goToQuestion(idx) {
@@ -267,26 +315,39 @@ function animateScore(target) {
 }
 
 async function submitQuiz() {
-  if (submitting.value) return;
+  if (submitting.value || !attempt.value) return;
   if (timer.value) clearInterval(timer.value);
   submitting.value = true;
   try {
-    const { data } = await api.post(`/quiz/${route.params.id}/soumettre`, { reponses: answers.value });
+    const { data } = await api.post(`/quiz/${route.params.id}/soumettre`, {
+      tentative_id: attempt.value.tentative_id,
+      reponses: answers.value,
+    });
     result.value = data;
     await nextTick();
     animateScore(data.score);
   } catch (e) {
-    showErrorToast(e, 'Could not submit the quiz.');
+    const payload = e.response?.data || {};
+    if (e.response?.status === 422 && payload.expire) {
+      blocked.value = {
+        symbol: '⏱',
+        title: "Time's up",
+        message: 'The time for this attempt ran out and it was submitted automatically.',
+      };
+    } else {
+      showErrorToast(e, 'Could not submit the quiz.');
+    }
   }
   finally { submitting.value = false; }
 }
 
-function restart() {
+async function restart() {
   result.value = null;
   answers.value = {};
   currentIndex.value = 0;
   animatedScore.value = 0;
-  if (quizData.value?.minuterie) startTimer(quizData.value.minuterie);
+  attempt.value = null;
+  await startAttempt();
 }
 
 onMounted(async () => {
@@ -294,7 +355,19 @@ onMounted(async () => {
   try {
     const { data } = await api.get(`/quiz/${route.params.id}`);
     quizData.value = data;
-    if (data.minuterie) startTimer(data.minuterie);
+
+    if (!data.questions?.length) return; // empty state — nothing to attempt
+
+    if (data.tentatives_restantes === 0) {
+      blocked.value = {
+        symbol: '⏳',
+        title: 'No attempts left',
+        message: `You have used all ${data.tentatives_max} attempt(s) for this quiz. Review your results to see how you did.`,
+      };
+      return;
+    }
+
+    await startAttempt();
   } catch (e) {
     showErrorToast(e, 'Could not load this quiz.');
   }
@@ -334,7 +407,7 @@ onUnmounted(() => {
   line-height: 1.1;
   letter-spacing: -.03em;
 }
-.quiz-count { margin: 0; color: #7d867d; font-size: 12px; }
+.quiz-count { margin: 0; color: #686f68; font-size: 12px; }
 .quiz-count strong { color: #33473a; }
 
 .timer-pill {
@@ -349,7 +422,7 @@ onUnmounted(() => {
   transition: background .2s ease, color .2s ease, border-color .2s ease;
 }
 .timer-value { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; }
-.timer-danger { background: #f7efed; border-color: #e4cbc6; color: #a4574f; }
+.timer-danger { background: #f7efed; border-color: #e4cbc6; color: #934f47; }
 
 .progress-track {
   height: 5px;
@@ -361,7 +434,7 @@ onUnmounted(() => {
 .progress-fill {
   height: 100%;
   border-radius: 4px;
-  background: #6f9276;
+  background: #5f7e66;
   transition: width .4s cubic-bezier(.22, 1, .36, 1);
 }
 
@@ -374,7 +447,7 @@ onUnmounted(() => {
   border: 1px solid #e2e6de;
   border-radius: 7px;
   background: #fff;
-  color: #8b938b;
+  color: #686f68;
   font: inherit;
   font-size: 11px;
   font-weight: 700;
@@ -395,7 +468,7 @@ onUnmounted(() => {
   width: 34px;
   height: 34px;
   border-radius: 9px;
-  background: #6f9276;
+  background: #5f7e66;
   color: #fff;
   font-size: 14px;
   font-weight: 700;
@@ -435,12 +508,12 @@ onUnmounted(() => {
   height: 28px;
   border-radius: 7px;
   background: #eef0eb;
-  color: #6f7a70;
+  color: #657066;
   font-size: 12px;
   font-weight: 700;
   transition: background .18s ease, color .18s ease;
 }
-.choice-selected .choice-letter { background: #6f9276; color: #fff; }
+.choice-selected .choice-letter { background: #5f7e66; color: #fff; }
 .choice-text { flex: 1; }
 .choice-check { flex-shrink: 0; }
 
@@ -454,7 +527,7 @@ onUnmounted(() => {
   justify-content: center;
   gap: 6px;
   margin: 16px 0 0;
-  color: #9a7a3f;
+  color: #846936;
   font-size: 12px;
 }
 
@@ -498,7 +571,7 @@ onUnmounted(() => {
 }
 .score-pct { font-size: 18px; font-weight: 700; }
 .score-number.is-pass, .score-pct.is-pass { color: #46704f; }
-.score-number.is-fail, .score-pct.is-fail { color: #a4574f; }
+.score-number.is-fail, .score-pct.is-fail { color: #934f47; }
 
 .result-chip {
   display: inline-flex;
@@ -511,7 +584,7 @@ onUnmounted(() => {
 }
 .chip-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
 .chip-pass { background: #e8f0e7; color: #46704f; }
-.chip-fail { background: #f3e8e6; color: #a4574f; }
+.chip-fail { background: #f3e8e6; color: #934f47; }
 
 .stats-grid {
   display: grid;
@@ -532,7 +605,7 @@ onUnmounted(() => {
   font-size: 22px;
   font-weight: 400;
 }
-.mini-stat span { color: #8b938b; font-size: 11px; }
+.mini-stat span { color: #686f68; font-size: 11px; }
 
 .results-divider { height: 1px; margin: 28px 0; background: #ecece5; }
 .corrections-title {
@@ -556,11 +629,11 @@ onUnmounted(() => {
   font-weight: 700;
 }
 .correction-correct .correction-mark { background: #dcead9; color: #46704f; }
-.correction-wrong .correction-mark { background: #efd9d5; color: #a4574f; }
+.correction-wrong .correction-mark { background: #efd9d5; color: #934f47; }
 .correction-index { color: #33473a; font-size: 13px; font-weight: 650; }
-.correction-line { margin: 0 0 3px; color: #6f7a70; font-size: 12px; line-height: 1.6; }
+.correction-line { margin: 0 0 3px; color: #657066; font-size: 12px; line-height: 1.6; }
 .correction-line strong { color: #33473a; }
-.correction-line.is-good { color: #567a5e; }
+.correction-line.is-good { color: #53755b; }
 .correction-line.is-good strong { color: #46704f; }
 
 .results-actions {
@@ -579,7 +652,7 @@ onUnmounted(() => {
   font-size: 25px;
   font-weight: 400;
 }
-.error-panel p { margin: 8px 0 20px; color: #828a82; font-size: 13px; }
+.error-panel p { margin: 8px 0 20px; color: #686f68; font-size: 13px; }
 .empty-symbol {
   display: grid;
   place-items: center;
@@ -588,11 +661,11 @@ onUnmounted(() => {
   margin: 0 auto 14px;
   border-radius: 50%;
   background: #edf1e9;
-  color: #65816a;
+  color: #59715e;
   font-size: 24px;
 }
 .quiz-loading { display: grid; gap: 20px; }
-.loading-note { margin: 0; color: #828a82; font-size: 13px; text-align: center; }
+.loading-note { margin: 0; color: #686f68; font-size: 13px; text-align: center; }
 .skeleton-block {
   border-radius: 10px;
   background: #eceee7;

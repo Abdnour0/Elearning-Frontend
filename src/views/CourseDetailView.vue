@@ -197,7 +197,7 @@ onMounted(async () => {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: #648069;
+  color: #59715e;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: .13em;
@@ -215,7 +215,7 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 9px;
-  color: #7d867d;
+  color: #686f68;
   font-size: 12px;
 }
 .instructor-avatar {
@@ -229,7 +229,7 @@ onMounted(async () => {
   font-size: 11px;
   font-weight: 700;
 }
-.meta-dot { color: #b6bcb4; }
+.meta-dot { color: #6b6e6a; }
 
 /* ── Layout ────────────────────────────────────────────── */
 .detail-grid {
@@ -254,7 +254,7 @@ onMounted(async () => {
   font-weight: 400;
   letter-spacing: -.02em;
 }
-.about-card p { margin: 0; color: #6f7a70; font-size: 14px; line-height: 1.75; }
+.about-card p { margin: 0; color: #657066; font-size: 14px; line-height: 1.75; }
 .curriculum { margin-top: 40px; }
 
 /* ── Curriculum ────────────────────────────────────────── */
@@ -270,10 +270,10 @@ onMounted(async () => {
   list-style: none;
 }
 .module-item summary::-webkit-details-marker { display: none; }
-.module-index { color: #a1a79f; font-size: 11px; }
+.module-index { color: #6b6e69; font-size: 11px; }
 .module-title { color: #28382e; font-size: 15px; font-weight: 650; }
-.module-count { color: #8b938b; font-size: 11px; }
-.module-plus { color: #658069; font-size: 18px; transition: transform .18s ease; }
+.module-count { color: #686f68; font-size: 11px; }
+.module-plus { color: #5b735f; font-size: 18px; transition: transform .18s ease; }
 .module-item[open] .module-plus { transform: rotate(45deg); }
 .lesson-list { margin: 0; padding: 0 4px 12px; list-style: none; }
 .lesson-list li {
@@ -290,14 +290,14 @@ onMounted(async () => {
   height: 28px;
   border-radius: 7px;
   background: #eef1ea;
-  color: #5f7d66;
+  color: #57715d;
 }
-.icon-video { background: #e6eef0; color: #4f7d84; }
-.icon-pdf { background: #f1ebe0; color: #8a6d3b; }
-.icon-image { background: #e7eee6; color: #57745e; }
+.icon-video { background: #e6eef0; color: #487278; }
+.icon-pdf { background: #f1ebe0; color: #816738; }
+.icon-image { background: #e7eee6; color: #55725c; }
 .icon-texte { background: #eceef1; color: #5c6b7a; }
 .lesson-name { color: #3a4a3f; font-size: 13px; }
-.lesson-type { color: #98a097; font-size: 10px; text-transform: capitalize; }
+.lesson-type { color: #696e68; font-size: 10px; text-transform: capitalize; }
 
 /* ── Sidebar ───────────────────────────────────────────── */
 .sticky-sidebar { position: sticky; top: 96px; display: grid; gap: 16px; }
@@ -331,17 +331,17 @@ onMounted(async () => {
   text-transform: uppercase;
 }
 .enroll-body { padding: 20px; }
-.enroll-note { margin: 0 0 14px; color: #7d867d; font-size: 12px; line-height: 1.6; }
+.enroll-note { margin: 0 0 14px; color: #686f68; font-size: 12px; line-height: 1.6; }
 .progress-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-.preview-label { color: #939a91; font-size: 9px; font-weight: 700; letter-spacing: .12em; }
-.progress-value { color: #52775c; font-size: 14px; font-weight: 700; }
+.preview-label { color: #696e68; font-size: 9px; font-weight: 700; letter-spacing: .12em; }
+.progress-value { color: #51755b; font-size: 14px; font-weight: 700; }
 .progress-track {
   height: 5px;
   overflow: hidden;
   border-radius: 4px;
   background: #eef0eb;
 }
-.progress-track span { display: block; height: 100%; border-radius: 4px; background: #6f9276; }
+.progress-track span { display: block; height: 100%; border-radius: 4px; background: #5f7e66; }
 
 .zen-btn {
   display: inline-flex;
@@ -383,10 +383,10 @@ onMounted(async () => {
 .quiz-list li:first-child { border-top: 0; }
 .quiz-copy { display: grid; gap: 3px; }
 .quiz-title { color: #3a4a3f; font-size: 13px; font-weight: 600; }
-.quiz-time { color: #939a91; font-size: 11px; }
+.quiz-time { color: #696e68; font-size: 11px; }
 .quiz-action { color: #55735c; font-size: 12px; font-weight: 700; text-decoration: none; }
 .quiz-action:hover { color: #3f5f49; }
-.quiz-locked { color: #a1a79f; font-size: 11px; }
+.quiz-locked { color: #6b6e69; font-size: 11px; }
 
 /* ── Skeletons & error ─────────────────────────────────── */
 .skeleton-block, .skeleton-line {
@@ -412,7 +412,7 @@ onMounted(async () => {
   margin: 0 auto 14px;
   border-radius: 50%;
   background: #edf1e9;
-  color: #65816a;
+  color: #59715e;
   font-size: 24px;
 }
 .detail-error h2 {
@@ -421,7 +421,7 @@ onMounted(async () => {
   font-size: 26px;
   font-weight: 400;
 }
-.detail-error p { margin: 8px 0 20px; color: #828a82; font-size: 13px; }
+.detail-error p { margin: 8px 0 20px; color: #686f68; font-size: 13px; }
 
 /* ── Responsive ────────────────────────────────────────── */
 @media (max-width: 880px) {

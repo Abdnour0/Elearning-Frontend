@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+
+# Application areas are account-gated and add no index value.
+Disallow: /admin
+Disallow: /formateur
+Disallow: /dashboard
+Disallow: /profil
+Disallow: /login
+Disallow: /register
+
+# Hash routes and in-app quiz player are not crawlable content.
+Disallow: /quiz/
+
+Sitemap: https://elearning-frontend-five-olive.vercel.app/sitemap.xml

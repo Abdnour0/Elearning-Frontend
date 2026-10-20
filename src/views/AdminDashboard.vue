@@ -48,9 +48,9 @@
           <div v-for="kpi in kpis" :key="kpi.key" class="stat-card">
             <div class="stat-top">
               <span class="stat-label">{{ kpi.label }}</span>
-              <span class="trend-pill" :class="kpi.trend > 0 ? 'trend-up' : 'trend-neutral'">
-                <v-icon size="12">{{ kpi.trend > 0 ? 'mdi-trending-up' : 'mdi-minus' }}</v-icon>
-                {{ kpi.trend > 0 ? '+' : '' }}{{ kpi.trend }}%
+              <span v-if="kpiTrends && kpiTrends[kpi.key] !== null && kpiTrends[kpi.key] !== undefined" class="trend-pill" :class="(kpiTrends[kpi.key] || 0) > 0 ? 'trend-up' : 'trend-neutral'">
+                <v-icon size="12">{{ (kpiTrends[kpi.key] || 0) > 0 ? 'mdi-trending-up' : 'mdi-minus' }}</v-icon>
+                {{ (kpiTrends[kpi.key] || 0) > 0 ? '+' : '' }}{{ kpiTrends[kpi.key] }}%
               </span>
             </div>
             <strong class="tabular-nums">{{ stats[kpi.key] ?? '—' }}</strong>
@@ -162,10 +162,10 @@ const lineReady = ref(false);
 const { isLoading, markLoading, markLoaded } = useViewLoadState();
 
 const kpis = [
-  { key: 'total_users',       label: 'USERS',             caption: 'registered accounts', trend: 12 },
-  { key: 'published_courses', label: 'PUBLISHED COURSES', caption: 'live for learners',   trend: 4  },
-  { key: 'total_enrollments', label: 'ENROLLMENTS',       caption: 'across all courses',  trend: 28 },
-  { key: 'total_courses',     label: 'TOTAL COURSES',     caption: 'in the catalogue',    trend: 0  },
+  { key: 'total_users',       label: 'USERS',             caption: 'registered accounts' },
+  { key: 'published_courses', label: 'PUBLISHED COURSES', caption: 'live for learners' },
+  { key: 'total_enrollments', label: 'ENROLLMENTS',       caption: 'across all courses' },
+  { key: 'total_courses',     label: 'TOTAL COURSES',     caption: 'in the catalogue' },
 ];
 
 const roleColors = { admin: '#a4574f', formateur: '#a97852', apprenant: '#6f9276' };
@@ -335,7 +335,7 @@ onMounted(async () => {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: #648069;
+  color: #59715e;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: .13em;
@@ -349,8 +349,8 @@ onMounted(async () => {
   line-height: 1.04;
   letter-spacing: -.04em;
 }
-.page-head h1 em { color: #557a61; }
-.page-lede { margin: 0; color: #7d867e; font-size: 13px; }
+.page-head h1 em { color: #52755d; }
+.page-lede { margin: 0; color: #686f69; font-size: 13px; }
 .head-actions { display: flex; align-items: center; gap: 12px; }
 
 /* ── KPIs ──────────────────────────────────────────────── */
@@ -368,7 +368,7 @@ onMounted(async () => {
   background: #fff;
 }
 .stat-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.stat-label { color: #778778; font-size: 9px; font-weight: 700; letter-spacing: .12em; }
+.stat-label { color: #637064; font-size: 9px; font-weight: 700; letter-spacing: .12em; }
 .trend-pill {
   display: inline-flex;
   align-items: center;
@@ -379,7 +379,7 @@ onMounted(async () => {
   font-weight: 700;
 }
 .trend-up { background: #e8f0e7; color: #46704f; }
-.trend-neutral { background: #eef0eb; color: #828a82; }
+.trend-neutral { background: #eef0eb; color: #686f68; }
 .stat-card strong {
   margin-top: 12px;
   font-family: 'Iowan Old Style', Georgia, serif;
@@ -388,7 +388,7 @@ onMounted(async () => {
   letter-spacing: -.02em;
   line-height: 1;
 }
-.stat-detail { margin-top: 6px; color: #929990; font-size: 11px; }
+.stat-detail { margin-top: 6px; color: #696e68; font-size: 11px; }
 
 /* ── Panels ────────────────────────────────────────────── */
 .chart-grid {
@@ -418,7 +418,7 @@ onMounted(async () => {
   font-weight: 400;
   letter-spacing: -.02em;
 }
-.panel-head p { margin: 4px 0 0; color: #929990; font-size: 12px; }
+.panel-head p { margin: 4px 0 0; color: #696e68; font-size: 12px; }
 .panel-chip {
   padding: 4px 10px;
   border-radius: 20px;
@@ -469,7 +469,7 @@ onMounted(async () => {
 }
 .activity-copy { display: grid; gap: 2px; min-width: 0; }
 .activity-name { color: #33473a; font-size: 13px; font-weight: 650; }
-.activity-course { overflow: hidden; color: #8b938b; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.activity-course { overflow: hidden; color: #686f68; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
 .new-chip {
   flex-shrink: 0;
   margin-left: auto;
@@ -480,7 +480,7 @@ onMounted(async () => {
   font-size: 10px;
   font-weight: 700;
 }
-.activity-empty { padding: 40px 0; color: #929990; font-size: 13px; text-align: center; }
+.activity-empty { padding: 40px 0; color: #696e68; font-size: 13px; text-align: center; }
 
 /* ── Buttons / menu ────────────────────────────────────── */
 .zen-btn {
@@ -523,7 +523,7 @@ onMounted(async () => {
 .menu-subheader {
   height: auto;
   padding: 8px 12px 4px;
-  color: #929a91;
+  color: #696e68;
   font-size: 9px;
   font-weight: 700;
   letter-spacing: .12em;

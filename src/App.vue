@@ -1,5 +1,8 @@
 <template>
   <v-app>
+    <!-- Keyboard/screen-reader bypass: jump straight past the nav to the page content. -->
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+
     <!-- Floating Island Nav -->
     <v-app-bar
       app flat elevation="0"
@@ -43,6 +46,7 @@
         <template v-else-if="authStore.isAdmin">
           <v-btn variant="text" to="/admin" class="nav-link text-none font-weight-medium">Overview</v-btn>
           <v-btn variant="text" to="/admin/users" class="nav-link text-none font-weight-medium">People</v-btn>
+          <v-btn variant="text" to="/admin/audit" class="nav-link text-none font-weight-medium">Activity</v-btn>
           <v-btn variant="text" to="/catalogue" class="nav-link text-none font-weight-medium">Courses</v-btn>
         </template>
 
@@ -51,15 +55,19 @@
           <div class="nav-divider mx-3" />
           <v-menu location="bottom end" transition="slide-y-transition" :offset="[0, 12]" open-on-hover>
             <template #activator="{ props }">
-              <v-avatar
+              <!-- Native <button> so Vuetify's aria-haspopup/aria-expanded are legal on it.
+                   A bare <v-avatar> renders a <div>, which trips aria-allowed-attr. -->
+              <button
                 v-bind="props"
-                :color="roleColor"
-                size="36"
-                class="nav-avatar cursor-pointer"
+                type="button"
+                class="nav-avatar-btn"
+                :aria-label="`${initials} — open account menu`"
                 @click="$router.push('/profil')"
               >
-                <span class="text-caption font-weight-black text-white">{{ initials }}</span>
-              </v-avatar>
+                <v-avatar :color="roleColor" size="36" class="nav-avatar">
+                  <span class="text-caption font-weight-black text-white">{{ initials }}</span>
+                </v-avatar>
+              </button>
             </template>
             <v-card class="user-menu-card rounded-lg overflow-hidden" width="260">
               <div class="menu-head">
@@ -85,7 +93,9 @@
       <div class="d-flex d-md-none align-center ml-2">
         <v-menu location="bottom end" transition="scale-transition">
           <template #activator="{ props }">
-            <v-btn v-bind="props" icon="mdi-menu" variant="text" />
+            <!-- aria-label: the button renders only the MDI menu glyph, so it has no
+                 inner text; without this it fails Lighthouse's button-name audit. -->
+            <v-btn v-bind="props" icon="mdi-menu" variant="text" aria-label="Open menu" />
           </template>
           <v-card class="user-menu-card rounded-lg pa-2" width="220">
             <v-list density="compact" bg-color="transparent" class="pa-1">
@@ -106,6 +116,7 @@
               <template v-else-if="authStore.isAdmin">
                 <v-list-item to="/admin" title="Overview" prepend-icon="mdi-shield-crown" class="rounded-lg text-body-2 menu-item" />
                 <v-list-item to="/admin/users" title="People" prepend-icon="mdi-account-group" class="rounded-lg text-body-2 menu-item" />
+                <v-list-item to="/admin/audit" title="Activity" prepend-icon="mdi-history" class="rounded-lg text-body-2 menu-item" />
                 <v-list-item to="/catalogue" title="Courses" prepend-icon="mdi-bookshelf" class="rounded-lg text-body-2 menu-item" />
               </template>
 
@@ -121,7 +132,8 @@
       </div><!-- /nav-inner -->
     </v-app-bar>
 
-    <v-main class="page-bg" :class="{ 'no-nav': hideNav }">
+    <!-- v-main renders the page's single <main> landmark; the skip link targets it. -->
+    <v-main id="main-content" tabindex="-1" class="page-bg" :class="{ 'no-nav': hideNav }">
       <router-view v-slot="{ Component, route: currentRoute }">
         <transition name="page-fade" mode="out-in">
           <component :is="Component" :key="currentRoute.fullPath" />
@@ -185,6 +197,7 @@
         </div>
       </transition-group>
     </div>
+    <div id="main" />
   </v-app>
 </template>
 
@@ -235,6 +248,31 @@ const toastIconColor = (type) => ({
 </script>
 
 <style scoped>
+/* ── Skip link ─────────────────────────────────────────────
+   Off-screen until focused, so it never shifts layout or
+   shows on mouse use. Targets <main id="main-content">. */
+.skip-link {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 3000;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: #2f3a33;
+  color: #fbfaf6;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(-200%);
+}
+/* :focus (not :focus-visible) — a skip link must reveal whenever it receives
+   focus, including programmatic focus after a hash navigation. */
+.skip-link:focus {
+  transform: translateY(0);
+  outline: 2px solid #2f3a33;
+  outline-offset: 2px;
+}
+
 /* Full-width inner wrapper keeps content from touching edges */
 .nav-inner {
   width: 100%;
@@ -243,7 +281,7 @@ const toastIconColor = (type) => ({
 
 /* ── Nav links ───────────────────────────────────────────── */
 .nav-link {
-  color: #69766c !important;
+  color: #647067 !important;
   font-size: 12px;
   font-weight: 550 !important;
   letter-spacing: 0;
@@ -271,7 +309,7 @@ const toastIconColor = (type) => ({
   right: 14px;
   height: 2px;
   border-radius: 2px;
-  background: #6f9276;
+  background: #5f7e66;
 }
 
 .nav-cta {
@@ -286,6 +324,18 @@ const toastIconColor = (type) => ({
   background: #e2e6de;
 }
 
+.nav-avatar-btn {
+  display: inline-flex;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.nav-avatar-btn:focus-visible {
+  outline: 2px solid #648069;
+  outline-offset: 3px;
+}
 .nav-avatar {
   border: 2px solid #e7eee6;
   transition: border-color .18s ease;
@@ -332,7 +382,7 @@ const toastIconColor = (type) => ({
 }
 .menu-email {
   overflow: hidden;
-  color: #8b938b;
+  color: #686f68;
   font-size: 11px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -349,18 +399,18 @@ const toastIconColor = (type) => ({
   text-transform: uppercase;
 }
 .role-apprenant { background: #e7eee6; color: #46704f; }
-.role-formateur { background: #f1ebe0; color: #8a6d3b; }
-.role-admin { background: #f3e8e6; color: #a4574f; }
+.role-formateur { background: #f1ebe0; color: #816738; }
+.role-admin { background: #f3e8e6; color: #934f47; }
 
 .menu-item { color: #4a5a4f !important; }
 .menu-item:hover { background: #f2f5ef !important; }
-.menu-logout { color: #a4574f !important; }
+.menu-logout { color: #934f47 !important; }
 
 /* ── Footer ──────────────────────────────────────────────── */
 .el-footer {
   background: #f4f4ee !important;
   border-top: 1px solid #e8e8e1 !important;
-  color: #737e73 !important;
+  color: #666f66 !important;
 }
 .footer-brand {
   color: #314237;
@@ -368,15 +418,15 @@ const toastIconColor = (type) => ({
   font-weight: 700;
   letter-spacing: -.02em;
 }
-.footer-copy { color: #8b938b; font-size: 12px; }
+.footer-copy { color: #686f68; font-size: 12px; }
 .footer-link {
   position: relative;
-  color: #737e73;
+  color: #666f66;
   font-size: 13px;
   text-decoration: none;
   transition: color .18s ease;
 }
-.footer-link:hover { color: #537a62 !important; }
+.footer-link:hover { color: #4c6e59 !important; }
 .footer-link::after {
   content: '';
   position: absolute;
@@ -384,7 +434,7 @@ const toastIconColor = (type) => ({
   bottom: -2px;
   width: 0;
   height: 1px;
-  background: #6f9276;
+  background: #5f7e66;
   transition: width .22s ease;
 }
 .footer-link:hover::after { width: 100%; }
@@ -398,12 +448,12 @@ const toastIconColor = (type) => ({
   border: 1px solid #e2e6de;
   border-radius: 50%;
   background: #ffffff;
-  color: #6f7a70;
+  color: #657066;
   text-decoration: none;
   transition: background .18s ease, color .18s ease, border-color .18s ease;
 }
 .social-icon-wrapper:hover {
-  background: #6f9276;
+  background: #5f7e66;
   border-color: #6f9276;
   color: #ffffff;
 }

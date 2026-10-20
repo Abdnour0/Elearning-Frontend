@@ -15,3 +15,13 @@ if (!envUrl && import.meta.env.PROD) {
 }
 
 export const API_BASE_URL = envUrl || 'http://localhost:8000/api/v1';
+
+/**
+ * Absolute URL of the Sanctum CSRF-cookie endpoint.
+ *
+ * It lives at the web root, NOT under the API prefix, so we strip a trailing
+ * `/api` or `/api/vN` segment from the base URL:
+ *   http://localhost:8000/api/v1  ->  http://localhost:8000/sanctum/csrf-cookie
+ */
+export const SANCTUM_CSRF_URL =
+  API_BASE_URL.replace(/\/api(?:\/v\d+)?$/, '') + '/sanctum/csrf-cookie';

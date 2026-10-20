@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API_BASE_URL } from './config/apiBase.js';
+import { API_BASE_URL, SANCTUM_CSRF_URL } from './config/apiBase.js';
 import { showToast } from './composables/useToast.js';
 
 const api = axios.create({
@@ -21,13 +21,18 @@ api.interceptors.response.use(
     const message = error.response?.data?.message;
 
     if (status === 401) {
-      window.location.href = '/login';
+      try {
+        localStorage.removeItem('user');
+      } catch { /* ignore */ }
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
       return Promise.reject(error);
     }
 
     if (status === 419 && !error.config._retry) {
       error.config._retry = true;
-      return api.get('/sanctum/csrf-cookie').then(() => {
+      return api.get(SANCTUM_CSRF_URL).then(() => {
         return api(error.config);
       }).catch(() => {
         showToast('Your session expired. Please sign in again.', 'error', 6000);

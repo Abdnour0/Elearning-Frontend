@@ -108,6 +108,7 @@
             <v-text-field v-model="form.quiz.titre" label="Quiz title" variant="outlined" color="primary" class="zen-input" />
             <v-text-field v-model.number="form.quiz.dureeSecondes" label="Duration (sec)" type="number" variant="outlined" color="primary" class="zen-input" />
             <v-text-field v-model.number="form.quiz.scoreMinimal" label="Minimum score (%)" type="number" variant="outlined" color="primary" class="zen-input" />
+            <v-text-field v-model.number="form.quiz.tentatives_max" label="Max attempts" type="number" variant="outlined" color="primary" class="zen-input" />
           </div>
 
           <div v-for="(q, idx) in form.quiz.questions" :key="idx" class="question-block">
@@ -183,7 +184,7 @@ const form = ref({
   titre: '', categorie: '', description: '',
   modules: [],
   hasQuiz: false,
-  quiz: { titre: 'Course quiz', dureeSecondes: 600, scoreMinimal: 60, questions: [] },
+  quiz: { titre: 'Course quiz', dureeSecondes: 600, scoreMinimal: 60, tentatives_max: 3, questions: [] },
 });
 
 const step1Valid   = computed(() => form.value.titre && form.value.categorie && form.value.description);
@@ -275,16 +276,22 @@ async function saveCourse() {
     for (const id of deletedLecons.value) await api.delete(`/lecons/${id}`);
     for (const id of deletedModules.value) await api.delete(`/modules/${id}`);
     if (form.value.hasQuiz && form.value.quiz.titre) {
-      const { data: qData } = await api.post(`/cours/${courseId}/quizzes`, {
-        titre: form.value.quiz.titre, dureeSecondes: form.value.quiz.dureeSecondes, scoreMinimal: form.value.quiz.scoreMinimal,
-      });
-      for (const q of form.value.quiz.questions) {
-        await api.post(`/quizzes/${qData.id}/questions`, {
-          contenu: q.contenu, type: q.type, bonneReponse: q.bonneReponse,
+      // One request, one quiz: the backend upserts it (never a duplicate) and
+      // replaces the question set, so re-saving the course is idempotent.
+      await api.post(`/cours/${courseId}/quizzes`, {
+        titre: form.value.quiz.titre,
+        dureeSecondes: form.value.quiz.dureeSecondes,
+        scoreMinimal: form.value.quiz.scoreMinimal,
+        tentatives_max: form.value.quiz.tentatives_max,
+        questions: form.value.quiz.questions.map(q => ({
+          contenu: q.contenu,
+          type: q.type,
+          bonneReponse: q.bonneReponse,
           choix: q.choixStr ? q.choixStr.split(';').map(s => s.trim()) : [],
-          ordre: q.ordre, points: q.points,
-        });
-      }
+          ordre: q.ordre,
+          points: q.points,
+        })),
+      });
     }
     router.push('/formateur');
   } catch(e) {
@@ -326,7 +333,7 @@ onMounted(async () => {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: #648069;
+  color: #59715e;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: .13em;
@@ -340,7 +347,7 @@ onMounted(async () => {
   line-height: 1.04;
   letter-spacing: -.04em;
 }
-.page-lede { margin: 0; color: #7d867e; font-size: 13px; }
+.page-lede { margin: 0; color: #686f69; font-size: 13px; }
 
 /* ── Step bar ──────────────────────────────────────────── */
 .step-bar { display: flex; gap: 8px; margin-bottom: 30px; }
@@ -352,7 +359,7 @@ onMounted(async () => {
   transition: background .3s ease;
 }
 .step-active { background: #9db99f; }
-.step-done { background: #6f9276; }
+.step-done { background: #5f7e66; }
 
 /* ── Cards ─────────────────────────────────────────────── */
 .paper-card {
@@ -389,10 +396,10 @@ onMounted(async () => {
   margin: 0 auto 10px;
   border-radius: 50%;
   background: #edf1e9;
-  color: #65816a;
+  color: #59715e;
   font-size: 22px;
 }
-.empty-inline p { margin: 0; color: #828a82; font-size: 13px; }
+.empty-inline p { margin: 0; color: #686f68; font-size: 13px; }
 
 .module-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
 .index-badge {
@@ -426,7 +433,7 @@ onMounted(async () => {
 }
 .module-block > summary::-webkit-details-marker { display: none; }
 .module-block-title { color: #33473a; font-size: 14px; font-weight: 650; }
-.module-chevron { color: #8b938b; transition: transform .2s ease; }
+.module-chevron { color: #686f68; transition: transform .2s ease; }
 .module-block[open] .module-chevron { transform: rotate(180deg); }
 .module-block-body { padding: 4px 18px 18px; }
 
@@ -451,7 +458,7 @@ onMounted(async () => {
   padding: 15px 0;
   border-bottom: 1px solid #eff0ea;
 }
-.review-row span { color: #7d867d; font-size: 13px; }
+.review-row span { color: #686f68; font-size: 13px; }
 .review-row strong { color: #28382e; font-size: 13px; font-weight: 650; text-align: right; }
 .review-note {
   margin: 22px 0 0;
@@ -502,7 +509,7 @@ onMounted(async () => {
   transition: background .16s ease, border-color .16s ease;
 }
 .icon-btn:hover { background: #f2f5ef; border-color: #c3cfc1; }
-.icon-btn.is-danger { color: #a4574f; }
+.icon-btn.is-danger { color: #934f47; }
 .icon-btn.is-danger:hover { background: #f7efed; border-color: #e0c9c4; }
 .flex-grow-1 { flex: 1 1 auto; }
 

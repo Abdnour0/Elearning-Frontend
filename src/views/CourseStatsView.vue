@@ -130,7 +130,7 @@ onMounted(async () => {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: #648069;
+  color: #59715e;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: .13em;
@@ -144,7 +144,7 @@ onMounted(async () => {
   line-height: 1.05;
   letter-spacing: -.04em;
 }
-.stats-lede { margin: 0; color: #7d867e; font-size: 13px; }
+.stats-lede { margin: 0; color: #686f69; font-size: 13px; }
 
 /* ── KPIs ──────────────────────────────────────────────── */
 .kpi-row {
@@ -160,7 +160,7 @@ onMounted(async () => {
   border-radius: 8px;
   background: #fff;
 }
-.stat-label { color: #778778; font-size: 9px; font-weight: 700; letter-spacing: .12em; }
+.stat-label { color: #637064; font-size: 9px; font-weight: 700; letter-spacing: .12em; }
 .stat-card strong {
   margin-top: 10px;
   font-family: 'Iowan Old Style', Georgia, serif;
@@ -170,7 +170,7 @@ onMounted(async () => {
   color: #28382e;
 }
 .stat-card strong small { font-size: 18px; }
-.stat-detail { margin-top: 4px; color: #929990; font-size: 11px; }
+.stat-detail { margin-top: 4px; color: #696e68; font-size: 11px; }
 
 /* ── Table ─────────────────────────────────────────────── */
 .paper-card {
@@ -191,7 +191,7 @@ onMounted(async () => {
 .zen-table th {
   padding: 0 12px 12px;
   border-bottom: 1px solid #e8e8df;
-  color: #929a91;
+  color: #696e68;
   font-size: 9px;
   font-weight: 700;
   letter-spacing: .1em;
@@ -216,11 +216,11 @@ onMounted(async () => {
   background: #eef0eb;
 }
 .rate-track span { display: block; height: 100%; border-radius: 4px; }
-.rate-track .is-pass { background: #6f9276; }
+.rate-track .is-pass { background: #5f7e66; }
 .rate-track .is-warn { background: #c9a15f; }
 .rate-value { font-size: 12px; font-weight: 700; }
 .is-pass-text { color: #46704f; }
-.is-warn-text { color: #9a7a3f; }
+.is-warn-text { color: #846936; }
 
 /* ── Empty / error ─────────────────────────────────────── */
 .empty-card, .stats-error { text-align: center; padding: 56px 24px; }
@@ -230,7 +230,7 @@ onMounted(async () => {
   font-size: 24px;
   font-weight: 400;
 }
-.empty-card p, .stats-error p { margin: 8px 0 0; color: #828a82; font-size: 13px; }
+.empty-card p, .stats-error p { margin: 8px 0 0; color: #686f68; font-size: 13px; }
 .stats-error p { margin-bottom: 20px; }
 .empty-symbol {
   display: grid;
@@ -240,7 +240,7 @@ onMounted(async () => {
   margin: 0 auto 14px;
   border-radius: 50%;
   background: #edf1e9;
-  color: #65816a;
+  color: #59715e;
   font-size: 24px;
 }
 

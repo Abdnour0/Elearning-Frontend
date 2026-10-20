@@ -1,5 +1,6 @@
 <template>
   <div class="results-page">
+    <h1 class="sr-only">Quiz results</h1>
     <div class="results-card">
       <!-- Loading -->
       <template v-if="isInitial || isLoading">
@@ -196,7 +197,7 @@ onUnmounted(() => {
 }
 .score-number small { margin-left: 2px; font-size: 20px; }
 .score-number.is-pass { color: #46704f; }
-.score-number.is-fail { color: #a4574f; }
+.score-number.is-fail { color: #934f47; }
 
 .result-chip {
   display: inline-flex;
@@ -209,7 +210,7 @@ onUnmounted(() => {
 }
 .chip-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
 .chip-pass { background: #e8f0e7; color: #46704f; }
-.chip-fail { background: #f3e8e6; color: #a4574f; }
+.chip-fail { background: #f3e8e6; color: #934f47; }
 
 .results-divider { height: 1px; margin: 30px 0; background: #ecece5; }
 
@@ -241,11 +242,11 @@ onUnmounted(() => {
   font-weight: 700;
 }
 .correction-correct .correction-mark { background: #dcead9; color: #46704f; }
-.correction-wrong .correction-mark { background: #efd9d5; color: #a4574f; }
+.correction-wrong .correction-mark { background: #efd9d5; color: #934f47; }
 .correction-index { color: #33473a; font-size: 13px; font-weight: 650; }
-.correction-line { margin: 0 0 3px; color: #6f7a70; font-size: 12px; line-height: 1.6; }
+.correction-line { margin: 0 0 3px; color: #657066; font-size: 12px; line-height: 1.6; }
 .correction-line strong { color: #33473a; }
-.correction-line.is-good { color: #567a5e; }
+.correction-line.is-good { color: #53755b; }
 .correction-line.is-good strong { color: #46704f; }
 
 /* ── Actions ───────────────────────────────────────────── */
@@ -279,8 +280,8 @@ onUnmounted(() => {
 .zen-btn-quiet:hover { background: #f4f6f1; border-color: #c3cfc1; }
 
 /* ── Misc ──────────────────────────────────────────────── */
-.results-loading { margin-top: 18px; color: #828a82; font-size: 13px; }
-.results-lede { margin: 0 0 6px; color: #828a82; font-size: 13px; }
+.results-loading { margin-top: 18px; color: #686f68; font-size: 13px; }
+.results-lede { margin: 0 0 6px; color: #686f68; font-size: 13px; }
 .empty-symbol {
   display: grid;
   place-items: center;
@@ -289,7 +290,7 @@ onUnmounted(() => {
   margin: 0 auto 14px;
   border-radius: 50%;
   background: #edf1e9;
-  color: #65816a;
+  color: #59715e;
   font-size: 24px;
 }
 .skeleton-block, .skeleton-line {

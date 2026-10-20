@@ -31,8 +31,13 @@ export default defineConfig({
     },
   },
   build: {
-    // Let Vite/Rollup derive a safe chunk graph automatically.
-    // The previous manual chunk rules introduced circular chunks in production.
-    chunkSizeWarningLimit: 700,
+    // Chunking is left to Rollup; a previously hand-written manualChunks config
+    // produced circular chunks in production.
+    //
+    // chunkSizeWarningLimit is deliberately NOT raised. It used to be 700, purely
+    // to silence a warning from a 746 kB entry chunk. That bloat came from
+    // importing the entire `vuetify/components` namespace (which drags in every
+    // component's co-located CSS) plus the @mdi/font webfont. Both are gone and
+    // the largest chunk is now ~385 kB, so Vite's 500 kB default is a real guard.
   },
 });

@@ -216,7 +216,7 @@ async function handleResetPassword() {
   display: inline-flex;
   align-items: center;
   gap: 9px;
-  color: #5f7d66;
+  color: #57715d;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: .13em;
@@ -232,11 +232,11 @@ async function handleResetPassword() {
   letter-spacing: -.04em;
   color: #24362a;
 }
-.auth-panel h1 em { color: #557a61; }
+.auth-panel h1 em { color: #52755d; }
 .auth-lede {
   margin: 0 0 30px;
   max-width: 390px;
-  color: #7b837c;
+  color: #5f6b62;
   font-size: 14px;
   line-height: 1.7;
 }
@@ -244,7 +244,7 @@ async function handleResetPassword() {
 .zen-input :deep(.v-field) { border-radius: 8px; }
 .auth-row { gap: 12px; }
 .auth-mini-link {
-  color: #557a61;
+  color: #52755d;
   font-size: 12px;
   font-weight: 650;
   text-decoration: none;
@@ -261,16 +261,16 @@ async function handleResetPassword() {
   box-shadow: none !important;
 }
 .zen-btn:hover { background: #456c54 !important; }
-.zen-quiet-btn { color: #66716a !important; text-transform: none; }
+.zen-quiet-btn { color: #656f69 !important; text-transform: none; }
 
 .auth-switch {
   text-align: center;
-  color: #7b837c;
+  color: #5f6b62;
   font-size: 13px;
 }
 .auth-switch a {
   margin-left: 4px;
-  color: #557a61;
+  color: #52755d;
   font-weight: 650;
   text-decoration: none;
 }
@@ -297,11 +297,11 @@ async function handleResetPassword() {
   letter-spacing: -.04em;
   color: #24362a;
 }
-.auth-aside h2 em { color: #557a61; }
+.auth-aside h2 em { color: #52755d; }
 .auth-aside p {
   max-width: 380px;
   margin: 0;
-  color: #6f7a70;
+  color: #657066;
   font-size: 14px;
   line-height: 1.7;
 }
@@ -315,8 +315,8 @@ async function handleResetPassword() {
   box-shadow: 0 18px 50px rgba(52, 72, 55, .08);
 }
 .preview-top { display: flex; align-items: center; justify-content: space-between; }
-.preview-label { color: #939a91; font-size: 9px; font-weight: 700; letter-spacing: .12em; }
-.preview-progress { color: #52775c; font-size: 11px; font-weight: 700; }
+.preview-label { color: #696e68; font-size: 9px; font-weight: 700; letter-spacing: .12em; }
+.preview-progress { color: #51755b; font-size: 11px; font-weight: 700; }
 .aside-preview h3 {
   margin: 12px 0 5px;
   font-family: 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
@@ -325,7 +325,7 @@ async function handleResetPassword() {
   letter-spacing: -.02em;
   color: #28382e;
 }
-.aside-preview p { color: #828a82; font-size: 12px; line-height: 1.6; }
+.aside-preview p { color: #686f68; font-size: 12px; line-height: 1.6; }
 .progress-track {
   height: 4px;
   margin: 16px 0 12px;
@@ -333,7 +333,7 @@ async function handleResetPassword() {
   border-radius: 4px;
   background: #eef0eb;
 }
-.progress-track span { display: block; height: 100%; border-radius: 4px; background: #6f9276; }
+.progress-track span { display: block; height: 100%; border-radius: 4px; background: #5f7e66; }
 .preview-foot {
   display: flex;
   align-items: center;
@@ -353,7 +353,7 @@ async function handleResetPassword() {
   letter-spacing: -.02em;
   color: #28382e;
 }
-.dialog-lede { margin: 0 0 22px; color: #7b837c; font-size: 13px; line-height: 1.6; }
+.dialog-lede { margin: 0 0 22px; color: #5f6b62; font-size: 13px; line-height: 1.6; }
 
 /* ── Responsive ────────────────────────────────────────── */
 @media (max-width: 900px) {

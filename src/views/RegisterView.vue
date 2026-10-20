@@ -190,7 +190,7 @@ async function handleRegister() {
   display: inline-flex;
   align-items: center;
   gap: 9px;
-  color: #5f7d66;
+  color: #57715d;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: .13em;
@@ -206,11 +206,11 @@ async function handleRegister() {
   letter-spacing: -.04em;
   color: #24362a;
 }
-.auth-panel h1 em { color: #557a61; }
+.auth-panel h1 em { color: #52755d; }
 .auth-lede {
   margin: 0 0 28px;
   max-width: 410px;
-  color: #7b837c;
+  color: #5f6b62;
   font-size: 14px;
   line-height: 1.7;
 }
@@ -226,7 +226,7 @@ async function handleRegister() {
   border: 1px solid #e4e7df;
   border-radius: 10px;
   background: #fff;
-  color: #6f786f;
+  color: #676f67;
   text-align: left;
   cursor: pointer;
   font: inherit;
@@ -238,7 +238,7 @@ async function handleRegister() {
   background: #f0f4ee;
 }
 .role-name { margin-top: 8px; color: #33473a; font-size: 13px; font-weight: 700; }
-.role-note { color: #8b938b; font-size: 11px; }
+.role-note { color: #686f68; font-size: 11px; }
 
 .zen-input :deep(.v-field) { border-radius: 8px; }
 
@@ -253,10 +253,10 @@ async function handleRegister() {
 }
 .zen-btn:hover { background: #456c54 !important; }
 
-.auth-switch { text-align: center; color: #7b837c; font-size: 13px; }
+.auth-switch { text-align: center; color: #5f6b62; font-size: 13px; }
 .auth-switch a {
   margin-left: 4px;
-  color: #557a61;
+  color: #52755d;
   font-weight: 650;
   text-decoration: none;
 }
@@ -283,11 +283,11 @@ async function handleRegister() {
   letter-spacing: -.04em;
   color: #24362a;
 }
-.auth-aside h2 em { color: #557a61; }
+.auth-aside h2 em { color: #52755d; }
 .auth-aside p {
   max-width: 380px;
   margin: 0;
-  color: #6f7a70;
+  color: #657066;
   font-size: 14px;
   line-height: 1.7;
 }
@@ -300,7 +300,7 @@ async function handleRegister() {
   background: #fff;
   box-shadow: 0 18px 50px rgba(52, 72, 55, .08);
 }
-.preview-label { color: #939a91; font-size: 9px; font-weight: 700; letter-spacing: .12em; }
+.preview-label { color: #696e68; font-size: 9px; font-weight: 700; letter-spacing: .12em; }
 .path-list { margin: 14px 0 0; padding: 0; list-style: none; }
 .path-list li {
   display: grid;
@@ -311,9 +311,9 @@ async function handleRegister() {
   border-top: 1px solid #eff0ea;
 }
 .path-list li:first-child { border-top: 0; }
-.path-symbol { color: #62806a; font-size: 17px; }
+.path-symbol { color: #587360; font-size: 17px; }
 .path-name { color: #33473a; font-size: 13px; }
-.path-note { color: #929a91; font-size: 11px; }
+.path-note { color: #696e68; font-size: 11px; }
 
 /* ── Responsive ────────────────────────────────────────── */
 @media (max-width: 900px) {

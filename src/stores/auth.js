@@ -1,14 +1,10 @@
 import { defineStore } from 'pinia';
 import axios from 'axios';
 import api from '../axios';
-import { API_BASE_URL } from '../config/apiBase.js';
-
-// Sanctum CSRF cookie lives at the web root, NOT under /api.
-// e.g. http://localhost:8000/sanctum/csrf-cookie
-const SANCTUM_URL = API_BASE_URL.replace(/\/api(?:\/v\d+)?$/, '') + '/sanctum/csrf-cookie';
+import { SANCTUM_CSRF_URL } from '../config/apiBase.js';
 
 async function refreshCsrf() {
-  await axios.get(SANCTUM_URL, { withCredentials: true });
+  await axios.get(SANCTUM_CSRF_URL, { withCredentials: true });
 }
 
 export const useAuthStore = defineStore('auth', {

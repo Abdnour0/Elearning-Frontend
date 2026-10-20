@@ -21,6 +21,7 @@ import CourseCreateView from '../src/views/CourseCreateView.vue';
 import CourseStatsView from '../src/views/CourseStatsView.vue';
 import AdminDashboard from '../src/views/AdminDashboard.vue';
 import AdminUsersView from '../src/views/AdminUsersView.vue';
+import AdminAuditView from '../src/views/AdminAuditView.vue';
 
 // ── Mocks ────────────────────────────────────────────────────────
 const { mockGet, mockPost, mockPut, mockDelete } = vi.hoisted(() => ({
@@ -67,6 +68,7 @@ const VIEWS = [
   { name: 'CourseStatsView', component: CourseStatsView, path: '/formateur/cours/1/stats', role: 'formateur' },
   { name: 'AdminDashboard', component: AdminDashboard, path: '/admin', role: 'admin' },
   { name: 'AdminUsersView', component: AdminUsersView, path: '/admin/users', role: 'admin' },
+  { name: 'AdminAuditView', component: AdminAuditView, path: '/admin/audit', role: 'admin' },
 ];
 
 function makeRouter(component, path) {
@@ -119,4 +121,36 @@ describe('View smoke tests', () => {
       wrapper.unmount();
     });
   }
+});
+
+// ── I-2 regression guard ─────────────────────────────────────────
+// Both views previously jumped from <h2>/<h3> with no page <h1> at all, which
+// fails heading-order checks and leaves the page title out of the a11y tree.
+// The h1 is visually hidden (the designs have no title slot), so assert both
+// that it exists once and that it carries the .sr-only class.
+describe('Page heading present (I-2)', () => {
+  it.each([
+    ['ProfileView', ProfileView, '/profil'],
+    ['QuizResultsView', QuizResultsView, '/quiz/1/resultats'],
+  ])('%s exposes exactly one <h1>', async (_name, component, path) => {
+    const pinia = createPinia();
+    setActivePinia(pinia);
+    useAuthStore().$patch({
+      user: { id: 1, name: 'Test User', email: 'test@example.com', role: 'apprenant' },
+    });
+
+    const router = makeRouter(component, path);
+    await router.push(path);
+    await router.isReady();
+
+    const wrapper = mountView(component, { global: { plugins: [pinia, router] } });
+    await flushPromises();
+
+    const h1s = wrapper.findAll('h1');
+    expect(h1s.length).toBe(1);
+    expect(h1s[0].classes()).toContain('sr-only');
+    expect(h1s[0].text().length).toBeGreaterThan(0);
+
+    wrapper.unmount();
+  });
 });

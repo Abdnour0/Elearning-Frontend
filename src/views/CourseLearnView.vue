@@ -3,7 +3,7 @@
     <template v-if="course">
       <div class="learn-layout" :class="{ 'with-sidebar': sidebarVisible }">
         <!-- ── Main: lesson content ──────────────────────── -->
-        <main class="lesson-main">
+        <div class="lesson-main">
           <header class="learn-header">
             <div class="header-left">
               <RouterLink class="quiet-btn" to="/dashboard">← Dashboard</RouterLink>
@@ -119,7 +119,7 @@
               </div>
             </div>
           </div>
-        </main>
+        </div>
 
         <!-- ── Sidebar: curriculum ───────────────────────── -->
         <aside v-if="sidebarVisible" class="sidebar-panel">
@@ -392,7 +392,7 @@ watch(() => route.params.id, initHub);
   background: #fbfaf6;
 }
 .header-left { display: flex; align-items: center; gap: 10px; }
-.lesson-counter { color: #8b938b; font-size: 11px; font-weight: 700; letter-spacing: .1em; }
+.lesson-counter { color: #686f68; font-size: 11px; font-weight: 700; letter-spacing: .1em; }
 
 .content-scroll { flex: 1; overflow-y: auto; padding: 34px 26px 60px; }
 .content-max { max-width: 1040px; margin: 0 auto; }
@@ -408,12 +408,12 @@ watch(() => route.params.id, initHub);
   letter-spacing: .05em;
   text-transform: uppercase;
 }
-.type-video { background: #e6eef0; color: #4f7d84; }
-.type-pdf { background: #f1ebe0; color: #8a6d3b; }
-.type-image { background: #e7eee6; color: #57745e; }
+.type-video { background: #e6eef0; color: #487278; }
+.type-pdf { background: #f1ebe0; color: #816738; }
+.type-image { background: #e7eee6; color: #55725c; }
 .type-texte { background: #eceef1; color: #5c6b7a; }
 .type-td { background: #eceef1; color: #5c6b7a; }
-.module-label-text { color: #648069; font-size: 10px; font-weight: 700; letter-spacing: .12em; }
+.module-label-text { color: #59715e; font-size: 10px; font-weight: 700; letter-spacing: .12em; }
 .lesson-head h1 {
   margin: 0;
   font-family: 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
@@ -436,7 +436,7 @@ watch(() => route.params.id, initHub);
 .stage-frame { width: 100%; height: 100%; border: 0; }
 .image-stage { display: flex; align-items: center; justify-content: center; padding: 24px; background: #f6f7f3; }
 .stage-center { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%; }
-.stage-copy { gap: 8px; text-align: center; color: #7d867d; }
+.stage-copy { gap: 8px; text-align: center; color: #686f68; }
 .stage-copy h3 {
   margin: 6px 0 0;
   font-family: 'Iowan Old Style', Georgia, serif;
@@ -444,8 +444,8 @@ watch(() => route.params.id, initHub);
   font-weight: 400;
 }
 .stage-copy p { margin: 0; font-size: 13px; }
-.stage-icon { color: #b6c1b4; }
-.stage-note { color: #a1a79f; font-size: 12px; }
+.stage-icon { color: #686f67; }
+.stage-note { color: #6b6e69; font-size: 12px; }
 .doc-stage { padding: 60px 24px; }
 .text-stage { padding: 44px 48px; background: #fff; }
 .text-content-rich { color: #3a4a3f; font-size: 16px; line-height: 1.8; }
@@ -495,7 +495,7 @@ watch(() => route.params.id, initHub);
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: #648069;
+  color: #59715e;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: .13em;
@@ -511,19 +511,19 @@ watch(() => route.params.id, initHub);
 }
 .progress-value { color: #46704f; font-family: 'Iowan Old Style', Georgia, serif; font-size: 24px; }
 .progress-track { height: 5px; overflow: hidden; border-radius: 4px; background: #eef0eb; }
-.progress-track span { display: block; height: 100%; border-radius: 4px; background: #6f9276; transition: width .4s ease; }
-.progress-foot { display: block; margin-top: 10px; color: #8b938b; font-size: 10px; font-weight: 700; letter-spacing: .1em; }
+.progress-track span { display: block; height: 100%; border-radius: 4px; background: #5f7e66; transition: width .4s ease; }
+.progress-foot { display: block; margin-top: 10px; color: #686f68; font-size: 10px; font-weight: 700; letter-spacing: .1em; }
 
 .sidebar-scroll { flex: 1; overflow-y: auto; padding: 20px 14px 40px; }
 .module-group { margin-bottom: 26px; }
 .module-label {
   padding: 0 10px 10px;
-  color: #8b938b;
+  color: #686f68;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: .12em;
 }
-.module-label.is-quiz { color: #9a7a3f; }
+.module-label.is-quiz { color: #846936; }
 .lesson-btn {
   display: flex;
   align-items: center;
@@ -553,10 +553,10 @@ watch(() => route.params.id, initHub);
   border-radius: 8px;
   background: #f1f3ee;
 }
-.lib-lock { color: #b6bdb5; }
+.lib-lock { color: #6a6e6a; }
 .lib-copy { display: grid; gap: 3px; min-width: 0; }
 .lib-title { overflow: hidden; color: #33473a; font-size: 13px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
-.lib-type { color: #98a097; font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.lib-type { color: #696e68; font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
 
 /* ── Empty / loading ───────────────────────────────────── */
 .empty-state { padding: 100px 20px; text-align: center; }
@@ -568,7 +568,7 @@ watch(() => route.params.id, initHub);
   margin: 0 auto 14px;
   border-radius: 50%;
   background: #edf1e9;
-  color: #65816a;
+  color: #59715e;
   font-size: 24px;
 }
 .empty-state h2 {
@@ -577,7 +577,7 @@ watch(() => route.params.id, initHub);
   font-size: 26px;
   font-weight: 400;
 }
-.empty-state p { margin: 8px 0 0; color: #828a82; font-size: 13px; }
+.empty-state p { margin: 8px 0 0; color: #686f68; font-size: 13px; }
 .learn-loading {
   display: flex;
   flex-direction: column;
@@ -586,7 +586,7 @@ watch(() => route.params.id, initHub);
   height: 100%;
   gap: 18px;
 }
-.learn-loading p { color: #828a82; font-size: 13px; }
+.learn-loading p { color: #686f68; font-size: 13px; }
 
 /* ── Buttons ───────────────────────────────────────────── */
 .zen-btn {

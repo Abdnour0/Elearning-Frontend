@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="E-Learning Hub">
+  <rect width="64" height="64" rx="14" fill="#537a62"/>
+  <!-- Mortarboard: cap diamond + the band that sits over the head. -->
+  <path d="M32 17 L55 27 L32 37 L9 27 Z" fill="#fbfaf6"/>
+  <path d="M20.5 30.5 V39.5 c0 .6 .4 1.2 1 1.5 2.9 1.5 6.7 2.3 10.5 2.3 s7.6-.8 10.5-2.3 c.6-.3 1-.9 1-1.5 v-9 l-11 4.9 z" fill="#fbfaf6" opacity=".88"/>
+</svg>

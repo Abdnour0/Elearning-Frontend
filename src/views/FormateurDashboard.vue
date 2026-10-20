@@ -221,7 +221,7 @@ onMounted(async () => {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: #648069;
+  color: #59715e;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: .13em;
@@ -235,8 +235,8 @@ onMounted(async () => {
   line-height: 1.04;
   letter-spacing: -.04em;
 }
-.page-head h1 em { color: #557a61; }
-.page-lede { margin: 0; color: #7d867e; font-size: 13px; }
+.page-head h1 em { color: #52755d; }
+.page-lede { margin: 0; color: #686f69; font-size: 13px; }
 
 /* ── Stats ─────────────────────────────────────────────── */
 .stats-row {
@@ -252,7 +252,7 @@ onMounted(async () => {
   border-radius: 8px;
   background: #fff;
 }
-.stat-label { color: #778778; font-size: 9px; font-weight: 700; letter-spacing: .12em; }
+.stat-label { color: #637064; font-size: 9px; font-weight: 700; letter-spacing: .12em; }
 .stat-card strong {
   margin-top: 9px;
   font-family: 'Iowan Old Style', Georgia, serif;
@@ -260,7 +260,7 @@ onMounted(async () => {
   font-weight: 400;
   letter-spacing: -.02em;
 }
-.stat-detail { margin-top: 4px; color: #929990; font-size: 11px; }
+.stat-detail { margin-top: 4px; color: #696e68; font-size: 11px; }
 
 /* ── Section ───────────────────────────────────────────── */
 .section-title {
@@ -312,8 +312,8 @@ onMounted(async () => {
   text-transform: uppercase;
 }
 .status-publie { background: #e6efe4; color: #46704f; }
-.status-brouillon { background: #f1ebe0; color: #8a6d3b; }
-.status-depublie { background: #f3e8e6; color: #a4574f; }
+.status-brouillon { background: #f1ebe0; color: #816738; }
+.status-depublie { background: #f3e8e6; color: #934f47; }
 
 .course-body {
   display: flex;
@@ -323,7 +323,7 @@ onMounted(async () => {
   padding: 22px 24px;
 }
 .course-category {
-  color: #648069;
+  color: #59715e;
   font-size: 9px;
   font-weight: 700;
   letter-spacing: .1em;
@@ -344,7 +344,7 @@ onMounted(async () => {
   overflow: hidden;
   margin: 0;
   max-width: 560px;
-  color: #7d867d;
+  color: #686f68;
   font-size: 12px;
   line-height: 1.6;
 }
@@ -359,7 +359,7 @@ onMounted(async () => {
 }
 .course-meta { display: flex; gap: 34px; }
 .meta-block { display: grid; gap: 4px; }
-.meta-label { color: #929a91; font-size: 9px; font-weight: 700; letter-spacing: .1em; }
+.meta-label { color: #696e68; font-size: 9px; font-weight: 700; letter-spacing: .1em; }
 .meta-value { color: #33473a; font-size: 13px; font-weight: 650; font-variant-numeric: tabular-nums; }
 
 .course-actions { display: flex; align-items: center; gap: 8px; }
@@ -378,7 +378,7 @@ onMounted(async () => {
 }
 .icon-btn:hover { background: #f2f5ef; border-color: #c3cfc1; transform: translateY(-1px); }
 .icon-btn.is-publish { color: #46704f; }
-.icon-btn.is-danger { color: #a4574f; }
+.icon-btn.is-danger { color: #934f47; }
 .icon-btn.is-danger:hover { background: #f7efed; border-color: #e0c9c4; }
 .icon-btn:disabled { opacity: .55; cursor: default; transform: none; }
 
@@ -398,7 +398,7 @@ onMounted(async () => {
   margin: 0 auto 14px;
   border-radius: 50%;
   background: #edf1e9;
-  color: #65816a;
+  color: #59715e;
   font-size: 24px;
 }
 .empty-card h2 {
@@ -407,7 +407,7 @@ onMounted(async () => {
   font-size: 24px;
   font-weight: 400;
 }
-.empty-card p { margin: 8px 0 20px; color: #828a82; font-size: 13px; }
+.empty-card p { margin: 8px 0 20px; color: #686f68; font-size: 13px; }
 
 /* ── Buttons ───────────────────────────────────────────── */
 .zen-btn {
@@ -444,7 +444,7 @@ onMounted(async () => {
   font-weight: 400;
   letter-spacing: -.02em;
 }
-.dialog-lede { margin: 0 0 22px; color: #6f7a70; font-size: 13px; line-height: 1.6; }
+.dialog-lede { margin: 0 0 22px; color: #657066; font-size: 13px; line-height: 1.6; }
 .dialog-lede strong { color: #33473a; }
 .dialog-actions { display: flex; justify-content: flex-end; gap: 10px; }
 

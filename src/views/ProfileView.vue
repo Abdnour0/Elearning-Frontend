@@ -1,5 +1,6 @@
 <template>
   <div class="profile-page">
+    <h1 class="sr-only">My profile</h1>
     <div class="profile-inner">
       <div class="profile-card">
         <!-- ── Identity panel ─────────────────────────── -->
@@ -63,16 +64,16 @@
               <v-form @submit.prevent="saveProfile">
                 <div class="field-grid">
                   <div class="field">
-                    <label>Full name</label>
-                    <v-text-field v-model="form.name" variant="outlined" density="comfortable" color="primary" hide-details prepend-inner-icon="mdi-account-outline" class="zen-input" />
+                    <label for="profile-name">Full name</label>
+                    <v-text-field id="profile-name" v-model="form.name" variant="outlined" density="comfortable" color="primary" hide-details prepend-inner-icon="mdi-account-outline" class="zen-input" />
                   </div>
                   <div class="field">
-                    <label>Email address</label>
-                    <v-text-field v-model="form.email" variant="outlined" density="comfortable" color="primary" hide-details prepend-inner-icon="mdi-email-outline" class="zen-input" />
+                    <label for="profile-email">Email address</label>
+                    <v-text-field id="profile-email" v-model="form.email" variant="outlined" density="comfortable" color="primary" hide-details prepend-inner-icon="mdi-email-outline" class="zen-input" />
                   </div>
                   <div class="field">
-                    <label>Phone number</label>
-                    <v-text-field v-model="form.telephone" variant="outlined" density="comfortable" color="primary" hide-details prepend-inner-icon="mdi-phone-outline" class="zen-input" />
+                    <label for="profile-phone">Phone number</label>
+                    <v-text-field id="profile-phone" v-model="form.telephone" variant="outlined" density="comfortable" color="primary" hide-details prepend-inner-icon="mdi-phone-outline" class="zen-input" />
                   </div>
                 </div>
 
@@ -96,8 +97,9 @@
               <v-form @submit.prevent="changePassword">
                 <div class="field-grid">
                   <div class="field full">
-                    <label>Current password</label>
+                    <label for="profile-current">Current password</label>
                     <v-text-field
+                      id="profile-current"
                       v-model="pwForm.current" :type="showCurrent ? 'text' : 'password'"
                       variant="outlined" density="comfortable" color="primary" hide-details
                       prepend-inner-icon="mdi-lock-outline" :append-inner-icon="showCurrent ? 'mdi-eye-off' : 'mdi-eye'"
@@ -105,8 +107,9 @@
                     />
                   </div>
                   <div class="field">
-                    <label>New password</label>
+                    <label for="profile-new">New password</label>
                     <v-text-field
+                      id="profile-new"
                       v-model="pwForm.password" :type="showNew ? 'text' : 'password'"
                       variant="outlined" density="comfortable" color="primary" hide-details
                       prepend-inner-icon="mdi-shield-lock-outline" :append-inner-icon="showNew ? 'mdi-eye-off' : 'mdi-eye'"
@@ -114,8 +117,9 @@
                     />
                   </div>
                   <div class="field">
-                    <label>Confirm password</label>
+                    <label for="profile-confirm">Confirm password</label>
                     <v-text-field
+                      id="profile-confirm"
                       v-model="pwForm.password_confirmation" :type="showConfirm ? 'text' : 'password'"
                       variant="outlined" density="comfortable" color="primary" hide-details
                       prepend-inner-icon="mdi-shield-check-outline" :append-inner-icon="showConfirm ? 'mdi-eye-off' : 'mdi-eye'"
@@ -292,7 +296,7 @@ onMounted(async () => {
   text-align: center;
   letter-spacing: -.02em;
 }
-.identity-email { margin: 0 0 12px; color: #8b938b; font-size: 12px; text-align: center; word-break: break-all; }
+.identity-email { margin: 0 0 12px; color: #686f68; font-size: 12px; text-align: center; word-break: break-all; }
 .role-chip {
   display: block;
   width: fit-content;
@@ -325,9 +329,9 @@ onMounted(async () => {
   color: #28382e;
 }
 .m-val.sage { color: #46704f; }
-.m-lbl { margin-top: 2px; color: #929a91; font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.m-lbl { margin-top: 2px; color: #696e68; font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
 
-.nav-group-label { display: block; padding-left: 12px; margin-bottom: 10px; color: #a1a79f; font-size: 9px; font-weight: 700; letter-spacing: .14em; }
+.nav-group-label { display: block; padding-left: 12px; margin-bottom: 10px; color: #6b6e69; font-size: 9px; font-weight: 700; letter-spacing: .14em; }
 .nav-item {
   display: flex;
   align-items: center;
@@ -338,7 +342,7 @@ onMounted(async () => {
   border: 1px solid transparent;
   border-radius: 9px;
   background: transparent;
-  color: #66716a;
+  color: #656f69;
   font: inherit;
   font-size: 13px;
   font-weight: 650;
@@ -357,7 +361,7 @@ onMounted(async () => {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: #648069;
+  color: #59715e;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: .13em;
@@ -371,11 +375,11 @@ onMounted(async () => {
   line-height: 1.05;
   letter-spacing: -.035em;
 }
-.section-header h3 em { color: #557a61; }
+.section-header h3 em { color: #52755d; }
 
 .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .field.full { grid-column: 1 / -1; }
-.field label { display: block; margin-bottom: 8px; color: #66716a; font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+.field label { display: block; margin-bottom: 8px; color: #656f69; font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
 .zen-input :deep(.v-field) { border-radius: 8px; }
 
 .form-actions { display: flex; justify-content: flex-end; margin-top: 28px; }
@@ -397,9 +401,9 @@ onMounted(async () => {
   font-family: 'Iowan Old Style', Georgia, serif;
   font-size: 18px;
   font-weight: 400;
-  color: #a4574f;
+  color: #934f47;
 }
-.danger-zone p { margin: 0; color: #8b7a77; font-size: 12px; }
+.danger-zone p { margin: 0; color: #786a67; font-size: 12px; }
 
 /* ── Buttons ───────────────────────────────────────────── */
 .zen-btn {
@@ -421,7 +425,7 @@ onMounted(async () => {
 }
 .zen-btn:hover:not(:disabled) { background: #456c54; transform: translateY(-1px); }
 .zen-btn:disabled { opacity: .6; cursor: default; }
-.zen-btn-danger { background: #fff; color: #a4574f; border: 1px solid #e0c9c4; flex-shrink: 0; }
+.zen-btn-danger { background: #fff; color: #934f47; border: 1px solid #e0c9c4; flex-shrink: 0; }
 .zen-btn-danger:hover { background: #a4574f; color: #fff; border-color: #a4574f; }
 
 /* ── Responsive ────────────────────────────────────────── */

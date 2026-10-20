@@ -27,4 +27,19 @@ export default [
       'no-console': ['warn', { allow: ['warn', 'error'] }],
     },
   },
+  {
+    // Build/tooling scripts run in Node, not the browser.
+    files: ['scripts/**/*.{js,mjs}'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: {
+        ...globals.node,
+      },
+    },
+    rules: {
+      // A generator's whole job is to report to stdout and set an exit code.
+      'no-console': 'off',
+    },
+  },
 ];
